@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hassan Mahmoud — "It is never too late to be what you might have been"</title>
+<meta name="description" content="Hassan Mahmoud, Pharmacist. Medicines, medical advice, athlete support and beauty guidance — care built around your health.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Manrope:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+
+  /* ============ RESET & ROOT ============ */
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  :root{
+    --deep-green: #0B3D2E;
+    --deep-green-2: #0E4634;
+    --deep-green-3: #123F30;
+    --deep-green-light: #1C5940;
+    --white: #FFFFFF;
+    --white-soft: rgba(255,255,255,0.75);
+    --white-softer: rgba(255,255,255,0.82);
+    --ink: #16241E;
+    --ink-soft: rgba(22,36,30,0.62);
+    --hairline-dark: rgba(255,255,255,0.16);
+    --hairline-light: rgba(11,61,46,0.14);
+  }
+
+  html{
+    scroll-behavior: smooth;
+    scroll-padding-top: 84px;
+  }
+
+  body{
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--ink);
+    background: var(--white);
+    overflow-x: hidden;
+  }
+
+  section{ width: 100%; }
+
+  a{ color: inherit; }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+  }
+
+  /* ============ NAV ============ */
+  .site-nav{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 5vw;
+    background: rgba(11, 61, 46, 0.72);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .site-nav__logo{
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .site-nav__links{
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: clamp(18px, 3vw, 40px);
+  }
+
+  .site-nav__links a{
+    font-family: 'Manrope', sans-serif;
+    font-weight: 300;
+    font-size: 0.82rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--white-soft);
+    text-decoration: none;
+    padding-bottom: 4px;
+    border-bottom: 1px solid transparent;
+    transition: color 0.3s ease, border-color 0.3s ease;
+  }
+
+  .site-nav__links a:hover,
+  .site-nav__links a:focus-visible{
+    color: var(--white);
+    border-color: var(--white);
+  }
+
+  @media (max-width: 640px){
+    .site-nav{ padding: 16px 20px; }
+    .site-nav__links{ gap: 14px; }
+    .site-nav__links a{ font-size: 0.68rem; letter-spacing: 0.08em; }
+    .site-nav__logo{ font-size: 0.9rem; }
+  }
+
+  @media (max-width: 400px){
+    .site-nav__logo{ display: none; }
+  }
+
+  /* ============ HERO ============ */
+  .hero{
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at 50% -10%, var(--deep-green-light) 0%, transparent 55%),
+      linear-gradient(160deg, var(--deep-green) 0%, var(--deep-green-3) 55%, #06231A 100%);
+    isolation: isolate;
+  }
+
+  .hero__pulse{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 14%;
+    width: 100%;
+    height: 120px;
+    opacity: 0.35;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .hero__pulse path{
+    fill: none;
+    stroke: var(--white);
+    stroke-width: 1;
+    stroke-dasharray: 1400;
+    stroke-dashoffset: 1400;
+    animation: draw 3.2s ease-out forwards 0.6s;
+  }
+
+  @keyframes draw{ to{ stroke-dashoffset: 0; } }
+
+  .hero::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(115deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px);
+    z-index: 0;
+  }
+
+  .hero::after{
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 180px rgba(0,0,0,0.45);
+    z-index: 0;
+  }
+
+  .hero__content{
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 100px 24px 40px 24px;
+    max-width: 780px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero__eyebrow{
+    font-family: 'Manrope', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--white-softer);
+    margin-bottom: 28px;
+  }
+
+  .hero__eyebrow::before,
+  .hero__eyebrow::after{
+    content: "—";
+    color: rgba(255,255,255,0.35);
+    margin: 0 12px;
+  }
+
+  .hero__name{
+    font-weight: 600;
+    font-size: clamp(2.6rem, 7vw, 5.2rem);
+    line-height: 1.05;
+    color: var(--white);
+    letter-spacing: -0.01em;
+  }
+
+  .hero__tagline{
+    margin-top: 26px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 300;
+    font-style: italic;
+    font-size: clamp(1.05rem, 2vw, 1.35rem);
+    line-height: 1.6;
+    color: var(--white-softer);
+    max-width: 560px;
+  }
+
+  .hero__divider{
+    width: 64px;
+    height: 1px;
+    background: rgba(255,255,255,0.4);
+    margin: 40px 0;
+  }
+
+  .hero__cta{
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 38px;
+    background: var(--white);
+    color: var(--deep-green);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid var(--white);
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.35s ease, color 0.35s ease, transform 0.25s ease, box-shadow 0.35s ease;
+    box-shadow: 0 0 0 rgba(255,255,255,0);
+  }
+
+  .hero__cta:hover{
+    background: transparent;
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+
+  .hero__cta:focus-visible{
+    outline: 2px solid var(--white);
+    outline-offset: 4px;
+  }
+
+  .hero__cta svg{
+    width: 14px;
+    height: 14px;
+    transition: transform 0.35s ease;
+  }
+
+  .hero__cta:hover svg{ transform: translateX(4px); }
+
+  @media (max-width: 480px){
+    .hero__cta{ padding: 14px 28px; font-size: 13px; }
+    .hero__eyebrow{ letter-spacing: 0.3em; }
+  }
+
+  /* ============ ABOUT ============ */
+  .about{
+    position: relative;
+    width: 100%;
+    background: var(--white);
+    padding: 140px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .about__frame{
+    position: relative;
+    width: 100%;
+    max-width: 980px;
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 56px;
+    align-items: start;
+  }
+
+  .about__accent{
+    position: relative;
+    height: 100%;
+    min-height: 220px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .about__accent-block{
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--deep-green) 0%, var(--deep-green-light) 70%, transparent 100%);
+  }
+
+  .about__accent-mark{
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--deep-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .about__accent-mark svg{
+    width: 18px;
+    height: 18px;
+    stroke: var(--white);
+    fill: none;
+    stroke-width: 1.6;
+  }
+
+  .about__body{ display: flex; flex-direction: column; }
+
+  .about__eyebrow{
+    font-family: 'Manrope', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--deep-green);
+    margin-bottom: 18px;
+  }
+
+  .about__heading{
+    font-weight: 700;
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    color: var(--deep-green);
+    letter-spacing: -0.01em;
+    margin-bottom: 34px;
+    position: relative;
+    padding-bottom: 22px;
+  }
+
+  .about__heading::after{
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 72px;
+    height: 3px;
+    background: var(--deep-green);
+  }
+
+  .about__text{
+    font-family: 'Manrope', sans-serif;
+    font-weight: 300;
+    font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+    line-height: 1.85;
+    color: var(--ink);
+    max-width: 620px;
+  }
+
+  @media (max-width: 640px){
+    .about{ padding: 100px 20px; }
+    .about__frame{ grid-template-columns: 1fr; gap: 28px; }
+    .about__accent{ min-height: unset; height: 64px; flex-direction: row; align-items: center; }
+    .about__accent-block{
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--deep-green) 0%, var(--deep-green-light) 70%, transparent 100%);
+    }
+    .about__accent-mark{ top: 50%; left: 0; transform: translate(-10%, -50%); }
+  }
+
+  /* ============ SHOWCASE ============ */
+  .showcase{
+    position: relative;
+    width: 100%;
+    background:
+      radial-gradient(ellipse at 85% 0%, var(--deep-green-light) 0%, transparent 50%),
+      linear-gradient(170deg, var(--deep-green) 0%, var(--deep-green-2) 60%, #06231A 100%);
+    padding: 130px 24px;
+  }
+
+  .showcase__head{
+    max-width: 1080px;
+    margin: 0 auto 72px auto;
+    text-align: center;
+  }
+
+  .showcase__eyebrow{
+    font-family: 'Manrope', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--white-soft);
+    margin-bottom: 18px;
+  }
+
+  .showcase__title{
+    font-weight: 700;
+    font-size: clamp(2rem, 4.4vw, 3rem);
+    color: var(--white);
+    letter-spacing: -0.01em;
+  }
+
+  .showcase__grid{
+    max-width: 1080px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--hairline-dark);
+    border: 1px solid var(--hairline-dark);
+  }
+
+  .showcase__item{
+    position: relative;
+    background: var(--deep-green-2);
+    padding: 48px 30px 40px 30px;
+    display: flex;
+    flex-direction: column;
+    transition: background 0.4s ease, transform 0.4s ease;
+  }
+
+  .showcase__item:hover{
+    background: var(--deep-green-light);
+    transform: translateY(-4px);
+  }
+
+  .showcase__num{
+    font-family: 'Manrope', sans-serif;
+    font-weight: 200;
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    color: var(--white-soft);
+    margin-bottom: 26px;
+  }
+
+  .showcase__num::after{
+    content: "";
+    display: block;
+    width: 28px;
+    height: 1px;
+    background: var(--white-soft);
+    margin-top: 14px;
+  }
+
+  .showcase__name{
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: var(--white);
+    margin-bottom: 14px;
+    letter-spacing: -0.005em;
+  }
+
+  .showcase__desc{
+    font-family: 'Manrope', sans-serif;
+    font-weight: 300;
+    font-size: 0.94rem;
+    line-height: 1.7;
+    color: var(--white-soft);
+  }
+
+  @media (max-width: 980px){
+    .showcase__grid{ grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 560px){
+    .showcase__grid{ grid-template-columns: 1fr; }
+    .showcase{ padding: 100px 20px; }
+  }
+
+  /* ============ CONTACT ============ */
+  .contact{
+    position: relative;
+    width: 100%;
+    background: var(--white);
+    padding: 140px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .contact__frame{
+    width: 100%;
+    max-width: 720px;
+    text-align: center;
+  }
+
+  .contact__eyebrow{
+    font-family: 'Manrope', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--deep-green);
+    margin-bottom: 18px;
+  }
+
+  .contact__heading{
+    font-weight: 700;
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    color: var(--deep-green);
+    letter-spacing: -0.01em;
+    margin-bottom: 26px;
+  }
+
+  .contact__invite{
+    font-family: 'Manrope', sans-serif;
+    font-weight: 300;
+    font-size: clamp(1.05rem, 1.8vw, 1.2rem);
+    line-height: 1.8;
+    color: var(--ink-soft);
+    max-width: 520px;
+    margin: 0 auto 56px auto;
+  }
+
+  .contact__details{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+    padding: 44px 40px;
+    border: 1px solid var(--hairline-light);
+    position: relative;
+  }
+
+  .contact__details::before,
+  .contact__details::after{
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--deep-green);
+  }
+
+  .contact__details::before{ top: -1px; left: -1px; border-right: none; border-bottom: none; }
+  .contact__details::after{ bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+  .contact__item{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: 'Manrope', sans-serif;
+  }
+
+  .contact__icon{
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--deep-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .contact__icon svg{
+    width: 15px;
+    height: 15px;
+    stroke: var(--white);
+    fill: none;
+    stroke-width: 1.8;
+  }
+
+  .contact__value{
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+  }
+
+  .contact__value a{
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s ease, color 0.3s ease;
+  }
+
+  .contact__value a:hover{
+    color: var(--deep-green);
+    border-color: var(--deep-green);
+  }
+
+  .contact__divider{
+    width: 100%;
+    height: 1px;
+    background: var(--hairline-light);
+  }
+
+  .contact__signature{
+    margin-top: 56px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 300;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--deep-green);
+  }
+
+  .site-footer{
+    background: var(--deep-green);
+    text-align: center;
+    padding: 28px 20px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 300;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: var(--white-soft);
+  }
+
+  @media (max-width: 480px){
+    .contact{ padding: 100px 18px; }
+    .contact__details{ padding: 36px 24px; width: 100%; }
+  }
+
+  /* ============ CHAT SECTION ============ */
+  .chat-section{
+    position: relative;
+    width: 100%;
+    background: var(--white);
+    padding: 130px 24px 150px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .chat-section__head{
+    max-width: 640px;
+    text-align: center;
+    margin-bottom: 52px;
+  }
+
+  .chat-section__eyebrow{
+    display: block;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--deep-green);
+    margin-bottom: 18px;
+  }
+
+  .chat-section__title{
+    font-weight: 700;
+    font-size: clamp(2rem, 4.4vw, 2.8rem);
+    color: var(--deep-green);
+    letter-spacing: -0.01em;
+    margin-bottom: 20px;
+  }
+
+  .chat-section__sub{
+    font-family: 'Manrope', sans-serif;
+    font-weight: 300;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--ink-soft);
+  }
+
+  .chat-section__frame{
+    width: 100%;
+    max-width: 760px;
+    height: 620px;
+    border: 1px solid var(--hairline-light);
+    overflow: hidden;
+  }
+
+  @media (max-width: 640px){
+    .chat-section{ padding: 100px 18px 120px 18px; }
+    .chat-section__frame{ height: 520px; }
+  }
+
+  /* ============ CHAT WIDGET THEME ============ */
+  :root{
+    --chat--color-primary: #0B3D2E;
+    --chat--color-primary-shade-50: #123F30;
+    --chat--color-primary-shade-100: #1C5940;
+    --chat--color-secondary: #0B3D2E;
+    --chat--color-white: #ffffff;
+    --chat--color-light: #f7f9f8;
+    --chat--color-dark: #16241E;
+    --chat--color-typing: #16241E;
+
+    --chat--header--background: #0B3D2E;
+    --chat--header--color: #ffffff;
+
+    --chat--toggle--background: #0B3D2E;
+    --chat--toggle--hover--background: #1C5940;
+    --chat--toggle--active--background: #123F30;
+    --chat--toggle--color: #ffffff;
+
+    --chat--message--bot--background: #f7f9f8;
+    --chat--message--bot--color: #16241E;
+    --chat--message--user--background: #0B3D2E;
+    --chat--message--user--color: #ffffff;
+
+    --chat--font-family: 'Manrope', sans-serif;
+    --chat--border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+  <nav class="site-nav">
+    <a href="#hero" class="site-nav__logo">Hassan Mahmoud</a>
+    <ul class="site-nav__links">
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#showcase">Showcase</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="#chat">Chat</a></li>
+    </ul>
+  </nav>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="hero">
+    <svg class="hero__pulse" viewBox="0 0 1200 120" preserveAspectRatio="none">
+      <path d="M0,60 L280,60 L320,20 L360,100 L400,60 L440,60 L470,40 L500,60 L1200,60"></path>
+    </svg>
+
+    <div class="hero__content">
+      <div class="hero__eyebrow">Pharmacist &amp; Discovery Specialist</div>
+      <h1 class="hero__name">Hassan Mahmoud</h1>
+      <p class="hero__tagline">"It is never too late to be what you might have been"</p>
+      <div class="hero__divider"></div>
+      <a href="#showcase" class="hero__cta">
+        Discover My Work
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M13 6l6 6-6 6"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section class="about" id="about">
+    <div class="about__frame">
+      <div class="about__accent">
+        <div class="about__accent-mark">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 2.6 5 6 5c2 0 3.5 1.1 4.2 2.4C10.9 6.1 12.4 5 14.4 5c3.4 0 5.1 3.4 3.6 6.8C15.9 16.4 12 21 12 21z"/>
+          </svg>
+        </div>
+        <div class="about__accent-block"></div>
+      </div>
+
+      <div class="about__body">
+        <span class="about__eyebrow">Who I Am</span>
+        <h2 class="about__heading">About</h2>
+        <p class="about__text">
+          Im your medical assistant, i do care about your health and your needs as much as you do care for your self
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SHOWCASE ============ -->
+  <section class="showcase" id="showcase">
+    <div class="showcase__head">
+      <span class="showcase__eyebrow">What I Offer</span>
+      <h2 class="showcase__title">Showcase</h2>
+    </div>
+
+    <div class="showcase__grid">
+      <div class="showcase__item">
+        <span class="showcase__num">01</span>
+        <h3 class="showcase__name">Medicines</h3>
+        <p class="showcase__desc">Carefully verified prescriptions and dosages, matched to your body and your history — never a guess.</p>
+      </div>
+
+      <div class="showcase__item">
+        <span class="showcase__num">02</span>
+        <h3 class="showcase__name">Medical Advice</h3>
+        <p class="showcase__desc">Straight answers on symptoms, drug interactions, and when to treat at home versus when to see a doctor.</p>
+      </div>
+
+      <div class="showcase__item">
+        <span class="showcase__num">03</span>
+        <h3 class="showcase__name">Athlete Section</h3>
+        <p class="showcase__desc">Recovery and supplementation guidance built for training bodies — safe, compliant, and performance-aware.</p>
+      </div>
+
+      <div class="showcase__item">
+        <span class="showcase__num">04</span>
+        <h3 class="showcase__name">Beauty</h3>
+        <p class="showcase__desc">Skin and haircare chosen with a pharmacist's eye — real ingredients that work, not marketing claims.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section class="contact" id="contact">
+    <div class="contact__frame">
+      <span class="contact__eyebrow">Get In Touch</span>
+      <h2 class="contact__heading">Let's Connect</h2>
+
+      <p class="contact__invite">
+        A question about a medication, a symptom you're unsure of, or simply where to start —
+        reach out. Your health deserves a real answer, not a guess.
+      </p>
+
+      <div class="contact__details">
+        <div class="contact__item">
+          <span class="contact__icon">
+            <svg viewBox="0 0 24 24"><path d="M3 6l9 7 9-7M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg>
+          </span>
+          <span class="contact__value"><a href="mailto:souna.92@icloud.com">souna.92@icloud.com</a></span>
+        </div>
+
+        <div class="contact__divider"></div>
+
+        <div class="contact__item">
+          <span class="contact__icon">
+            <svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .6 2.9a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.5 2.9.6a2 2 0 0 1 1.8 2.1z"/></svg>
+          </span>
+          <span class="contact__value"><a href="tel:+96176681395">76 681 395</a></span>
+        </div>
+      </div>
+
+      <p class="contact__signature">Here for your health, always. — Hassan</p>
+    </div>
+  </section>
+
+  <!-- ============ LIVE CHAT ============ -->
+  <section class="chat-section" id="chat">
+    <div class="chat-section__head">
+      <span class="chat-section__eyebrow">Ask Me Anything</span>
+      <h2 class="chat-section__title">Chat With Me</h2>
+      <p class="chat-section__sub">Have a quick question about a medication, a symptom, or where to start? Ask below.</p>
+    </div>
+    <div id="n8n-chat" class="chat-section__frame"></div>
+  </section>
+
+  <footer class="site-footer">
+    © 2026 Hassan Mahmoud — Pharmacist
+  </footer>
+
+  <!-- ============ LIVE CHAT WIDGET ============ -->
+  <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+  <script type="module">
+    import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+    createChat({
+      webhookUrl: 'https://sounamahmoud.app.n8n.cloud/webhook/eda4e60c-f4ec-4b48-9e6c-09a6fb1b28e0/chat',
+      target: '#n8n-chat',
+      mode: 'fullscreen',
+      initialMessages: [
+        "Hi, I'm Hassan Mahmoud. Ask me about medicines, symptoms, recovery, or skincare — I'm here to help."
+      ],
+      i18n: {
+        en: {
+          title: 'Hassan Mahmoud — Pharmacist',
+          subtitle: "Here for your health, always.",
+          inputPlaceholder: 'Type your question…',
+        },
+      },
+    });
+  </script>
+
+</body>
+</html>
