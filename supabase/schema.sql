@@ -18,6 +18,7 @@ create table if not exists public.products (
   size_en     text check (char_length(size_en) <= 40),
   size_ar     text check (char_length(size_ar) <= 40),
   price       numeric(10,2) not null check (price >= 0),
+  stock       integer not null default 0 check (stock >= 0),
   is_new      boolean not null default false,
   is_active   boolean not null default true,
   image_url   text,
@@ -143,10 +144,16 @@ begin
 
     select * into v_prod
       from public.products
-     where id = (v_item->>'id')::uuid and is_active;
+     where id = (v_item->>'id')::uuid and is_active
+       for update;
     if not found then
       raise exception 'Product unavailable';
     end if;
+    if v_prod.stock < v_qty then
+      raise exception 'Not enough stock for %', v_prod.name_en;
+    end if;
+
+    update public.products set stock = stock - v_qty where id = v_prod.id;
 
     v_lines := v_lines || jsonb_build_object(
       'id', v_prod.id, 'name_en', v_prod.name_en, 'name_ar', v_prod.name_ar,
@@ -168,6 +175,40 @@ $$;
 
 revoke all on function public.place_order(text, text, text, text, jsonb) from public;
 grant execute on function public.place_order(text, text, text, text, jsonb) to anon, authenticated;
+
+-- 3. Cancelling an order puts its items back in stock.
+--    Re-opening a cancelled order takes them out again (fails if stock ran out).
+create or replace function public.sync_stock_on_status()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_item jsonb;
+  v_sign integer;
+begin
+  if new.status = 'cancelled' and old.status <> 'cancelled' then
+    v_sign := 1;
+  elsif old.status = 'cancelled' and new.status <> 'cancelled' then
+    v_sign := -1;
+  else
+    return new;
+  end if;
+
+  for v_item in select * from jsonb_array_elements(new.items) loop
+    update public.products
+       set stock = stock + v_sign * (v_item->>'qty')::integer
+     where id = (v_item->>'id')::uuid;
+  end loop;
+  return new;
+end;
+$$;
+
+drop trigger if exists orders_sync_stock on public.orders;
+create trigger orders_sync_stock
+  after update of status on public.orders
+  for each row execute function public.sync_stock_on_status();
 
 -- ---------- 5. Image storage ------------------------------------------
 

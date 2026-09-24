@@ -81,6 +81,8 @@
   .nm small{ display:block; color:var(--ink-soft); }
   .tag{ display:inline-block; padding:2px 10px; font-size:.78rem; border-radius:999px; background:var(--mist-2); }
   .tag--off{ background:#EFE3E0; color:var(--danger); }
+  .tag--low{ background:#F1E7C9; color:#6B5314; }
+  .stock{ font-weight:500; }
   .actions{ display:flex; gap:6px; justify-content:flex-end; }
   .table-wrap{ overflow-x:auto; }
 
@@ -178,7 +180,7 @@
       </div>
       <div class="table-wrap">
         <table class="tbl">
-          <thead><tr><th></th><th>Product</th><th>Section</th><th>Price</th><th>Status</th><th></th></tr></thead>
+          <thead><tr><th></th><th>Product</th><th>Section</th><th>Price</th><th>Stock</th><th>Status</th><th></th></tr></thead>
           <tbody id="productRows"></tbody>
         </table>
       </div>
@@ -235,7 +237,10 @@
         <label class="field">Size (Arabic)<input class="ar" name="size_ar" maxlength="40" placeholder="مثال: 50 مل"></label>
       </div>
       <div class="row2">
+        <label class="field">Stock (units available)<input name="stock" type="number" min="0" step="1" required placeholder="e.g. 25"></label>
         <label class="field">Sort order<input name="sort_order" type="number" step="1" value="0"></label>
+      </div>
+      <div class="row2">
         <label class="field">Illustration (used when there is no photo)
           <select name="type">
             <option value="dropper">Dropper bottle</option><option value="tube">Tube</option><option value="pump">Pump bottle</option>
@@ -341,6 +346,12 @@
       products = r.data || []; renderProducts();
     });
   }
+  var LOW_STOCK = 5;
+  function stockCell(n){
+    n = parseInt(n, 10) || 0;
+    var tag = n === 0 ? ' <span class="tag tag--off">Out of stock</span>' : (n <= LOW_STOCK ? ' <span class="tag tag--low">Low</span>' : '');
+    return '<span class="stock">' + n + '</span>' + tag;
+  }
   function renderProducts(){
     var f = $('#deptFilter').value;
     var list = products.filter(function(p){ return f === 'all' || p.dept === f; });
@@ -351,6 +362,7 @@
         '<td class="nm">' + esc(p.name_en) + '<small dir="rtl">' + esc(p.name_ar) + '</small></td>' +
         '<td>' + esc(DEPT[p.dept]) + '<small class="hint" style="display:block">' + esc((CATS[p.dept].filter(function(c){ return c[0] === p.cat; })[0] || ['',''])[1]) + '</small></td>' +
         '<td>' + money(p.price) + '</td>' +
+        '<td>' + stockCell(p.stock) + '</td>' +
         '<td>' + (p.is_active ? '<span class="tag">Visible</span>' : '<span class="tag tag--off">Hidden</span>') + (p.is_new ? ' <span class="tag">New</span>' : '') + '</td>' +
         '<td><div class="actions">' +
           '<button class="btn btn--sm" data-edit="' + esc(p.id) + '">Edit</button>' +
@@ -396,13 +408,13 @@
   function openDialog(id){
     editing = id ? products.filter(function(p){ return p.id === id; })[0] : null;
     pendingFile = null; $('#imgFile').value = ''; $('#rmImg').checked = false; $('#formErr').hidden = true;
-    var p = editing || {dept:'medical', cat:'vitamins', type:'box', price:'', sort_order:0, is_active:true, is_new:false};
+    var p = editing || {dept:'medical', cat:'vitamins', type:'box', price:'', stock:'', sort_order:0, is_active:true, is_new:false};
     $('#dlgTitle').textContent = editing ? 'Edit product' : 'Add product';
     var el = form.elements;
     el.dept.value = p.dept; fillCats(p.dept, p.cat);
     el.name_en.value = p.name_en || ''; el.name_ar.value = p.name_ar || '';
     el.desc_en.value = p.desc_en || ''; el.desc_ar.value = p.desc_ar || '';
-    el.price.value = p.price; el.size_en.value = p.size_en || ''; el.size_ar.value = p.size_ar || '';
+    el.price.value = p.price; el.stock.value = p.stock == null ? '' : p.stock; el.size_en.value = p.size_en || ''; el.size_ar.value = p.size_ar || '';
     el.sort_order.value = p.sort_order || 0; el.type.value = p.type || 'box';
     el.is_new.checked = !!p.is_new; el.is_active.checked = p.is_active !== false;
     preview(p.image_url); $('#rmRow').hidden = !p.image_url;
@@ -453,13 +465,15 @@
     var price = parseFloat(el.price.value);
     if(!el.name_en.value.trim() || !el.name_ar.value.trim()){ err.textContent = 'Please enter the name in English and Arabic.'; err.hidden = false; return; }
     if(isNaN(price) || price < 0){ err.textContent = 'Please enter a valid price.'; err.hidden = false; return; }
+    var stock = Number(el.stock.value);
+    if(el.stock.value.trim() === '' || !Number.isInteger(stock) || stock < 0){ err.textContent = 'Please enter the stock as a whole number, 0 or more.'; err.hidden = false; return; }
 
     var row = {
       dept: el.dept.value, cat: el.cat.value, type: el.type.value,
       name_en: el.name_en.value.trim(), name_ar: el.name_ar.value.trim(),
       desc_en: el.desc_en.value.trim() || null, desc_ar: el.desc_ar.value.trim() || null,
       size_en: el.size_en.value.trim() || null, size_ar: el.size_ar.value.trim() || null,
-      price: price, sort_order: parseInt(el.sort_order.value, 10) || 0,
+      price: price, stock: stock, sort_order: parseInt(el.sort_order.value, 10) || 0,
       is_new: el.is_new.checked, is_active: el.is_active.checked
     };
     var oldUrl = editing && editing.image_url;
