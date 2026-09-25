@@ -331,36 +331,6 @@
   .contact__wa{ margin-top: 28px; }
   @media (max-width: 860px){ .contact__grid{ grid-template-columns: 1fr; gap: 36px; } }
 
-  /* Chat */
-  .chat-head{ max-width: 640px; margin: 0 auto 40px; text-align: center; }
-  .chat-head .lead{ margin-inline: auto; }
-  .chat-frame{ width: 100%; max-width: 760px; height: 620px; margin-inline: auto; border: 1px solid var(--teal); background: var(--ivory); overflow: hidden; }
-  [dir="rtl"] .chat-frame{ direction: rtl; }
-  @media (max-width: 640px){ .chat-frame{ height: 540px; } }
-
-  :root{
-    --chat--color-primary: #1F5F6B;
-    --chat--color-primary-shade-50: #184C57;
-    --chat--color-primary-shade-100: #2C2C2C;
-    --chat--color-secondary: #1F5F6B;
-    --chat--color-white: #ffffff;
-    --chat--color-light: #DFF4F1;
-    --chat--color-dark: #2C2C2C;
-    --chat--color-typing: #2C2C2C;
-    --chat--header--background: #DFF4F1;
-    --chat--header--color: #2C2C2C;
-    --chat--toggle--background: #1F5F6B;
-    --chat--toggle--hover--background: #2C2C2C;
-    --chat--toggle--active--background: #2C2C2C;
-    --chat--toggle--color: #ffffff;
-    --chat--message--bot--background: #DFF4F1;
-    --chat--message--bot--color: #2C2C2C;
-    --chat--message--user--background: #1F5F6B;
-    --chat--message--user--color: #ffffff;
-    --chat--font-family: 'Jost','Tajawal',sans-serif;
-    --chat--border-radius: 4px;
-  }
-
   /* Footer */
   .footer{ background: var(--teal-deep); color: var(--white); padding: 72px 0 0; }
   .footer__grid{ display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 48px; padding-bottom: 56px; }
@@ -564,7 +534,7 @@
       <p class="hero__tag" data-i18n="hero_tag">Inspired by Nature. Perfected by Science.</p>
       <div class="hero__actions">
         <a class="btn btn--solid" href="#departments" data-i18n="hero_cta1">Shop now</a>
-        <a class="btn btn--line" href="#chat" data-i18n="hero_cta2">Get medical advice</a>
+        <a class="btn btn--line" href="#contact" data-i18n="hero_cta2">Get medical advice</a>
       </div>
     </div>
   </div>
@@ -608,11 +578,11 @@
       <aside class="advice">
         <h3 class="advice__title" data-i18n="advice_title">Ask before you decide</h3>
         <ul class="advice__list">
-          <li><a href="#chat" data-i18n="advice_1">Symptoms, and when to see a doctor</a></li>
-          <li><a href="#chat" data-i18n="advice_2">Medication questions and interactions</a></li>
-          <li><a href="#chat" data-i18n="advice_3">Vitamins and supplements that suit you</a></li>
+          <li><a href="#contact" data-i18n="advice_1">Symptoms, and when to see a doctor</a></li>
+          <li><a href="#contact" data-i18n="advice_2">Medication questions and interactions</a></li>
+          <li><a href="#contact" data-i18n="advice_3">Vitamins and supplements that suit you</a></li>
         </ul>
-        <a class="btn btn--solid" href="#chat" data-i18n="chat_cta">Chat with us</a>
+        <a class="btn btn--solid" href="#contact" data-i18n="chat_cta">Contact us</a>
         <p class="advice__note" data-i18n="advice_note">General guidance only. It does not replace your doctor.</p>
       </aside>
     </div>
@@ -686,17 +656,6 @@
   </div>
 </section>
 
-<!-- ============ CHAT ============ -->
-<section class="section section--mist" id="chat" aria-labelledby="chatTitle">
-  <div class="wrap">
-    <div class="chat-head">
-      <h2 class="h2" id="chatTitle" data-i18n="chat_title">Chat with us</h2>
-      <p class="lead" data-i18n="chat_sub">Have a quick question about a medication, a symptom or where to start? Ask below.</p>
-    </div>
-    <div id="n8n-chat" class="chat-frame"></div>
-  </div>
-</section>
-
 </main>
 
 <!-- ============ FOOTER ============ -->
@@ -719,7 +678,7 @@
       <ul>
         <li><a href="mailto:souna.92@gmail.com">souna.92@gmail.com</a></li>
         <li><a href="tel:+96176681395" dir="ltr">76 681 395</a></li>
-        <li><a href="#chat" data-i18n="chat_cta">Chat with us</a></li>
+        <li><a href="#contact" data-i18n="chat_cta">Contact us</a></li>
       </ul>
     </div>
   </div>
@@ -778,7 +737,7 @@
       lead_beauty:'Skin care where natural ingredients meet careful formulation.',
       advice_title:'Ask before you decide',
       advice_1:'Symptoms, and when to see a doctor', advice_2:'Medication questions and interactions', advice_3:'Vitamins and supplements that suit you',
-      advice_note:'General guidance only. It does not replace your doctor.', chat_cta:'Chat with us',
+      advice_note:'General guidance only. It does not replace your doctor.', chat_cta:'Contact us',
       cat_all:'All', sort_label:'Sort by', sort_feat:'Featured', sort_low:'Price, low to high', sort_high:'Price, high to low', sort_az:'Name, A–Z',
       count:'{n} products', add:'Add to cart', added:'Added to cart', badge_new:'New',
       cart_title:'Your cart', cart_empty:'Your cart is empty. Add a product to get started.', subtotal:'Subtotal',
@@ -788,7 +747,6 @@
       contact_title:"Let's connect",
       contact_text:"A question about a medication, a symptom you're unsure of, or simply where to start — reach out. Your health deserves a real answer, not a guess.",
       c_email:'Email', c_phone:'Phone', c_wa:'Message on WhatsApp',
-      chat_title:'Chat with us', chat_sub:'Have a quick question about a medication, a symptom or where to start? Ask below.',
       f_shop:'Shop', f_help:'Help & contact', f_rights:'© 2026 AVARA. All rights reserved.',
       loading:'Loading products…', load_err:'We could not load the products. Please refresh the page or try again shortly.', no_products:'No products in this section yet.',
       name_label:'Full name', phone_label:'Phone number', address_label:'Delivery address (optional)', notes_label:'Notes (optional)',
@@ -798,8 +756,6 @@
       order_unavail:'One of the products in your cart is no longer available. We refreshed the list, please check your cart.',
       order_ok_title:'Thank you, your order is in', order_ok_text:'Your order number is {no}. We will contact you soon to confirm delivery and payment.',
       order_wa_confirm:'Message us on WhatsApp', continue:'Continue shopping', wa_order:'Hello AVARA, my order number is #{no}.',
-      chat_title_w:'AVARA — Health Care Assistant', chat_sub_w:'Your health matters.', chat_ph:'Type your question…',
-      chat_first:'Hello, welcome to AVARA. Ask me about medical advice, athlete recovery or beauty care — I\'m here to help.',
       langBtn:'العربية'
     },
     ar: {
@@ -818,7 +774,7 @@
       lead_beauty:'عناية بالبشرة حيث تلتقي المكوّنات الطبيعية بالتركيب العلمي الدقيق.',
       advice_title:'اسأل قبل أن تقرّر',
       advice_1:'الأعراض ومتى يجب مراجعة الطبيب', advice_2:'أسئلة الأدوية والتداخلات الدوائية', advice_3:'الفيتامينات والمكمّلات المناسبة لك',
-      advice_note:'إرشادات عامة فقط، ولا تغني عن استشارة الطبيب.', chat_cta:'تحدّث معنا',
+      advice_note:'إرشادات عامة فقط، ولا تغني عن استشارة الطبيب.', chat_cta:'تواصل معنا',
       cat_all:'الكل', sort_label:'ترتيب حسب', sort_feat:'المميّزة', sort_low:'السعر: من الأقل إلى الأعلى', sort_high:'السعر: من الأعلى إلى الأقل', sort_az:'الاسم: أ – ي',
       count:'{n} منتج', add:'أضف إلى السلة', added:'أُضيف إلى السلة', badge_new:'جديد',
       cart_title:'سلّتك', cart_empty:'سلّتك فارغة. أضف منتجاً للبدء.', subtotal:'المجموع',
@@ -828,7 +784,6 @@
       contact_title:'لنتواصل',
       contact_text:'سؤال عن دواء، أو عَرَض لست متأكداً منه، أو ببساطة لا تعرف من أين تبدأ؟ تواصل معنا. صحتك تستحق إجابة حقيقية لا تخميناً.',
       c_email:'البريد الإلكتروني', c_phone:'الهاتف', c_wa:'راسلنا عبر واتساب',
-      chat_title:'تحدّث معنا', chat_sub:'لديك سؤال سريع عن دواء أو عَرَض أو لا تعرف من أين تبدأ؟ اسأل هنا.',
       f_shop:'تسوّق', f_help:'المساعدة والتواصل', f_rights:'© 2026 AVARA. جميع الحقوق محفوظة.',
       loading:'جارٍ تحميل المنتجات…', load_err:'تعذّر تحميل المنتجات. يرجى تحديث الصفحة أو المحاولة بعد قليل.', no_products:'لا توجد منتجات في هذا القسم بعد.',
       name_label:'الاسم الكامل', phone_label:'رقم الهاتف', address_label:'عنوان التوصيل (اختياري)', notes_label:'ملاحظات (اختياري)',
@@ -838,8 +793,6 @@
       order_unavail:'أحد المنتجات في سلّتك لم يعد متاحاً. حدّثنا القائمة، يرجى مراجعة سلّتك.',
       order_ok_title:'شكراً لك، وصلنا طلبك', order_ok_text:'رقم طلبك هو {no}. سنتواصل معك قريباً لتأكيد التوصيل والدفع.',
       order_wa_confirm:'راسلنا عبر واتساب', continue:'متابعة التسوق', wa_order:'مرحباً AVARA، رقم طلبي #{no}.',
-      chat_title_w:'AVARA — مساعد الرعاية الصحية', chat_sub_w:'صحتك تهمّنا.', chat_ph:'اكتب سؤالك…',
-      chat_first:'مرحباً بك في AVARA. اسألني عن النصائح الطبية أو استشفاء الرياضيين أو العناية بالجمال، أنا هنا للمساعدة.',
       langBtn:'English'
     }
   };
@@ -1111,7 +1064,6 @@
     lang = lang === 'ar' ? 'en' : 'ar';
     try{ localStorage.setItem('avara-lang', lang); }catch(e){}
     applyLang();
-    if(window.avaraInitChat) window.avaraInitChat(lang);
   });
   document.addEventListener('keydown', function(e){
     if(e.key !== 'Escape') return;
@@ -1123,31 +1075,6 @@
   applyLang();
   loadProducts();
 })();
-</script>
-
-<!-- ============ LIVE CHAT WIDGET (n8n) ============ -->
-<link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
-<script type="module">
-  import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
-
-  window.avaraInitChat = function(lang){
-    var L = window.AVARA_I18N || {};
-    var target = document.getElementById('n8n-chat');
-    target.innerHTML = '';
-    function pack(l){
-      var s = L[l] || {};
-      return { title: s.chat_title_w, subtitle: s.chat_sub_w, inputPlaceholder: s.chat_ph, footer: '', getStarted: s.chat_cta, closeButtonTooltip: s.close };
-    }
-    createChat({
-      webhookUrl: 'https://sounamahmoud.app.n8n.cloud/webhook/eda4e60c-f4ec-4b48-9e6c-09a6fb1b28e0/chat',
-      target: '#n8n-chat',
-      mode: 'fullscreen',
-      defaultLanguage: lang === 'ar' ? 'ar' : 'en',
-      initialMessages: [ (L[lang] || L.en || {}).chat_first ],
-      i18n: { en: pack('en'), ar: pack('ar') }
-    });
-  };
-  window.avaraInitChat(document.documentElement.lang === 'ar' ? 'ar' : 'en');
 </script>
 
 </body>
