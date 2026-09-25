@@ -14,8 +14,14 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <style>
   :root{
-    --sage:#B8C2A8; --sage-deep:#8D9A7B; --moss:#4A5640; --ink:#2B3326; --ink-soft:#5B6553;
-    --mist:#F3F5EF; --mist-2:#E4E9DB; --white:#fff; --danger:#8A2E20;
+    --sage:#DFF4F1;        /* Soft Mint */
+    --sage-deep:#2F8F9D;   /* Avara Teal */
+    --moss:#1F5F6B;        /* Deep Teal */
+    --ink:#2C2C2C;         /* Charcoal */
+    --ink-soft:#5B5F5F;
+    --mist:#FAF9F6;        /* Ivory White */
+    --mist-2:#C6E5E0;
+    --white:#fff; --danger:#8A2E20;
     --font:'Jost',system-ui,-apple-system,'Segoe UI',sans-serif;
   }
   *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
@@ -30,7 +36,7 @@
   a.btn.btn--solid{ color:var(--white); }
   .btn{ display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:.6rem 1.2rem; font-size:.92rem; font-weight:500;
         border:1px solid var(--moss); border-radius:2px; background:transparent; transition:background .2s, color .2s; white-space:nowrap; }
-  .btn:hover{ background:var(--sage); border-color:var(--sage); }
+  .btn:hover{ background:var(--sage); border-color:var(--moss); }
   .btn--solid{ background:var(--moss); color:var(--white); }
   .btn--solid:hover{ background:var(--ink); border-color:var(--ink); }
   .btn--danger{ border-color:var(--danger); color:var(--danger); }
@@ -75,14 +81,12 @@
   /* ---------- Products table ---------- */
   .tbl{ width:100%; border-collapse:collapse; background:var(--white); border:1px solid var(--mist-2); }
   .tbl th,.tbl td{ padding:12px 14px; text-align:start; border-bottom:1px solid var(--mist-2); vertical-align:middle; }
-  .tbl th{ font-size:.8rem; font-weight:500; color:var(--ink-soft); background:#FAFBF7; }
+  .tbl th{ font-size:.8rem; font-weight:500; color:var(--ink-soft); background:#F3FAF9; }
   .thumb{ width:52px; height:52px; background:var(--mist); display:grid; place-items:center; overflow:hidden; font-size:.7rem; color:var(--ink-soft); }
   .thumb img{ width:100%; height:100%; object-fit:cover; }
   .nm small{ display:block; color:var(--ink-soft); }
   .tag{ display:inline-block; padding:2px 10px; font-size:.78rem; border-radius:999px; background:var(--mist-2); }
   .tag--off{ background:#EFE3E0; color:var(--danger); }
-  .tag--low{ background:#F1E7C9; color:#6B5314; }
-  .stock{ font-weight:500; }
   .actions{ display:flex; gap:6px; justify-content:flex-end; }
   .table-wrap{ overflow-x:auto; }
 
@@ -108,7 +112,7 @@
 
   /* ---------- Dialog ---------- */
   dialog{ width:min(720px, calc(100% - 24px)); max-height:92vh; margin:auto; border:0; padding:0; background:var(--white); color:var(--ink); }
-  dialog::backdrop{ background:rgba(43,51,38,.45); }
+  dialog::backdrop{ background:rgba(44,44,44,.45); }
   .dlg__head{ display:flex; justify-content:space-between; align-items:center; padding:18px 24px; border-bottom:1px solid var(--mist-2); position:sticky; top:0; background:var(--white); z-index:1; }
   .dlg__head h3{ font-size:1.25rem; font-weight:400; }
   .dlg__body{ padding:22px 24px 8px; }
@@ -180,7 +184,7 @@
       </div>
       <div class="table-wrap">
         <table class="tbl">
-          <thead><tr><th></th><th>Product</th><th>Section</th><th>Price</th><th>Stock</th><th>Status</th><th></th></tr></thead>
+          <thead><tr><th></th><th>Product</th><th>Section</th><th>Price</th><th>Status</th><th></th></tr></thead>
           <tbody id="productRows"></tbody>
         </table>
       </div>
@@ -237,10 +241,7 @@
         <label class="field">Size (Arabic)<input class="ar" name="size_ar" maxlength="40" placeholder="مثال: 50 مل"></label>
       </div>
       <div class="row2">
-        <label class="field">Stock (units available)<input name="stock" type="number" min="0" step="1" required placeholder="e.g. 25"></label>
         <label class="field">Sort order<input name="sort_order" type="number" step="1" value="0"></label>
-      </div>
-      <div class="row2">
         <label class="field">Illustration (used when there is no photo)
           <select name="type">
             <option value="dropper">Dropper bottle</option><option value="tube">Tube</option><option value="pump">Pump bottle</option>
@@ -321,8 +322,17 @@
     err.hidden = true; btn.disabled = true; btn.textContent = 'Signing in…';
     sb.auth.signInWithPassword({email:f.email.value.trim(), password:f.password.value}).then(function(r){
       btn.disabled = false; btn.textContent = 'Sign in';
-      if(r.error){ err.textContent = 'Email or password is incorrect.'; err.hidden = false; return; }
+      if(r.error){
+        var m = r.error.message || 'Unknown error';
+        if(/invalid login/i.test(m)) m = 'Invalid login credentials. Check the email and password, and that the user exists in this Supabase project.';
+        else if(/not confirmed/i.test(m)) m = 'Email not confirmed. In Supabase open Authentication > Users, then confirm the user or recreate it with Auto Confirm ticked.';
+        else if(/api key|apikey|jwt/i.test(m)) m = 'Invalid API key. Check the anon key in config.js.';
+        err.textContent = m; err.hidden = false; return;
+      }
       f.password.value = ''; enter(r.data.user);
+    }).catch(function(x){
+      btn.disabled = false; btn.textContent = 'Sign in';
+      err.textContent = 'Could not reach Supabase. Check the Project URL in config.js.'; err.hidden = false;
     });
   });
   $('#signOut').addEventListener('click', function(){
@@ -346,12 +356,6 @@
       products = r.data || []; renderProducts();
     });
   }
-  var LOW_STOCK = 5;
-  function stockCell(n){
-    n = parseInt(n, 10) || 0;
-    var tag = n === 0 ? ' <span class="tag tag--off">Out of stock</span>' : (n <= LOW_STOCK ? ' <span class="tag tag--low">Low</span>' : '');
-    return '<span class="stock">' + n + '</span>' + tag;
-  }
   function renderProducts(){
     var f = $('#deptFilter').value;
     var list = products.filter(function(p){ return f === 'all' || p.dept === f; });
@@ -362,7 +366,6 @@
         '<td class="nm">' + esc(p.name_en) + '<small dir="rtl">' + esc(p.name_ar) + '</small></td>' +
         '<td>' + esc(DEPT[p.dept]) + '<small class="hint" style="display:block">' + esc((CATS[p.dept].filter(function(c){ return c[0] === p.cat; })[0] || ['',''])[1]) + '</small></td>' +
         '<td>' + money(p.price) + '</td>' +
-        '<td>' + stockCell(p.stock) + '</td>' +
         '<td>' + (p.is_active ? '<span class="tag">Visible</span>' : '<span class="tag tag--off">Hidden</span>') + (p.is_new ? ' <span class="tag">New</span>' : '') + '</td>' +
         '<td><div class="actions">' +
           '<button class="btn btn--sm" data-edit="' + esc(p.id) + '">Edit</button>' +
@@ -408,13 +411,13 @@
   function openDialog(id){
     editing = id ? products.filter(function(p){ return p.id === id; })[0] : null;
     pendingFile = null; $('#imgFile').value = ''; $('#rmImg').checked = false; $('#formErr').hidden = true;
-    var p = editing || {dept:'medical', cat:'vitamins', type:'box', price:'', stock:'', sort_order:0, is_active:true, is_new:false};
+    var p = editing || {dept:'medical', cat:'vitamins', type:'box', price:'', sort_order:0, is_active:true, is_new:false};
     $('#dlgTitle').textContent = editing ? 'Edit product' : 'Add product';
     var el = form.elements;
     el.dept.value = p.dept; fillCats(p.dept, p.cat);
     el.name_en.value = p.name_en || ''; el.name_ar.value = p.name_ar || '';
     el.desc_en.value = p.desc_en || ''; el.desc_ar.value = p.desc_ar || '';
-    el.price.value = p.price; el.stock.value = p.stock == null ? '' : p.stock; el.size_en.value = p.size_en || ''; el.size_ar.value = p.size_ar || '';
+    el.price.value = p.price; el.size_en.value = p.size_en || ''; el.size_ar.value = p.size_ar || '';
     el.sort_order.value = p.sort_order || 0; el.type.value = p.type || 'box';
     el.is_new.checked = !!p.is_new; el.is_active.checked = p.is_active !== false;
     preview(p.image_url); $('#rmRow').hidden = !p.image_url;
@@ -465,15 +468,13 @@
     var price = parseFloat(el.price.value);
     if(!el.name_en.value.trim() || !el.name_ar.value.trim()){ err.textContent = 'Please enter the name in English and Arabic.'; err.hidden = false; return; }
     if(isNaN(price) || price < 0){ err.textContent = 'Please enter a valid price.'; err.hidden = false; return; }
-    var stock = Number(el.stock.value);
-    if(el.stock.value.trim() === '' || !Number.isInteger(stock) || stock < 0){ err.textContent = 'Please enter the stock as a whole number, 0 or more.'; err.hidden = false; return; }
 
     var row = {
       dept: el.dept.value, cat: el.cat.value, type: el.type.value,
       name_en: el.name_en.value.trim(), name_ar: el.name_ar.value.trim(),
       desc_en: el.desc_en.value.trim() || null, desc_ar: el.desc_ar.value.trim() || null,
       size_en: el.size_en.value.trim() || null, size_ar: el.size_ar.value.trim() || null,
-      price: price, stock: stock, sort_order: parseInt(el.sort_order.value, 10) || 0,
+      price: price, sort_order: parseInt(el.sort_order.value, 10) || 0,
       is_new: el.is_new.checked, is_active: el.is_active.checked
     };
     var oldUrl = editing && editing.image_url;
