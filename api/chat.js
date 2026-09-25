@@ -1,7 +1,7 @@
 // Vercel serverless function: POST /api/chat
 // Keeps the Gemini API key on the server (GEMINI_API_KEY env var), never in the browser.
 
-const MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash'; // free-tier model
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash'; // GA since Sep 2026; gemini-2.5-flash was retired Jun 17 2026
 const MAX_TURNS = 12;
 const MAX_CHARS = 1000;
 
@@ -43,7 +43,11 @@ module.exports = async function handler(req, res) {
     }
 
     const generationConfig = { temperature: 0.6, maxOutputTokens: 700 };
-    if (MODEL.includes('2.5-flash')) generationConfig.thinkingConfig = { thinkingBudget: 0 };
+    // "Thinking" controls differ by model generation: 2.5 models use thinkingBudget
+    // (0 disables it); Gemini 3 models use thinkingLevel instead and cannot fully
+    // disable thinking, so "low" is the fastest/cheapest setting available.
+    if (/^gemini-2\.5-flash/.test(MODEL)) generationConfig.thinkingConfig = { thinkingBudget: 0 };
+    else if (/^gemini-3/.test(MODEL)) generationConfig.thinkingConfig = { thinkingLevel: 'low' };
 
     const r = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
