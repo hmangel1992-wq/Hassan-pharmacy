@@ -11,6 +11,11 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon-192.png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="AVARA">
 
 <meta property="og:title" content="AVARA — Your Health Matters">
 <meta property="og:description" content="Inspired by Nature. Perfected by Science.">
@@ -132,6 +137,24 @@
   .tool:hover{ background: var(--mint); }
   .tool svg{ width: 21px; height: 21px; stroke: var(--ink); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
   .tool--lang{ font-size: .9rem; font-weight: 500; }
+  .tool--install{
+    gap: 8px; padding: 0 14px; border: 1px solid var(--teal); border-radius: 999px; font-size: .88rem; font-weight: 500;
+  }
+  .tool--install svg{ width: 17px; height: 17px; stroke: var(--teal-deep); }
+  .tool--install:hover{ background: var(--mint); }
+  .tool--install[hidden]{ display: none; }
+  @media (max-width: 640px){ .tool--install span{ display: none; } .tool--install{ padding: 0 10px; } }
+
+  .install-help{
+    position: fixed; z-index: 100; inset-inline: 0; bottom: 0; background: var(--white);
+    border-top: 1px solid var(--mint-2); padding: 20px 24px calc(20px + env(safe-area-inset-bottom, 0px));
+    transform: translateY(100%); transition: transform .3s ease; box-shadow: 0 -8px 24px rgba(44,44,44,.12);
+  }
+  .install-help.show{ transform: none; }
+  .install-help__in{ width: min(520px, 100%); margin-inline: auto; }
+  .install-help h3{ font-size: 1.1rem; font-weight: 500; margin-bottom: 8px; }
+  .install-help p{ color: var(--ink-soft); font-size: .92rem; line-height: 1.6; }
+  .install-help button{ margin-top: 14px; }
   .tool__count{
     position: absolute; top: 3px; inset-inline-end: 1px;
     min-width: 18px; height: 18px; padding: 0 5px;
@@ -523,6 +546,10 @@
       <button class="tool" id="searchBtn" type="button" aria-expanded="false" aria-controls="searchPanel" data-i18n-aria="search">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       </button>
+      <button class="tool tool--install" id="installBtn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"/></svg>
+        <span data-i18n="install_app">Install app</span>
+      </button>
       <button class="tool tool--lang" id="langBtn" type="button">العربية</button>
       <button class="tool" id="cartBtn" type="button" aria-haspopup="dialog" data-i18n-aria="cart_title">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
@@ -752,6 +779,13 @@
     </form>
   </div>
 </aside>
+<div class="install-help" id="installHelp" hidden role="dialog" aria-modal="false" aria-labelledby="installHelpTitle">
+  <div class="install-help__in">
+    <h3 id="installHelpTitle" data-i18n="install_help_title">Install the AVARA app</h3>
+    <p id="installHelpText"></p>
+    <button class="btn btn--line" type="button" id="installHelpClose" data-i18n="install_help_close">Got it</button>
+  </div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!-- ============ STORE LOGIC ============ -->
@@ -792,6 +826,11 @@
       chat_note:'General guidance only, not a medical diagnosis. For emergencies, contact local emergency services.',
       chat_greet:'Hello, welcome to AVARA. Ask me about medical advice, athlete recovery or beauty care — I\'m here to help.',
       chat_err:'Sorry, something went wrong. Please try again, or message us on WhatsApp.',
+      install_app:'Install app', install_added:'AVARA is installed on your device',
+      install_help_title:'Install the AVARA app', install_help_close:'Got it',
+      install_help_ios:'Tap the Share icon in Safari, then choose "Add to Home Screen".',
+      install_help_generic:'Open your browser menu and choose "Add to Home screen" or "Install app".',
+      install_help_installed:'AVARA is already installed. Look for it on your home screen or app list.',
       f_shop:'Shop', f_help:'Help & contact', f_rights:'© 2026 AVARA. All rights reserved.',
       loading:'Loading products…', load_err:'We could not load the products. Please refresh the page or try again shortly.', no_products:'No products in this section yet.',
       name_label:'Full name', phone_label:'Phone number', address_label:'Delivery address (optional)', notes_label:'Notes (optional)',
@@ -834,6 +873,11 @@
       chat_note:'إرشادات عامة فقط، وليست تشخيصاً طبياً. في حالات الطوارئ تواصل فوراً مع الطوارئ المحلية.',
       chat_greet:'مرحباً بك في AVARA. اسألني عن النصائح الطبية أو استشفاء الرياضيين أو العناية بالجمال، أنا هنا للمساعدة.',
       chat_err:'عذراً، حدث خطأ ما. يرجى المحاولة مجدداً أو مراسلتنا عبر واتساب.',
+      install_app:'تثبيت التطبيق', install_added:'تم تثبيت AVARA على جهازك',
+      install_help_title:'ثبّت تطبيق AVARA', install_help_close:'حسناً',
+      install_help_ios:'اضغط على أيقونة المشاركة في Safari، ثم اختر "إضافة إلى الشاشة الرئيسية".',
+      install_help_generic:'افتح قائمة المتصفح واختر "إضافة إلى الشاشة الرئيسية" أو "تثبيت التطبيق".',
+      install_help_installed:'تطبيق AVARA مثبّت لديك بالفعل. ابحث عنه في شاشتك الرئيسية أو قائمة التطبيقات.',
       f_shop:'تسوّق', f_help:'المساعدة والتواصل', f_rights:'© 2026 AVARA. جميع الحقوق محفوظة.',
       loading:'جارٍ تحميل المنتجات…', load_err:'تعذّر تحميل المنتجات. يرجى تحديث الصفحة أو المحاولة بعد قليل.', no_products:'لا توجد منتجات في هذا القسم بعد.',
       name_label:'الاسم الكامل', phone_label:'رقم الهاتف', address_label:'عنوان التوصيل (اختياري)', notes_label:'ملاحظات (اختياري)',
@@ -1172,6 +1216,50 @@
     $('#chatInput').addEventListener('input', function(){ autosize(this); });
     $('#chatInput').addEventListener('keydown', function(e){
       if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); chatForm.requestSubmit(); }
+    });
+  }
+
+  /* ---------- Install app (PWA) ---------- */
+  var deferredInstall = null;
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+
+  function hideInstallBtn(){ $('#installBtn').hidden = true; }
+  if(isStandalone) hideInstallBtn();   // already installed: no need to offer it again
+
+  function openInstallHelp(text){
+    $('#installHelpText').textContent = text;
+    var el = $('#installHelp'); el.hidden = false;
+    requestAnimationFrame(function(){ el.classList.add('show'); });
+  }
+  function closeInstallHelp(){
+    var el = $('#installHelp'); el.classList.remove('show');
+    setTimeout(function(){ el.hidden = true; }, 300);
+  }
+  $('#installHelpClose').addEventListener('click', closeInstallHelp);
+
+  // Chrome/Edge/Android may offer their own native install prompt; we keep
+  // it and fire it from our button instead of Chrome's mini-infobar.
+  window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferredInstall = e; });
+  window.addEventListener('appinstalled', function(){
+    deferredInstall = null; hideInstallBtn(); toast(t('install_added'));
+  });
+
+  $('#installBtn').addEventListener('click', function(){
+    if(deferredInstall){
+      deferredInstall.prompt();
+      deferredInstall.userChoice.then(function(){ deferredInstall = null; });
+      return;
+    }
+    // No native prompt available (iOS Safari, desktop Safari/Firefox, or
+    // Chrome hasn't offered one yet): show the manual steps instead.
+    if(isStandalone){ openInstallHelp(t('install_help_installed')); return; }
+    openInstallHelp(isIOS ? t('install_help_ios') : t('install_help_generic'));
+  });
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('/sw.js').catch(function(){});
     });
   }
 
