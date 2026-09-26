@@ -291,6 +291,13 @@
   }
   .section--mist .toolbar{ border-color: rgba(31,95,107,.25); }
   .chips{ display: flex; flex-wrap: wrap; gap: 8px; }
+  .subtabs{ display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+  .subtab{
+    padding: 11px 24px; font-size: .98rem; font-weight: 500; background: var(--white);
+    border: 1px solid var(--teal); border-radius: 2px; transition: background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .subtab:hover{ background: var(--mint); }
+  .subtab[aria-pressed="true"]{ background: var(--teal-deep); border-color: var(--teal-deep); color: var(--white); }
   .chip{
     padding: 7px 16px; font-size: .9rem; border: 1px solid var(--teal); border-radius: 999px;
     transition: background .2s ease, color .2s ease, border-color .2s ease;
@@ -665,6 +672,7 @@
         <p class="lead" data-i18n="lead_beauty">Skin care where natural ingredients meet careful formulation.</p>
       </div>
     </div>
+    <div class="subtabs" id="collTabs-beauty"></div>
     <div class="toolbar" id="tools-beauty"></div>
     <div class="grid" id="grid-beauty"></div>
   </div>
@@ -902,13 +910,41 @@
       {id:'recovery',  en:'Recovery',              ar:'استشفاء'},
       {id:'nutrition', en:'Hydration & nutrition', ar:'ترطيب وتغذية'},
       {id:'protection',en:'Protection',            ar:'حماية'}
-    ],
-    beauty: [
-      {id:'serums',    en:'Serums',                ar:'سيروم'},
-      {id:'moisture',  en:'Moisturisers & sun',    ar:'مرطّبات وواقي شمس'},
-      {id:'cleanse',   en:'Cleansers & masks',     ar:'منظّفات وماسكات'}
     ]
   };
+
+  // Beauty is split into three collections, each with its own category set.
+  var COLLECTIONS = {
+    beauty: [
+      { id:'avara_care', en:'Avara Care', ar:'أفارا كير', cats:[
+        {id:'brand',         en:'Brand',            ar:'العلامة التجارية'},
+        {id:'cleanser',      en:'Cleanser',          ar:'منظّفات'},
+        {id:'moisturizers',  en:'Moisturizers',      ar:'مرطّبات'},
+        {id:'sun_care',      en:'Sun care',          ar:'العناية بالشمس'},
+        {id:'bath_body',     en:'Bath & Body',       ar:'الاستحمام والجسم'},
+        {id:'mask_patches',  en:'Mask & Patches',    ar:'الأقنعة واللصقات'},
+        {id:'others',        en:'Others',            ar:'أخرى'}
+      ]},
+      { id:'avara_hair', en:'Avara Hair', ar:'أفارا هير', cats:[
+        {id:'brand',          en:'Brand',            ar:'العلامة التجارية'},
+        {id:'hair_care',      en:'Hair care',        ar:'العناية بالشعر'},
+        {id:'hair_treatment', en:'Hair treatment',   ar:'علاج الشعر'},
+        {id:'hair_color',     en:'Hair color',       ar:'صبغات الشعر'},
+        {id:'hair_styling',   en:'Hair styling',     ar:'تصفيف الشعر'},
+        {id:'others',         en:'Others',           ar:'أخرى'}
+      ]},
+      { id:'avara_cosmetics', en:'Avara Cosmetics', ar:'أفارا كوزمتكس', cats:[
+        {id:'face',          en:'Face',              ar:'الوجه'},
+        {id:'eyes',          en:'Eyes',              ar:'العيون'},
+        {id:'cheeks',        en:'Cheeks',            ar:'الخدود'},
+        {id:'lips',          en:'Lips',              ar:'الشفاه'},
+        {id:'nails',         en:'Nails',             ar:'الأظافر'},
+        {id:'makeup_tools',  en:'Makeup tools',      ar:'أدوات المكياج'},
+        {id:'others',        en:'Others',            ar:'أخرى'}
+      ]}
+    ]
+  };
+  function beautyColl(id){ return COLLECTIONS.beauty.filter(function(c){ return c.id === id; })[0] || COLLECTIONS.beauty[0]; }
 
   var PRODUCTS = [];   // loaded from Supabase (table: products)
   var DEPTS = ['medical','athlete','beauty'];
@@ -928,7 +964,7 @@
   var view = {
     medical:{cat:'all', sort:'featured'},
     athlete:{cat:'all', sort:'featured'},
-    beauty: {cat:'all', sort:'featured'}
+    beauty: {cat:'all', sort:'featured', collection:'avara_care'}
   };
   var byId = {};
   var loadState = 'loading';   // 'loading' | 'ok' | 'error'
@@ -939,7 +975,7 @@
 
   function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   function mapRow(r){
-    return {id:r.id, dept:r.dept, cat:r.cat, type:r.type || 'box', price:Number(r.price), isNew:!!r.is_new,
+    return {id:r.id, dept:r.dept, cat:r.cat, collection:r.collection || null, type:r.type || 'box', price:Number(r.price), isNew:!!r.is_new,
       size:[r.size_en || '', r.size_ar || r.size_en || ''], en:r.name_en, ar:r.name_ar || r.name_en,
       de:r.desc_en || '', da:r.desc_ar || r.desc_en || '', img:r.image_url || ''};
   }
@@ -966,7 +1002,13 @@
   function name(p){ return p[lang]; }
   function money(n){ return '$' + n.toFixed(2); }
   function saveCart(){ try{ localStorage.setItem('avara-cart', JSON.stringify(cart)); }catch(e){} }
-  function catLabel(p){ var c = CATS[p.dept].filter(function(x){ return x.id === p.cat; })[0]; return c ? c[lang] : ''; }
+  function catLabel(p){
+    if(p.dept === 'beauty'){
+      var cc = beautyColl(p.collection).cats.filter(function(x){ return x.id === p.cat; })[0];
+      return cc ? cc[lang] : '';
+    }
+    var c = CATS[p.dept].filter(function(x){ return x.id === p.cat; })[0]; return c ? c[lang] : '';
+  }
 
   /* ---------- Packshot ---------- */
   function pack(type){ return '<svg class="pack" viewBox="0 0 120 140" aria-hidden="true"><use href="#pk-' + esc(type) + '"/></svg>'; }
@@ -974,8 +1016,15 @@
 
   /* ---------- Toolbar + grid ---------- */
   function renderTools(d){
+    var collTabsEl = $('#collTabs-' + d);
+    if(collTabsEl){
+      collTabsEl.innerHTML = COLLECTIONS[d].map(function(c){
+        return '<button class="subtab" type="button" data-coll="' + d + ':' + c.id + '" aria-pressed="' + (view[d].collection === c.id) + '">' + c[lang] + '</button>';
+      }).join('');
+    }
+    var catList = collTabsEl ? beautyColl(view[d].collection).cats : CATS[d];
     var chips = '<button class="chip" type="button" data-chip="' + d + ':all" aria-pressed="' + (view[d].cat === 'all') + '">' + t('cat_all') + '</button>' +
-      CATS[d].map(function(c){
+      catList.map(function(c){
         return '<button class="chip" type="button" data-chip="' + d + ':' + c.id + '" aria-pressed="' + (view[d].cat === c.id) + '">' + c[lang] + '</button>';
       }).join('');
     var sorts = [['featured','sort_feat'],['low','sort_low'],['high','sort_high'],['az','sort_az']].map(function(s){
@@ -994,7 +1043,7 @@
       if(countEl) countEl.textContent = '';
       return;
     }
-    var list = PRODUCTS.filter(function(p){ return p.dept === d && (v.cat === 'all' || p.cat === v.cat); });
+    var list = PRODUCTS.filter(function(p){ return p.dept === d && (d !== 'beauty' || p.collection === v.collection) && (v.cat === 'all' || p.cat === v.cat); });
     if(v.sort === 'low')  list.sort(function(a,b){ return a.price - b.price; });
     if(v.sort === 'high') list.sort(function(a,b){ return b.price - a.price; });
     if(v.sort === 'az')   list.sort(function(a,b){ return name(a).localeCompare(name(b), lang); });
@@ -1093,13 +1142,19 @@
   function runSearch(){
     var q = $('#searchInput').value.trim().toLowerCase(), out = $('#searchResults');
     if(!q){ out.innerHTML = ''; return; }
-    var hits = PRODUCTS.filter(function(p){ return (p.en + ' ' + p.ar + ' ' + DEPT_LABEL[p.dept].en + ' ' + DEPT_LABEL[p.dept].ar).toLowerCase().indexOf(q) > -1; }).slice(0, 6);
+    var hits = PRODUCTS.filter(function(p){
+      var coll = p.dept === 'beauty' ? beautyColl(p.collection) : null;
+      var hay = p.en + ' ' + p.ar + ' ' + DEPT_LABEL[p.dept].en + ' ' + DEPT_LABEL[p.dept].ar + ' ' + (coll ? coll.en + ' ' + coll.ar : '');
+      return hay.toLowerCase().indexOf(q) > -1;
+    }).slice(0, 6);
     out.innerHTML = hits.length ? hits.map(function(p){
       return '<li><button type="button" data-goto="' + esc(p.id) + '"><span>' + esc(name(p)) + '<br><small>' + esc(pick(DEPT_LABEL[p.dept])) + '</small></span><span dir="ltr">' + money(p.price) + '</span></button></li>';
     }).join('') : '<li class="search-empty">' + t('search_none') + '</li>';
   }
   function goTo(id){
-    var p = byId[id]; view[p.dept].cat = 'all'; renderDept(p.dept); closeSearch();
+    var p = byId[id]; view[p.dept].cat = 'all';
+    if(p.dept === 'beauty') view.beauty.collection = p.collection || 'avara_care';
+    renderDept(p.dept); closeSearch();
     var el = document.getElementById('p-' + id); if(!el) return;
     el.scrollIntoView({behavior:'smooth', block:'center'});
     el.classList.add('is-found'); setTimeout(function(){ el.classList.remove('is-found'); }, 2400);
@@ -1129,6 +1184,12 @@
     if((el = e.target.closest('[data-chip]'))){
       var parts = el.getAttribute('data-chip').split(':'); view[parts[0]].cat = parts[1]; renderDept(parts[0]);
       var again = $('[data-chip="' + parts.join(':') + '"]'); if(again) again.focus(); return;
+    }
+    if((el = e.target.closest('[data-coll]'))){
+      var cparts = el.getAttribute('data-coll').split(':');
+      view[cparts[0]].collection = cparts[1]; view[cparts[0]].cat = 'all';
+      renderDept(cparts[0]);
+      var againC = $('[data-coll="' + cparts.join(':') + '"]'); if(againC) againC.focus(); return;
     }
     if((el = e.target.closest('[data-qty]'))){
       var q = el.getAttribute('data-qty').split(':'), pid = q[0];

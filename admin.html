@@ -218,13 +218,14 @@
       <button class="btn btn--sm" type="button" id="dlgClose">Close</button>
     </div>
     <div class="dlg__body">
-      <div class="row2">
+      <div class="row3">
         <label class="field">Section
           <select name="dept" required>
             <option value="medical">Medical advice</option>
             <option value="athlete">Athlete section</option>
             <option value="beauty">Beauty section</option>
           </select></label>
+        <label class="field" id="collectionField" hidden>Collection<select name="collection"></select></label>
         <label class="field">Category<select name="cat" required></select></label>
       </div>
       <div class="row2">
@@ -279,9 +280,24 @@
 
   var CATS = {
     medical:[['vitamins','Vitamins & supplements'],['firstaid','First aid'],['devices','Devices']],
-    athlete:[['recovery','Recovery'],['nutrition','Hydration & nutrition'],['protection','Protection']],
-    beauty: [['serums','Serums'],['moisture','Moisturisers & sun'],['cleanse','Cleansers & masks']]
+    athlete:[['recovery','Recovery'],['nutrition','Hydration & nutrition'],['protection','Protection']]
   };
+  var COLLECTIONS = {
+    beauty: [
+      { id:'avara_care', label:'Avara Care', cats:[
+        ['brand','Brand'],['cleanser','Cleanser'],['moisturizers','Moisturizers'],
+        ['sun_care','Sun care'],['bath_body','Bath & Body'],['mask_patches','Mask & Patches'],['others','Others']
+      ]},
+      { id:'avara_hair', label:'Avara Hair', cats:[
+        ['brand','Brand'],['hair_care','Hair care'],['hair_treatment','Hair treatment'],
+        ['hair_color','Hair color'],['hair_styling','Hair styling'],['others','Others']
+      ]},
+      { id:'avara_cosmetics', label:'Avara Cosmetics', cats:[
+        ['face','Face'],['eyes','Eyes'],['cheeks','Cheeks'],['lips','Lips'],['nails','Nails'],['makeup_tools','Makeup tools'],['others','Others']
+      ]}
+    ]
+  };
+  function beautyColl(id){ return COLLECTIONS.beauty.filter(function(c){ return c.id === id; })[0] || COLLECTIONS.beauty[0]; }
   var DEPT = {medical:'Medical advice', athlete:'Athlete section', beauty:'Beauty section'};
   var BUCKET = 'product-images';
 
@@ -356,6 +372,14 @@
       products = r.data || []; renderProducts();
     });
   }
+  function catHint(p){
+    if(p.dept === 'beauty'){
+      var coll = beautyColl(p.collection);
+      var cat = (coll.cats.filter(function(c){ return c[0] === p.cat; })[0] || ['',''])[1];
+      return coll.label + (cat ? ' — ' + cat : '');
+    }
+    return (CATS[p.dept].filter(function(c){ return c[0] === p.cat; })[0] || ['',''])[1];
+  }
   function renderProducts(){
     var f = $('#deptFilter').value;
     var list = products.filter(function(p){ return f === 'all' || p.dept === f; });
@@ -364,7 +388,7 @@
       return '<tr>' +
         '<td><div class="thumb">' + (p.image_url ? '<img src="' + esc(p.image_url) + '" alt="">' : 'No photo') + '</div></td>' +
         '<td class="nm">' + esc(p.name_en) + '<small dir="rtl">' + esc(p.name_ar) + '</small></td>' +
-        '<td>' + esc(DEPT[p.dept]) + '<small class="hint" style="display:block">' + esc((CATS[p.dept].filter(function(c){ return c[0] === p.cat; })[0] || ['',''])[1]) + '</small></td>' +
+        '<td>' + esc(DEPT[p.dept]) + '<small class="hint" style="display:block">' + esc(catHint(p)) + '</small></td>' +
         '<td>' + money(p.price) + '</td>' +
         '<td>' + (p.is_active ? '<span class="tag">Visible</span>' : '<span class="tag tag--off">Hidden</span>') + (p.is_new ? ' <span class="tag">New</span>' : '') + '</td>' +
         '<td><div class="actions">' +
@@ -397,12 +421,24 @@
   /* ---------- Product dialog ---------- */
   var dlg = $('#productDlg'), form = $('#productForm');
 
+  function fillCollections(selected){
+    form.elements.collection.innerHTML = COLLECTIONS.beauty.map(function(c){
+      return '<option value="' + c.id + '"' + (c.id === selected ? ' selected' : '') + '>' + c.label + '</option>';
+    }).join('');
+  }
   function fillCats(dept, selected){
-    form.elements.cat.innerHTML = CATS[dept].map(function(c){
+    var list = dept === 'beauty' ? beautyColl(form.elements.collection.value).cats : CATS[dept];
+    form.elements.cat.innerHTML = list.map(function(c){
       return '<option value="' + c[0] + '"' + (c[0] === selected ? ' selected' : '') + '>' + c[1] + '</option>';
     }).join('');
   }
-  form.elements.dept.addEventListener('change', function(){ fillCats(this.value); });
+  form.elements.dept.addEventListener('change', function(){
+    var isBeauty = this.value === 'beauty';
+    $('#collectionField').hidden = !isBeauty;
+    if(isBeauty) fillCollections(form.elements.collection.value || 'avara_care');
+    fillCats(this.value);
+  });
+  form.elements.collection.addEventListener('change', function(){ fillCats('beauty'); });
 
   function preview(url){
     $('#imgPreview').innerHTML = url ? '<img src="' + esc(url) + '" alt="">' : 'No photo';
@@ -411,10 +447,14 @@
   function openDialog(id){
     editing = id ? products.filter(function(p){ return p.id === id; })[0] : null;
     pendingFile = null; $('#imgFile').value = ''; $('#rmImg').checked = false; $('#formErr').hidden = true;
-    var p = editing || {dept:'medical', cat:'vitamins', type:'box', price:'', sort_order:0, is_active:true, is_new:false};
+    var p = editing || {dept:'medical', collection:null, cat:'vitamins', type:'box', price:'', sort_order:0, is_active:true, is_new:false};
     $('#dlgTitle').textContent = editing ? 'Edit product' : 'Add product';
     var el = form.elements;
-    el.dept.value = p.dept; fillCats(p.dept, p.cat);
+    el.dept.value = p.dept;
+    var isBeauty = p.dept === 'beauty';
+    $('#collectionField').hidden = !isBeauty;
+    if(isBeauty) fillCollections(p.collection || 'avara_care');
+    fillCats(p.dept, p.cat);
     el.name_en.value = p.name_en || ''; el.name_ar.value = p.name_ar || '';
     el.desc_en.value = p.desc_en || ''; el.desc_ar.value = p.desc_ar || '';
     el.price.value = p.price; el.size_en.value = p.size_en || ''; el.size_ar.value = p.size_ar || '';
@@ -470,7 +510,8 @@
     if(isNaN(price) || price < 0){ err.textContent = 'Please enter a valid price.'; err.hidden = false; return; }
 
     var row = {
-      dept: el.dept.value, cat: el.cat.value, type: el.type.value,
+      dept: el.dept.value, collection: el.dept.value === 'beauty' ? el.collection.value : null,
+      cat: el.cat.value, type: el.type.value,
       name_en: el.name_en.value.trim(), name_ar: el.name_ar.value.trim(),
       desc_en: el.desc_en.value.trim() || null, desc_ar: el.desc_ar.value.trim() || null,
       size_en: el.size_en.value.trim() || null, size_ar: el.size_ar.value.trim() || null,
