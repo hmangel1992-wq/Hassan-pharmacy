@@ -228,6 +228,7 @@
         <label class="field" id="collectionField" hidden>Collection<select name="collection"></select></label>
         <label class="field">Category<select name="cat" required></select></label>
       </div>
+      <label class="field">Brand (optional)<input name="brand" maxlength="80" placeholder="e.g. La Roche-Posay, Optimum Nutrition"></label>
       <div class="row2">
         <label class="field">Name (English)<input name="name_en" required maxlength="120"></label>
         <label class="field">Name (Arabic)<input class="ar" name="name_ar" required maxlength="120"></label>
@@ -285,11 +286,11 @@
   var COLLECTIONS = {
     beauty: [
       { id:'avara_care', label:'Avara Care', cats:[
-        ['brand','Brand'],['cleanser','Cleanser'],['moisturizers','Moisturizers'],
+        ['cleanser','Cleanser'],['moisturizers','Moisturizers'],
         ['sun_care','Sun care'],['bath_body','Bath & Body'],['mask_patches','Mask & Patches'],['others','Others']
       ]},
       { id:'avara_hair', label:'Avara Hair', cats:[
-        ['brand','Brand'],['hair_care','Hair care'],['hair_treatment','Hair treatment'],
+        ['hair_care','Hair care'],['hair_treatment','Hair treatment'],
         ['hair_color','Hair color'],['hair_styling','Hair styling'],['others','Others']
       ]},
       { id:'avara_cosmetics', label:'Avara Cosmetics', cats:[
@@ -387,7 +388,7 @@
     $('#productRows').innerHTML = list.map(function(p){
       return '<tr>' +
         '<td><div class="thumb">' + (p.image_url ? '<img src="' + esc(p.image_url) + '" alt="">' : 'No photo') + '</div></td>' +
-        '<td class="nm">' + esc(p.name_en) + '<small dir="rtl">' + esc(p.name_ar) + '</small></td>' +
+        '<td class="nm">' + esc(p.name_en) + (p.brand ? ' <span class="hint">— ' + esc(p.brand) + '</span>' : '') + '<small dir="rtl">' + esc(p.name_ar) + '</small></td>' +
         '<td>' + esc(DEPT[p.dept]) + '<small class="hint" style="display:block">' + esc(catHint(p)) + '</small></td>' +
         '<td>' + money(p.price) + '</td>' +
         '<td>' + (p.is_active ? '<span class="tag">Visible</span>' : '<span class="tag tag--off">Hidden</span>') + (p.is_new ? ' <span class="tag">New</span>' : '') + '</td>' +
@@ -455,7 +456,7 @@
     $('#collectionField').hidden = !isBeauty;
     if(isBeauty) fillCollections(p.collection || 'avara_care');
     fillCats(p.dept, p.cat);
-    el.name_en.value = p.name_en || ''; el.name_ar.value = p.name_ar || '';
+    el.brand.value = p.brand || ''; el.name_en.value = p.name_en || ''; el.name_ar.value = p.name_ar || '';
     el.desc_en.value = p.desc_en || ''; el.desc_ar.value = p.desc_ar || '';
     el.price.value = p.price; el.size_en.value = p.size_en || ''; el.size_ar.value = p.size_ar || '';
     el.sort_order.value = p.sort_order || 0; el.type.value = p.type || 'box';
@@ -512,6 +513,7 @@
     var row = {
       dept: el.dept.value, collection: el.dept.value === 'beauty' ? el.collection.value : null,
       cat: el.cat.value, type: el.type.value,
+      brand: el.brand.value.trim() || null,
       name_en: el.name_en.value.trim(), name_ar: el.name_ar.value.trim(),
       desc_en: el.desc_en.value.trim() || null, desc_ar: el.desc_ar.value.trim() || null,
       size_en: el.size_en.value.trim() || null, size_ar: el.size_ar.value.trim() || null,

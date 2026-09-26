@@ -10,6 +10,7 @@ create table if not exists public.products (
   dept        text not null check (dept in ('medical','athlete','beauty')),
   collection  text,   -- Beauty only: 'avara_care' | 'avara_hair' | 'avara_cosmetics'
   cat         text not null,
+  brand       text check (char_length(brand) <= 80),   -- e.g. 'La Roche-Posay', 'Optimum Nutrition' — not a filter category, just a product spec
   type        text not null default 'box'
               check (type in ('dropper','tube','pump','jar','tub','box','sachet')),
   name_en     text not null check (char_length(name_en) between 1 and 120),
@@ -48,9 +49,10 @@ create table if not exists public.admins (
 create index if not exists products_dept_idx on public.products (dept, sort_order);
 create index if not exists products_dept_coll_idx on public.products (dept, collection, sort_order);
 
--- Safe to re-run: adds the column above if this schema was applied before
--- the Beauty collections (Avara Care / Avara Hair / Avara Cosmetics) existed.
+-- Safe to re-run: adds the columns above if this schema was applied before
+-- the Beauty collections, or the Brand field, existed.
 alter table public.products add column if not exists collection text;
+alter table public.products add column if not exists brand text;
 create index if not exists orders_created_idx on public.orders (created_at desc);
 
 -- ---------- 2. Admin check -------------------------------------------

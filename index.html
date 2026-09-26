@@ -917,7 +917,6 @@
   var COLLECTIONS = {
     beauty: [
       { id:'avara_care', en:'Avara Care', ar:'أفارا كير', cats:[
-        {id:'brand',         en:'Brand',            ar:'العلامة التجارية'},
         {id:'cleanser',      en:'Cleanser',          ar:'منظّفات'},
         {id:'moisturizers',  en:'Moisturizers',      ar:'مرطّبات'},
         {id:'sun_care',      en:'Sun care',          ar:'العناية بالشمس'},
@@ -926,7 +925,6 @@
         {id:'others',        en:'Others',            ar:'أخرى'}
       ]},
       { id:'avara_hair', en:'Avara Hair', ar:'أفارا هير', cats:[
-        {id:'brand',          en:'Brand',            ar:'العلامة التجارية'},
         {id:'hair_care',      en:'Hair care',        ar:'العناية بالشعر'},
         {id:'hair_treatment', en:'Hair treatment',   ar:'علاج الشعر'},
         {id:'hair_color',     en:'Hair color',       ar:'صبغات الشعر'},
@@ -975,7 +973,7 @@
 
   function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   function mapRow(r){
-    return {id:r.id, dept:r.dept, cat:r.cat, collection:r.collection || null, type:r.type || 'box', price:Number(r.price), isNew:!!r.is_new,
+    return {id:r.id, dept:r.dept, cat:r.cat, collection:r.collection || null, brand:r.brand || '', type:r.type || 'box', price:Number(r.price), isNew:!!r.is_new,
       size:[r.size_en || '', r.size_ar || r.size_en || ''], en:r.name_en, ar:r.name_ar || r.name_en,
       de:r.desc_en || '', da:r.desc_ar || r.desc_en || '', img:r.image_url || ''};
   }
@@ -1051,7 +1049,7 @@
       return '<article class="card" id="p-' + esc(p.id) + '">' +
         '<div class="card__media">' + media(p) + (p.isNew ? '<span class="badge">' + t('badge_new') + '</span>' : '') + '</div>' +
         '<div class="card__body">' +
-          '<p class="card__cat">' + esc(catLabel(p)) + '</p>' +
+          '<p class="card__cat">' + (p.brand ? esc(p.brand) + ' · ' : '') + esc(catLabel(p)) + '</p>' +
           '<h3 class="card__name">' + esc(name(p)) + '</h3>' +
           '<p class="card__desc">' + esc(lang === 'ar' ? p.da : p.de) + '</p>' +
           '<div class="card__foot"><span class="card__size">' + esc(pick({en:p.size[0], ar:p.size[1]})) + '</span><span class="card__price" dir="ltr">' + money(p.price) + '</span></div>' +
@@ -1144,7 +1142,7 @@
     if(!q){ out.innerHTML = ''; return; }
     var hits = PRODUCTS.filter(function(p){
       var coll = p.dept === 'beauty' ? beautyColl(p.collection) : null;
-      var hay = p.en + ' ' + p.ar + ' ' + DEPT_LABEL[p.dept].en + ' ' + DEPT_LABEL[p.dept].ar + ' ' + (coll ? coll.en + ' ' + coll.ar : '');
+      var hay = p.en + ' ' + p.ar + ' ' + (p.brand || '') + ' ' + DEPT_LABEL[p.dept].en + ' ' + DEPT_LABEL[p.dept].ar + ' ' + (coll ? coll.en + ' ' + coll.ar : '');
       return hay.toLowerCase().indexOf(q) > -1;
     }).slice(0, 6);
     out.innerHTML = hits.length ? hits.map(function(p){
