@@ -224,6 +224,19 @@
   }
   .hero__actions{ margin-top: 2.2em; display: flex; flex-wrap: wrap; gap: 12px; }
 
+  .hero__focus{ margin-top: 32px; }
+  .hero__focus-tabs{ display: flex; flex-wrap: wrap; gap: 8px; }
+  .hero__focus-tab{
+    padding: .55rem 1.2rem; font-size: .92rem; font-weight: 500; border-radius: 999px;
+    border: 1px solid var(--teal); background: transparent;
+    transition: background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .hero__focus-tab:hover{ background: var(--mint); }
+  .hero__focus-tab[aria-selected="true"]{ background: var(--teal-deep); border-color: var(--teal-deep); color: var(--white); }
+  .hero__focus-text{ margin-top: 18px; font-size: 1.05rem; color: var(--ink-soft); line-height: 1.6; max-width: 48em; }
+  .hero__focus-brands{ list-style: none; display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .hero__focus-brands li{ padding: .4rem 1.05rem; font-size: .9rem; border: 1px solid var(--teal); border-radius: 999px; background: transparent; color: var(--ink); }
+
   @media (max-width: 899px){
     .hero{ background: var(--mint); }
     .hero__copy{ position: static; width: auto; padding: 32px 24px 48px; animation: none; }
@@ -595,6 +608,19 @@
   </div>
 </section>
 
+<!-- ============ BRANDS ============ -->
+<section class="section" id="brands" style="padding-bottom:64px" aria-labelledby="brandsTitle">
+  <div class="wrap">
+    <h2 class="h2" id="brandsTitle" data-i18n="brands_title">Brands you already trust</h2>
+    <p class="lead" data-i18n="brands_lead">Real skincare and performance brands, alongside AVARA's own products.</p>
+    <div class="hero__focus">
+      <div class="hero__focus-tabs" id="heroFocusTabs" role="tablist"></div>
+      <p class="hero__focus-text" id="heroFocusText" aria-live="polite"></p>
+      <ul class="hero__focus-brands" id="heroFocusBrands" aria-live="polite"></ul>
+    </div>
+  </div>
+</section>
+
 <!-- ============ DEPARTMENTS ============ -->
 <section class="section" id="departments" style="padding-bottom:40px">
   <div class="wrap">
@@ -810,6 +836,7 @@
       search:'Search products', search_ph:'Search products', search_none:'No products match your search.', menu:'Menu', close:'Close',
       hero_title:'Your Health Matters', hero_tag:'Inspired by Nature. Perfected by Science.',
       hero_cta1:'Shop now', hero_cta2:'Get medical advice',
+      brands_title:'Brands you already trust', brands_lead:"Real skincare and performance brands, alongside AVARA's own products.",
       dept_title:'Shop by department', shop:'Shop',
       tile_medical:'Health care essentials, with answers you can trust.',
       tile_athlete:'Recovery, hydration and everyday support for active bodies.',
@@ -857,6 +884,7 @@
       search:'ابحث عن منتج', search_ph:'ابحث عن منتج', search_none:'لا توجد منتجات مطابقة لبحثك.', menu:'القائمة', close:'إغلاق',
       hero_title:'صحتك تهمّنا', hero_tag:'مستوحاة من الطبيعة، مصقولة بالعلم.',
       hero_cta1:'تسوّق الآن', hero_cta2:'احصل على نصيحة طبية',
+      brands_title:'علامات تجارية تثق بها', brands_lead:'علامات حقيقية للعناية بالبشرة والأداء الرياضي، إلى جانب منتجات أفارا الخاصة.',
       dept_title:'تسوّق حسب القسم', shop:'تسوّق',
       tile_medical:'أساسيات الرعاية الصحية مع إجابات تثق بها.',
       tile_athlete:'استشفاء وترطيب ودعم يومي للأجسام النشطة.',
@@ -952,6 +980,35 @@
     beauty: {en:'Beauty section', ar:'قسم الجمال'}
   };
   var WA_NUMBER = '96176681395';
+
+  // Real brands carried in each department, used by the hero's interactive toggle.
+  var HERO_FOCUS = {
+    beauty: {
+      text: {
+        en: 'Skincare, hair and makeup from CeraVe, La Roche-Posay, Kérastase and more.',
+        ar: 'عناية بالبشرة والشعر والمكياج من CeraVe وLa Roche-Posay وKérastase وغيرها.'
+      },
+      brands: ['CeraVe', 'La Roche-Posay', 'Kérastase', 'Maybelline', 'Moroccanoil']
+    },
+    athlete: {
+      text: {
+        en: 'Recovery and performance from Optimum Nutrition, Isostar and more.',
+        ar: 'استشفاء وأداء رياضي من Optimum Nutrition وIsostar وغيرها.'
+      },
+      brands: ['Optimum Nutrition', 'Isostar', 'La Roche-Posay']
+    }
+  };
+  var heroFocus = 'beauty';
+  function renderHeroFocus(){
+    var tabsEl = $('#heroFocusTabs'); if(!tabsEl) return;
+    tabsEl.innerHTML = ['beauty', 'athlete'].map(function(k){
+      return '<button class="hero__focus-tab" type="button" role="tab" data-focus="' + k + '" aria-selected="' + (heroFocus === k) + '">' +
+        t(k === 'beauty' ? 'nav_beauty' : 'nav_athlete') + '</button>';
+    }).join('');
+    var f = HERO_FOCUS[heroFocus];
+    $('#heroFocusText').textContent = f.text[lang];
+    $('#heroFocusBrands').innerHTML = f.brands.map(function(b){ return '<li>' + esc(b) + '</li>'; }).join('');
+  }
 
   /* ---------- State ---------- */
   var $  = function(s,r){ return (r||document).querySelector(s); };
@@ -1171,6 +1228,7 @@
     DEPTS.forEach(renderDept);
     renderCart();
     runSearch();
+    renderHeroFocus();
   }
 
   /* ---------- Events ---------- */
@@ -1195,6 +1253,7 @@
     }
     if((el = e.target.closest('[data-rm]'))){ delete cart[el.getAttribute('data-rm')]; saveCart(); renderCart(); return; }
     if(e.target.closest('[data-close-cart]')){ closeCart(); return; }
+    if((el = e.target.closest('[data-focus]'))){ heroFocus = el.getAttribute('data-focus'); renderHeroFocus(); return; }
     if((el = e.target.closest('[data-goto]'))){ goTo(el.getAttribute('data-goto')); return; }
     if(e.target.closest('#nav a')){ $('#siteHeader').classList.remove('nav-open'); $('#menuBtn').setAttribute('aria-expanded','false'); }
   });
