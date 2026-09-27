@@ -20,9 +20,11 @@ create table if not exists public.products (
   size_en     text check (char_length(size_en) <= 40),
   size_ar     text check (char_length(size_ar) <= 40),
   price       numeric(10,2) not null check (price >= 0),
+  sale_price  numeric(10,2) check (sale_price is null or (sale_price >= 0 and sale_price < price)),
   is_new      boolean not null default false,
   is_active   boolean not null default true,
-  image_url   text,
+  image_url   text,   -- legacy single photo; superseded by images[] below
+  images      text[] not null default '{}' check (array_length(images,1) is null or array_length(images,1) <= 3),
   sort_order  integer not null default 0,
   created_at  timestamptz not null default now()
 );
@@ -50,9 +52,19 @@ create index if not exists products_dept_idx on public.products (dept, sort_orde
 create index if not exists products_dept_coll_idx on public.products (dept, collection, sort_order);
 
 -- Safe to re-run: adds the columns above if this schema was applied before
--- the Beauty collections, or the Brand field, existed.
+-- the Beauty collections, the Brand field, or photo galleries / sale prices, existed.
 alter table public.products add column if not exists collection text;
 alter table public.products add column if not exists brand text;
+alter table public.products add column if not exists images text[] not null default '{}';
+alter table public.products drop constraint if exists products_images_check;
+alter table public.products add constraint products_images_check
+  check (array_length(images,1) is null or array_length(images,1) <= 3);
+update public.products set images = array[image_url]
+  where image_url is not null and coalesce(array_length(images,1), 0) = 0;
+alter table public.products add column if not exists sale_price numeric(10,2);
+alter table public.products drop constraint if exists products_sale_price_check;
+alter table public.products add constraint products_sale_price_check
+  check (sale_price is null or (sale_price >= 0 and sale_price < price));
 create index if not exists orders_created_idx on public.orders (created_at desc);
 
 -- ---------- 2. Admin check -------------------------------------------
@@ -156,11 +168,13 @@ begin
       raise exception 'Product unavailable';
     end if;
 
+    -- Charge the sale price when one is set; this is also what gets stored
+    -- on the order, so order history reflects what the customer actually paid.
     v_lines := v_lines || jsonb_build_object(
       'id', v_prod.id, 'name_en', v_prod.name_en, 'name_ar', v_prod.name_ar,
-      'price', v_prod.price, 'qty', v_qty
+      'price', coalesce(v_prod.sale_price, v_prod.price), 'qty', v_qty
     );
-    v_total := v_total + v_prod.price * v_qty;
+    v_total := v_total + coalesce(v_prod.sale_price, v_prod.price) * v_qty;
   end loop;
 
   insert into public.orders (customer_name, phone, address, notes, items, total)

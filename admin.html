@@ -124,6 +124,14 @@
   .check input{ width:18px; height:18px; accent-color:var(--moss); }
   .imgbox{ display:flex; gap:16px; align-items:center; margin-bottom:14px; }
   .imgbox .thumb{ width:96px; height:96px; }
+  .photo-slots{ display:flex; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
+  .photo-slot{ width:150px; }
+  .photo-slot .thumb{ width:150px; height:150px; margin-bottom:8px; position:relative; }
+  .photo-slot .thumb small{ position:absolute; bottom:4px; inset-inline-start:4px; background:rgba(43,51,38,.7); color:#fff; font-size:.68rem; padding:1px 6px; border-radius:2px; }
+  .photo-slot input[type=file]{ width:100%; font-size:.76rem; }
+  .photo-slot .check{ margin-top:6px; margin-bottom:0; font-size:.8rem; }
+  .price-cell del{ display:block; color:var(--ink-soft); font-size:.85rem; text-decoration:line-through; }
+  .price-cell ins{ display:block; text-decoration:none; color:var(--moss); font-weight:600; }
   .hint{ font-size:.82rem; color:var(--ink-soft); }
   [dir="rtl-field"]{ direction:rtl; }
   .ar{ direction:rtl; text-align:right; }
@@ -242,6 +250,7 @@
         <label class="field">Size (English)<input name="size_en" maxlength="40" placeholder="e.g. 50 ml"></label>
         <label class="field">Size (Arabic)<input class="ar" name="size_ar" maxlength="40" placeholder="مثال: 50 مل"></label>
       </div>
+      <label class="field">Sale price (optional)<input name="sale_price" type="number" min="0" step="0.01" placeholder="Leave blank for no discount"></label>
       <div class="row2">
         <label class="field">Sort order<input name="sort_order" type="number" step="1" value="0"></label>
         <label class="field">Illustration (used when there is no photo)
@@ -251,15 +260,24 @@
           </select></label>
       </div>
 
-      <div class="imgbox">
-        <div class="thumb" id="imgPreview">No photo</div>
-        <div>
-          <label class="field" style="margin-bottom:6px">Product photo
-            <input type="file" id="imgFile" accept="image/jpeg,image/png,image/webp"></label>
-          <label class="check" id="rmRow" hidden style="margin-bottom:0"><input type="checkbox" id="rmImg"> Remove current photo</label>
-          <p class="hint">JPG, PNG or WebP. It is resized automatically.</p>
+      <div class="photo-slots">
+        <div class="photo-slot">
+          <div class="thumb" id="imgPreview0">No photo</div>
+          <input type="file" id="imgFile0" accept="image/jpeg,image/png,image/webp">
+          <label class="check" id="rmRow0" hidden><input type="checkbox" id="rmImg0"> Remove</label>
+        </div>
+        <div class="photo-slot">
+          <div class="thumb" id="imgPreview1">No photo</div>
+          <input type="file" id="imgFile1" accept="image/jpeg,image/png,image/webp">
+          <label class="check" id="rmRow1" hidden><input type="checkbox" id="rmImg1"> Remove</label>
+        </div>
+        <div class="photo-slot">
+          <div class="thumb" id="imgPreview2">No photo</div>
+          <input type="file" id="imgFile2" accept="image/jpeg,image/png,image/webp">
+          <label class="check" id="rmRow2" hidden><input type="checkbox" id="rmImg2"> Remove</label>
         </div>
       </div>
+      <p class="hint" style="margin-top:-6px;margin-bottom:14px">Up to 3 photos, JPG/PNG/WebP, resized automatically. The first photo shows in listings; customers can swipe between all of them on the product card.</p>
 
       <label class="check"><input type="checkbox" name="is_new"> Show a “New” badge</label>
       <label class="check"><input type="checkbox" name="is_active" checked> Visible in the store</label>
@@ -309,7 +327,7 @@
   if(!configured){ show('viewSetup'); return; }
   var sb = window.supabase.createClient(cfg.url, cfg.anonKey);
 
-  var products = [], orders = [], editing = null, pendingFile = null, timer = null;
+  var products = [], orders = [], editing = null, pendingFiles = [null, null, null], timer = null;
 
   /* ---------- Auth ---------- */
   function checkAdmin(user){
@@ -373,6 +391,7 @@
       products = r.data || []; renderProducts();
     });
   }
+  function firstPhoto(p){ return (p.images && p.images[0]) || p.image_url || ''; }
   function catHint(p){
     if(p.dept === 'beauty'){
       var coll = beautyColl(p.collection);
@@ -387,10 +406,10 @@
     $('#productsEmpty').hidden = list.length > 0;
     $('#productRows').innerHTML = list.map(function(p){
       return '<tr>' +
-        '<td><div class="thumb">' + (p.image_url ? '<img src="' + esc(p.image_url) + '" alt="">' : 'No photo') + '</div></td>' +
+        '<td><div class="thumb">' + (firstPhoto(p) ? '<img src="' + esc(firstPhoto(p)) + '" alt="">' + (p.images && p.images.length > 1 ? '<small>+' + (p.images.length - 1) + '</small>' : '') : 'No photo') + '</div></td>' +
         '<td class="nm">' + esc(p.name_en) + (p.brand ? ' <span class="hint">— ' + esc(p.brand) + '</span>' : '') + '<small dir="rtl">' + esc(p.name_ar) + '</small></td>' +
         '<td>' + esc(DEPT[p.dept]) + '<small class="hint" style="display:block">' + esc(catHint(p)) + '</small></td>' +
-        '<td>' + money(p.price) + '</td>' +
+        '<td class="price-cell">' + (p.sale_price != null ? '<del>' + money(p.price) + '</del><ins>' + money(p.sale_price) + '</ins>' : money(p.price)) + '</td>' +
         '<td>' + (p.is_active ? '<span class="tag">Visible</span>' : '<span class="tag tag--off">Hidden</span>') + (p.is_new ? ' <span class="tag">New</span>' : '') + '</td>' +
         '<td><div class="actions">' +
           '<button class="btn btn--sm" data-edit="' + esc(p.id) + '">Edit</button>' +
@@ -414,7 +433,9 @@
       if(!confirm('Delete "' + q.name_en + '"? This cannot be undone. Past orders keep their details.')) return;
       sb.from('products').delete().eq('id', q.id).then(function(r){
         if(r.error){ alert('Could not delete: ' + r.error.message); return; }
-        removeImage(q.image_url); loadProducts();
+        (q.images || []).forEach(removeImage);
+        if(q.image_url) removeImage(q.image_url);
+        loadProducts();
       });
     }
   });
@@ -441,14 +462,14 @@
   });
   form.elements.collection.addEventListener('change', function(){ fillCats('beauty'); });
 
-  function preview(url){
-    $('#imgPreview').innerHTML = url ? '<img src="' + esc(url) + '" alt="">' : 'No photo';
+  function preview(i, url){
+    $('#imgPreview' + i).innerHTML = url ? '<img src="' + esc(url) + '" alt="">' : 'No photo';
   }
 
   function openDialog(id){
     editing = id ? products.filter(function(p){ return p.id === id; })[0] : null;
-    pendingFile = null; $('#imgFile').value = ''; $('#rmImg').checked = false; $('#formErr').hidden = true;
-    var p = editing || {dept:'medical', collection:null, cat:'vitamins', type:'box', price:'', sort_order:0, is_active:true, is_new:false};
+    pendingFiles = [null, null, null]; $('#formErr').hidden = true;
+    var p = editing || {dept:'medical', collection:null, cat:'vitamins', type:'box', price:'', sort_order:0, is_active:true, is_new:false, images:[]};
     $('#dlgTitle').textContent = editing ? 'Edit product' : 'Add product';
     var el = form.elements;
     el.dept.value = p.dept;
@@ -458,21 +479,33 @@
     fillCats(p.dept, p.cat);
     el.brand.value = p.brand || ''; el.name_en.value = p.name_en || ''; el.name_ar.value = p.name_ar || '';
     el.desc_en.value = p.desc_en || ''; el.desc_ar.value = p.desc_ar || '';
-    el.price.value = p.price; el.size_en.value = p.size_en || ''; el.size_ar.value = p.size_ar || '';
+    el.price.value = p.price; el.sale_price.value = (p.sale_price != null ? p.sale_price : '');
+    el.size_en.value = p.size_en || ''; el.size_ar.value = p.size_ar || '';
     el.sort_order.value = p.sort_order || 0; el.type.value = p.type || 'box';
     el.is_new.checked = !!p.is_new; el.is_active.checked = p.is_active !== false;
-    preview(p.image_url); $('#rmRow').hidden = !p.image_url;
+    var existingImages = (p.images && p.images.length) ? p.images : (p.image_url ? [p.image_url] : []);
+    for(var i = 0; i < 3; i++){
+      $('#imgFile' + i).value = ''; $('#rmImg' + i).checked = false;
+      preview(i, existingImages[i] || '');
+      $('#rmRow' + i).hidden = !existingImages[i];
+    }
     dlg.showModal();
   }
   $('#addProduct').addEventListener('click', function(){ openDialog(null); });
   $('#dlgClose').addEventListener('click', function(){ dlg.close(); });
   $('#dlgCancel').addEventListener('click', function(){ dlg.close(); });
 
-  $('#imgFile').addEventListener('change', function(){
-    var f = this.files[0]; pendingFile = null;
-    if(!f){ preview(editing && editing.image_url); return; }
-    if(!/^image\/(jpeg|png|webp)$/.test(f.type)){ alert('Please choose a JPG, PNG or WebP image.'); this.value = ''; return; }
-    resize(f, 1200).then(function(blob){ pendingFile = blob; preview(URL.createObjectURL(blob)); $('#rmImg').checked = false; });
+  [0, 1, 2].forEach(function(i){
+    $('#imgFile' + i).addEventListener('change', function(){
+      var f = this.files[0]; pendingFiles[i] = null;
+      if(!f){
+        var existing = editing && ((editing.images && editing.images[i]) || (i === 0 ? editing.image_url : null));
+        preview(i, existing || '');
+        return;
+      }
+      if(!/^image\/(jpeg|png|webp)$/.test(f.type)){ alert('Please choose a JPG, PNG or WebP image.'); this.value = ''; return; }
+      resize(f, 1200).then(function(blob){ pendingFiles[i] = blob; preview(i, URL.createObjectURL(blob)); $('#rmImg' + i).checked = false; });
+    });
   });
 
   // Shrink big photos in the browser (max 1200px, JPEG) so pages stay fast
@@ -509,6 +542,11 @@
     var price = parseFloat(el.price.value);
     if(!el.name_en.value.trim() || !el.name_ar.value.trim()){ err.textContent = 'Please enter the name in English and Arabic.'; err.hidden = false; return; }
     if(isNaN(price) || price < 0){ err.textContent = 'Please enter a valid price.'; err.hidden = false; return; }
+    var salePriceRaw = el.sale_price.value.trim();
+    var salePrice = salePriceRaw === '' ? null : parseFloat(salePriceRaw);
+    if(salePrice != null && (isNaN(salePrice) || salePrice < 0 || salePrice >= price)){
+      err.textContent = 'The sale price must be lower than the regular price.'; err.hidden = false; return;
+    }
 
     var row = {
       dept: el.dept.value, collection: el.dept.value === 'beauty' ? el.collection.value : null,
@@ -517,22 +555,28 @@
       name_en: el.name_en.value.trim(), name_ar: el.name_ar.value.trim(),
       desc_en: el.desc_en.value.trim() || null, desc_ar: el.desc_ar.value.trim() || null,
       size_en: el.size_en.value.trim() || null, size_ar: el.size_ar.value.trim() || null,
-      price: price, sort_order: parseInt(el.sort_order.value, 10) || 0,
+      price: price, sale_price: salePrice, sort_order: parseInt(el.sort_order.value, 10) || 0,
       is_new: el.is_new.checked, is_active: el.is_active.checked
     };
-    var oldUrl = editing && editing.image_url;
+    var oldImages = (editing && editing.images) || (editing && editing.image_url ? [editing.image_url] : []);
     btn.disabled = true; btn.textContent = 'Saving…';
 
-    var step = Promise.resolve(oldUrl || null);
-    if(pendingFile) step = uploadImage(pendingFile);
-    else if($('#rmImg').checked) step = Promise.resolve(null);
+    // Resolve each of the 3 slots in parallel: a newly chosen file gets
+    // uploaded, a slot marked for removal resolves to null, and anything
+    // untouched keeps its existing photo.
+    var slotSteps = [0, 1, 2].map(function(i){
+      if(pendingFiles[i]) return uploadImage(pendingFiles[i]);
+      if($('#rmImg' + i).checked) return Promise.resolve(null);
+      return Promise.resolve(oldImages[i] || null);
+    });
 
-    step.then(function(url){
-      row.image_url = url;
+    Promise.all(slotSteps).then(function(urls){
+      row.images = urls.filter(Boolean);
       return editing ? sb.from('products').update(row).eq('id', editing.id) : sb.from('products').insert(row);
     }).then(function(r){
       if(r.error) throw r.error;
-      if(oldUrl && oldUrl !== row.image_url) removeImage(oldUrl);
+      // Clean up storage for any photo that was replaced or removed.
+      oldImages.forEach(function(url){ if(url && row.images.indexOf(url) === -1) removeImage(url); });
       dlg.close(); return loadProducts();
     }).catch(function(x){
       err.textContent = 'Could not save: ' + ((x && x.message) || 'unknown error'); err.hidden = false;

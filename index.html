@@ -352,6 +352,30 @@
   .card.is-found .card__media{ outline: 2px solid var(--teal-deep); outline-offset: 4px; }
   .card .btn{ padding: .7rem 1rem; font-size: .88rem; }
 
+  .gallery{ position: absolute; inset: 0; }
+  .gallery__track{
+    display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  }
+  .gallery__track::-webkit-scrollbar{ display: none; }
+  .gallery__track .g-img{ flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; scroll-snap-align: start; }
+  .gallery__nav{
+    position: absolute; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border-radius: 999px;
+    background: rgba(255,255,255,.85); display: grid; place-items: center; font-size: 1.1rem; line-height: 1; color: var(--ink);
+  }
+  @media (hover: hover){ .gallery__nav{ opacity: 0; transition: opacity .2s ease; } .card__media:hover .gallery__nav{ opacity: 1; } }
+  .gallery__nav--prev{ inset-inline-start: 8px; }
+  .gallery__nav--next{ inset-inline-end: 8px; }
+  .gallery__dots{ position: absolute; bottom: 8px; inset-inline: 0; display: flex; justify-content: center; gap: 5px; }
+  .gallery__dot{ width: 6px; height: 6px; border-radius: 999px; background: rgba(44,44,44,.3); }
+  .gallery__dot.is-active{ background: var(--teal-deep); }
+
+  .card__price--sale{ display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+  .card__price-was{ font-size: .82rem; color: var(--ink-soft); font-weight: 400; text-decoration: line-through; }
+  .card__price-now{ font-size: 1.15rem; font-weight: 600; color: var(--teal-deep); }
+  .line__price--sale{ display: flex; align-items: baseline; gap: 6px; }
+  .line__price-was{ font-size: .85rem; color: var(--ink-soft); text-decoration: line-through; }
+
   /* About */
   .about{ background: var(--teal-deep); color: var(--white); }
   .about__grid{ display: grid; grid-template-columns: .55fr 1.45fr; gap: 64px; align-items: start; }
@@ -849,6 +873,7 @@
       advice_note:'General guidance only. It does not replace your doctor.', chat_cta:'Chat with us',
       cat_all:'All', sort_label:'Sort by', sort_feat:'Featured', sort_low:'Price, low to high', sort_high:'Price, high to low', sort_az:'Name, A–Z',
       count:'{n} products', add:'Add to cart', added:'Added to cart', badge_new:'New',
+      gallery_prev:'Previous photo', gallery_next:'Next photo',
       cart_title:'Your cart', cart_empty:'Your cart is empty. Add a product to get started.', subtotal:'Subtotal',
       remove:'Remove', dec:'Decrease quantity', inc:'Increase quantity',
       cart_note:"We'll contact you to confirm your order, delivery and payment.",
@@ -897,6 +922,7 @@
       advice_note:'إرشادات عامة فقط، ولا تغني عن استشارة الطبيب.', chat_cta:'تحدّث معنا',
       cat_all:'الكل', sort_label:'ترتيب حسب', sort_feat:'المميّزة', sort_low:'السعر: من الأقل إلى الأعلى', sort_high:'السعر: من الأعلى إلى الأقل', sort_az:'الاسم: أ – ي',
       count:'{n} منتج', add:'أضف إلى السلة', added:'أُضيف إلى السلة', badge_new:'جديد',
+      gallery_prev:'الصورة السابقة', gallery_next:'الصورة التالية',
       cart_title:'سلّتك', cart_empty:'سلّتك فارغة. أضف منتجاً للبدء.', subtotal:'المجموع',
       remove:'إزالة', dec:'إنقاص الكمية', inc:'زيادة الكمية',
       cart_note:'سنتواصل معك لتأكيد الطلب والتوصيل والدفع.',
@@ -1030,10 +1056,13 @@
 
   function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   function mapRow(r){
-    return {id:r.id, dept:r.dept, cat:r.cat, collection:r.collection || null, brand:r.brand || '', type:r.type || 'box', price:Number(r.price), isNew:!!r.is_new,
+    var images = (Array.isArray(r.images) && r.images.length) ? r.images.filter(Boolean) : (r.image_url ? [r.image_url] : []);
+    return {id:r.id, dept:r.dept, cat:r.cat, collection:r.collection || null, brand:r.brand || '', type:r.type || 'box',
+      price:Number(r.price), salePrice: r.sale_price != null ? Number(r.sale_price) : null, isNew:!!r.is_new,
       size:[r.size_en || '', r.size_ar || r.size_en || ''], en:r.name_en, ar:r.name_ar || r.name_en,
-      de:r.desc_en || '', da:r.desc_ar || r.desc_en || '', img:r.image_url || ''};
+      de:r.desc_en || '', da:r.desc_ar || r.desc_en || '', images:images, img:images[0] || ''};
   }
+  function effPrice(p){ return p.salePrice != null ? p.salePrice : p.price; }
   function indexProducts(){
     byId = {}; PRODUCTS.forEach(function(p){ byId[p.id] = p; });
     Object.keys(cart).forEach(function(id){ if(!byId[id] || !(cart[id] > 0)) delete cart[id]; });
@@ -1068,6 +1097,31 @@
   /* ---------- Packshot ---------- */
   function pack(type){ return '<svg class="pack" viewBox="0 0 120 140" aria-hidden="true"><use href="#pk-' + esc(type) + '"/></svg>'; }
   function media(p){ return p.img ? '<img class="photo" src="' + esc(p.img) + '" alt="' + esc(name(p)) + '" loading="lazy">' : pack(p.type); }
+  function cardMedia(p){
+    if(!p.images || p.images.length < 2) return media(p);
+    var imgs = p.images.map(function(src){ return '<img class="g-img" src="' + esc(src) + '" alt="' + esc(name(p)) + '" loading="lazy">'; }).join('');
+    var dots = p.images.map(function(_, i){ return '<span class="gallery__dot' + (i === 0 ? ' is-active' : '') + '"></span>'; }).join('');
+    return '<div class="gallery" data-gallery>' +
+      '<div class="gallery__track">' + imgs + '</div>' +
+      '<button class="gallery__nav gallery__nav--prev" type="button" aria-label="' + t('gallery_prev') + '">‹</button>' +
+      '<button class="gallery__nav gallery__nav--next" type="button" aria-label="' + t('gallery_next') + '">›</button>' +
+      '<div class="gallery__dots">' + dots + '</div>' +
+    '</div>';
+  }
+  function wireGalleries(container){
+    container.querySelectorAll('[data-gallery]').forEach(function(g){
+      var track = g.querySelector('.gallery__track');
+      var dots = g.querySelectorAll('.gallery__dot');
+      var rtl = document.documentElement.dir === 'rtl';
+      function sync(){
+        var i = Math.max(0, Math.min(dots.length - 1, Math.round(Math.abs(track.scrollLeft) / track.clientWidth)));
+        dots.forEach(function(d, idx){ d.classList.toggle('is-active', idx === i); });
+      }
+      track.addEventListener('scroll', function(){ requestAnimationFrame(sync); }, {passive: true});
+      g.querySelector('.gallery__nav--prev').addEventListener('click', function(){ track.scrollBy({left: (rtl ? 1 : -1) * track.clientWidth, behavior: 'smooth'}); });
+      g.querySelector('.gallery__nav--next').addEventListener('click', function(){ track.scrollBy({left: (rtl ? -1 : 1) * track.clientWidth, behavior: 'smooth'}); });
+    });
+  }
 
   /* ---------- Toolbar + grid ---------- */
   function renderTools(d){
@@ -1099,21 +1153,25 @@
       return;
     }
     var list = PRODUCTS.filter(function(p){ return p.dept === d && (d !== 'beauty' || p.collection === v.collection) && (v.cat === 'all' || p.cat === v.cat); });
-    if(v.sort === 'low')  list.sort(function(a,b){ return a.price - b.price; });
-    if(v.sort === 'high') list.sort(function(a,b){ return b.price - a.price; });
+    if(v.sort === 'low')  list.sort(function(a,b){ return effPrice(a) - effPrice(b); });
+    if(v.sort === 'high') list.sort(function(a,b){ return effPrice(b) - effPrice(a); });
     if(v.sort === 'az')   list.sort(function(a,b){ return name(a).localeCompare(name(b), lang); });
     grid.innerHTML = list.length ? list.map(function(p){
+      var priceHtml = p.salePrice != null
+        ? '<span class="card__price card__price--sale" dir="ltr"><span class="card__price-was">' + money(p.price) + '</span><span class="card__price-now">' + money(p.salePrice) + '</span></span>'
+        : '<span class="card__price" dir="ltr">' + money(p.price) + '</span>';
       return '<article class="card" id="p-' + esc(p.id) + '">' +
-        '<div class="card__media">' + media(p) + (p.isNew ? '<span class="badge">' + t('badge_new') + '</span>' : '') + '</div>' +
+        '<div class="card__media">' + cardMedia(p) + (p.isNew ? '<span class="badge">' + t('badge_new') + '</span>' : '') + '</div>' +
         '<div class="card__body">' +
           '<p class="card__cat">' + (p.brand ? esc(p.brand) + ' · ' : '') + esc(catLabel(p)) + '</p>' +
           '<h3 class="card__name">' + esc(name(p)) + '</h3>' +
           '<p class="card__desc">' + esc(lang === 'ar' ? p.da : p.de) + '</p>' +
-          '<div class="card__foot"><span class="card__size">' + esc(pick({en:p.size[0], ar:p.size[1]})) + '</span><span class="card__price" dir="ltr">' + money(p.price) + '</span></div>' +
+          '<div class="card__foot"><span class="card__size">' + esc(pick({en:p.size[0], ar:p.size[1]})) + '</span>' + priceHtml + '</div>' +
           '<button class="btn btn--line" type="button" data-add="' + esc(p.id) + '">' + t('add') + '</button>' +
         '</div></article>';
     }).join('') : '<p class="state-msg">' + t('no_products') + '</p>';
     countEl.textContent = t('count').replace('{n}', list.length);
+    wireGalleries(grid);
   }
 
   function renderDept(d){ renderTools(d); renderGrid(d); }
@@ -1121,7 +1179,7 @@
   /* ---------- Cart ---------- */
   function cartTotals(){
     var n = 0, sum = 0;
-    Object.keys(cart).forEach(function(id){ n += cart[id]; sum += cart[id] * byId[id].price; });
+    Object.keys(cart).forEach(function(id){ n += cart[id]; sum += cart[id] * effPrice(byId[id]); });
     return {n:n, sum:sum};
   }
 
@@ -1147,9 +1205,9 @@
       var p = byId[id];
       return '<div class="line">' +
         '<div class="line__img">' + media(p) + '</div>' +
-        '<div><div class="line__name">' + esc(name(p)) + '</div><div class="line__price" dir="ltr">' + money(p.price) + '</div>' +
+        '<div><div class="line__name">' + esc(name(p)) + '</div><div class="line__price' + (p.salePrice != null ? ' line__price--sale' : '') + '" dir="ltr">' + (p.salePrice != null ? '<span class="line__price-was">' + money(p.price) + '</span>' + money(p.salePrice) : money(p.price)) + '</div>' +
           '<div class="qty"><button type="button" data-qty="' + esc(id) + ':-1" aria-label="' + t('dec') + '">−</button><span>' + cart[id] + '</span><button type="button" data-qty="' + esc(id) + ':1" aria-label="' + t('inc') + '">+</button></div></div>' +
-        '<div><div class="line__total" dir="ltr">' + money(p.price * cart[id]) + '</div><button class="line__rm" type="button" data-rm="' + esc(id) + '">' + t('remove') + '</button></div>' +
+        '<div><div class="line__total" dir="ltr">' + money(effPrice(p) * cart[id]) + '</div><button class="line__rm" type="button" data-rm="' + esc(id) + '">' + t('remove') + '</button></div>' +
       '</div>';
     }).join('');
     $('#cartTotal').textContent = money(tot.sum);
