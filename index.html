@@ -206,7 +206,46 @@
      ========================================================= */
   .hero{ background: var(--wall); }
   .hero__inner{ position: relative; max-width: 1680px; margin-inline: auto; container-type: inline-size; }
+  .hero{ overflow: hidden; }
   .hero__img{ width: 100%; height: auto; }
+  .hero__scene{ position: relative; transform: scale(1.03); transition: transform .3s ease-out; will-change: transform; }
+  .hero__pins{ position: absolute; inset: 0; pointer-events: none; }
+  .hotspot{ position: absolute; left: var(--x); top: var(--y); width: 30px; height: 30px; transform: translate(-50%, -50%); pointer-events: auto; }
+  .hotspot__dot{
+    position: absolute; inset: 0; border-radius: 999px; background: var(--white); border: 2px solid var(--teal-deep);
+    box-shadow: 0 2px 10px rgba(44,44,44,.28); transition: background .2s ease;
+  }
+  .hotspot__dot::before{
+    content: ''; position: absolute; inset: -2px; border-radius: 999px; border: 1.5px solid var(--teal-deep);
+    animation: hotspotPulse 2.4s ease-out infinite;
+  }
+  .hotspot__dot::after{
+    content: '+'; position: absolute; inset: 0; display: grid; place-items: center;
+    color: var(--teal-deep); font-size: 18px; font-weight: 500; line-height: 1;
+  }
+  .hotspot:hover .hotspot__dot, .hotspot[aria-expanded="true"] .hotspot__dot{ background: var(--teal-deep); }
+  .hotspot:hover .hotspot__dot::after, .hotspot[aria-expanded="true"] .hotspot__dot::after{ color: var(--white); }
+  .hotspot[aria-expanded="true"] .hotspot__dot::after{ content: '×'; }
+  @media (pointer: coarse){ .hotspot{ width: 42px; height: 42px; } .hotspot__dot{ inset: 6px; } }
+  @keyframes hotspotPulse{ 0%{ transform: scale(1); opacity: .8; } 100%{ transform: scale(2); opacity: 0; } }
+
+  .hotspot__pop{
+    position: absolute; z-index: 6; width: 264px; padding: 14px; background: var(--white);
+    border: 1px solid var(--mint-2); border-radius: 4px; box-shadow: 0 12px 34px rgba(44,44,44,.2);
+    display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: start;
+    animation: popIn .2s ease-out both;
+  }
+  .hotspot__pop[hidden]{ display: none; }
+  @keyframes popIn{ from{ opacity: 0; transform: translateY(6px) scale(.97); } to{ opacity: 1; transform: none; } }
+  .hotspot__pop-media{ position: relative; aspect-ratio: 1; background: var(--mint); overflow: hidden; display: grid; place-items: center; }
+  .hotspot__pop-media .pack{ width: 72%; }
+  .hotspot__pop-close{ position: absolute; top: 4px; inset-inline-end: 8px; font-size: 20px; line-height: 1; color: var(--ink-soft); }
+  .hotspot__pop-cat{ font-size: .74rem; color: var(--ink-soft); padding-inline-end: 18px; }
+  .hotspot__pop-name{ font-size: .98rem; font-weight: 500; line-height: 1.3; margin-top: 2px; }
+  .hotspot__pop-price{ margin-top: 6px; font-size: .95rem; }
+  .hotspot__pop-price del{ color: var(--ink-soft); font-size: .82rem; margin-inline-end: 6px; }
+  .hotspot__pop-price ins{ text-decoration: none; color: var(--teal-deep); font-weight: 600; }
+  .hotspot__pop .btn{ grid-column: 1 / -1; padding: .65rem 1rem; font-size: .88rem; }
   .hero__copy{
     position: absolute; left: 52%; top: 17%; width: 42%;
     animation: heroIn .9s ease-out .15s both;
@@ -619,8 +658,12 @@
 <!-- ============ HERO ============ -->
 <section class="hero" id="hero" aria-labelledby="heroTitle">
   <div class="hero__inner">
-    <img class="hero__img" src="assets/hero-banner.jpg" width="1536" height="1024" fetchpriority="high"
-         alt="A woman with glowing skin beside AVARA serum, cream and mist bottles">
+    <div class="hero__scene" id="heroScene">
+      <img class="hero__img" src="assets/hero-banner.jpg" width="1536" height="1024" fetchpriority="high"
+           alt="A woman with glowing skin beside AVARA serum, cream and mist bottles">
+      <div class="hero__pins" id="heroPins"></div>
+    </div>
+    <div class="hotspot__pop" id="hotspotPop" role="dialog" aria-label="Quick view" hidden></div>
     <div class="hero__copy">
       <h1 class="hero__title" id="heroTitle" data-i18n="hero_title">Your Health Matters</h1>
       <p class="hero__tag" data-i18n="hero_tag">Inspired by Nature. Perfected by Science.</p>
@@ -1076,7 +1119,7 @@
       .then(function(res){
         if(res.error){ throw res.error; }
         PRODUCTS = (res.data || []).map(mapRow); loadState = 'ok'; indexProducts();
-        DEPTS.forEach(renderDept); renderCart(); runSearch();
+        DEPTS.forEach(renderDept); renderCart(); runSearch(); renderHeroPins();
       })
       .catch(function(){ loadState = 'error'; DEPTS.forEach(renderGrid); });
   }
@@ -1287,6 +1330,7 @@
     renderCart();
     runSearch();
     renderHeroFocus();
+    renderHeroPins();
   }
 
   /* ---------- Events ---------- */
@@ -1394,6 +1438,88 @@
       if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); chatForm.requestSubmit(); }
     });
   }
+
+  /* ---------- Hero: shop-the-photo pins ---------- */
+  // Where the three bottles sit in assets/hero-banner.jpg, as % of the image.
+  var HERO_PINS = [{x:'73%', y:'69%'}, {x:'80%', y:'71%'}, {x:'91%', y:'74%'}];
+  var openPinId = null;
+
+  // One product from each Beauty collection, topped up from the rest of Beauty.
+  function pickHeroSpot(){
+    var beauty = PRODUCTS.filter(function(p){ return p.dept === 'beauty'; }), chosen = [];
+    COLLECTIONS.beauty.forEach(function(c){
+      var f = beauty.filter(function(p){ return p.collection === c.id; })[0];
+      if(f) chosen.push(f);
+    });
+    beauty.forEach(function(p){ if(chosen.length < 3 && chosen.indexOf(p) < 0) chosen.push(p); });
+    return chosen.slice(0, 3);
+  }
+  function renderHeroPins(){
+    var el = $('#heroPins'); if(!el) return;
+    closePin();
+    el.innerHTML = pickHeroSpot().map(function(p, i){
+      return '<button class="hotspot" type="button" style="--x:' + HERO_PINS[i].x + ';--y:' + HERO_PINS[i].y + '" data-pin="' + esc(p.id) +
+        '" aria-expanded="false" aria-controls="hotspotPop" aria-label="' + esc(name(p)) + '"><span class="hotspot__dot"></span></button>';
+    }).join('');
+  }
+  function closePin(){
+    var pop = $('#hotspotPop'); if(!pop) return;
+    pop.hidden = true; openPinId = null;
+    $$('.hotspot').forEach(function(b){ b.setAttribute('aria-expanded', 'false'); });
+  }
+  function openPinCard(id, btn){
+    var p = byId[id]; if(!p) return;
+    var pop = $('#hotspotPop');
+    var priceHtml = p.salePrice != null ? '<del>' + money(p.price) + '</del><ins>' + money(p.salePrice) + '</ins>' : money(p.price);
+    pop.innerHTML =
+      '<button class="hotspot__pop-close" type="button" data-pin-close aria-label="' + t('close') + '">×</button>' +
+      '<div class="hotspot__pop-media">' + media(p) + '</div>' +
+      '<div><p class="hotspot__pop-cat">' + (p.brand ? esc(p.brand) + ' · ' : '') + esc(catLabel(p)) + '</p>' +
+        '<h3 class="hotspot__pop-name">' + esc(name(p)) + '</h3>' +
+        '<p class="hotspot__pop-price" dir="ltr">' + priceHtml + '</p></div>' +
+      '<button class="btn btn--solid" type="button" data-add="' + esc(p.id) + '">' + t('add') + '</button>';
+    pop.hidden = false;
+
+    // Sit above the pin (below if there's no room), kept inside the hero.
+    var inner = pop.parentNode.getBoundingClientRect(), b = btn.getBoundingClientRect();
+    var w = pop.offsetWidth, h = pop.offsetHeight;
+    var top = b.top - inner.top - h - 16;
+    if(top < 8) top = b.bottom - inner.top + 16;
+    top = Math.max(8, Math.min(inner.height - h - 8, top));
+    var left = Math.max(8, Math.min(inner.width - w - 8, b.left + b.width / 2 - inner.left - w / 2));
+    pop.style.left = left + 'px'; pop.style.top = top + 'px';
+
+    $$('.hotspot').forEach(function(x){ x.setAttribute('aria-expanded', String(x === btn)); });
+    openPinId = id;
+  }
+
+  document.addEventListener('click', function(e){
+    var pin = e.target.closest('[data-pin]');
+    if(pin){
+      var id = pin.getAttribute('data-pin');
+      if(openPinId === id) closePin(); else openPinCard(id, pin);
+      return;
+    }
+    if(e.target.closest('[data-pin-close]') || e.target.closest('#hotspotPop [data-add]')){ closePin(); return; }
+    if(openPinId && !e.target.closest('#hotspotPop')) closePin();
+  });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && openPinId) closePin(); });
+  var lastW = window.innerWidth;
+  window.addEventListener('resize', function(){ if(window.innerWidth !== lastW){ lastW = window.innerWidth; closePin(); } });
+
+  // Gentle cursor parallax on the photo (mouse devices only, never with reduced motion).
+  (function(){
+    var scene = $('#heroScene'), heroEl = $('#hero');
+    if(!scene || !window.matchMedia('(hover: hover) and (pointer: fine)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var raf = 0;
+    heroEl.addEventListener('mousemove', function(e){
+      if(openPinId) return;   // hold still while a product card is open
+      var r = heroEl.getBoundingClientRect(), nx = (e.clientX - r.left) / r.width - .5, ny = (e.clientY - r.top) / r.height - .5;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(function(){ scene.style.transform = 'translate(' + (-nx * 14).toFixed(1) + 'px,' + (-ny * 10).toFixed(1) + 'px) scale(1.03)'; });
+    });
+    heroEl.addEventListener('mouseleave', function(){ if(!openPinId) scene.style.transform = ''; });
+  })();
 
   /* ---------- Install app (PWA) ---------- */
   var deferredInstall = null;
