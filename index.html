@@ -127,6 +127,7 @@
     transition: border-color .25s ease, color .25s ease;
   }
   .nav a:hover{ border-color: var(--teal); color: var(--teal-deep); }
+  .nav a[aria-current="page"]{ color: var(--teal-deep); border-color: var(--teal-deep); font-weight: 500; }
 
   .tools{ display: flex; align-items: center; gap: 4px; }
   .tool{
@@ -204,88 +205,21 @@
   /* =========================================================
      Hero — the banner IS the layout; copy sits in the wall space
      ========================================================= */
-  .hero{ background: var(--wall); }
-  .hero__inner{ position: relative; max-width: 1680px; margin-inline: auto; container-type: inline-size; }
-  .hero{ overflow: hidden; }
-  .hero__img{ width: 100%; height: auto; }
-  .hero__scene{ position: relative; transform: scale(1.03); transition: transform .3s ease-out; will-change: transform; }
-  .hero__pins{ position: absolute; inset: 0; pointer-events: none; }
-  .hotspot{ position: absolute; left: var(--x); top: var(--y); width: 30px; height: 30px; transform: translate(-50%, -50%); pointer-events: auto; }
-  .hotspot__dot{
-    position: absolute; inset: 0; border-radius: 999px; background: var(--white); border: 2px solid var(--teal-deep);
-    box-shadow: 0 2px 10px rgba(44,44,44,.28); transition: background .2s ease;
+  .hero-static{ position: relative; background: var(--wall); overflow: hidden; animation: heroIn .7s ease-out both; }
+  .hero-static img{ display: block; width: 100%; height: auto; }
+  @keyframes heroIn{ from{ opacity: 0; } to{ opacity: 1; } }
+  .hero-static__cta{
+    position: absolute; border-radius: 999px; transition: box-shadow .18s ease;
   }
-  .hotspot__dot::before{
-    content: ''; position: absolute; inset: -2px; border-radius: 999px; border: 1.5px solid var(--teal-deep);
-    animation: hotspotPulse 2.4s ease-out infinite;
-  }
-  .hotspot__dot::after{
-    content: '+'; position: absolute; inset: 0; display: grid; place-items: center;
-    color: var(--teal-deep); font-size: 18px; font-weight: 500; line-height: 1;
-  }
-  .hotspot:hover .hotspot__dot, .hotspot[aria-expanded="true"] .hotspot__dot{ background: var(--teal-deep); }
-  .hotspot:hover .hotspot__dot::after, .hotspot[aria-expanded="true"] .hotspot__dot::after{ color: var(--white); }
-  .hotspot[aria-expanded="true"] .hotspot__dot::after{ content: '×'; }
-  @media (pointer: coarse){ .hotspot{ width: 42px; height: 42px; } .hotspot__dot{ inset: 6px; } }
-  @keyframes hotspotPulse{ 0%{ transform: scale(1); opacity: .8; } 100%{ transform: scale(2); opacity: 0; } }
-
-  .hotspot__pop{
-    position: absolute; z-index: 6; width: 264px; padding: 14px; background: var(--white);
-    border: 1px solid var(--mint-2); border-radius: 4px; box-shadow: 0 12px 34px rgba(44,44,44,.2);
-    display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: start;
-    animation: popIn .2s ease-out both;
-  }
-  .hotspot__pop[hidden]{ display: none; }
-  @keyframes popIn{ from{ opacity: 0; transform: translateY(6px) scale(.97); } to{ opacity: 1; transform: none; } }
-  .hotspot__pop-media{ position: relative; aspect-ratio: 1; background: var(--mint); overflow: hidden; display: grid; place-items: center; }
-  .hotspot__pop-media .pack{ width: 72%; }
-  .hotspot__pop-close{ position: absolute; top: 4px; inset-inline-end: 8px; font-size: 20px; line-height: 1; color: var(--ink-soft); }
-  .hotspot__pop-cat{ font-size: .74rem; color: var(--ink-soft); padding-inline-end: 18px; }
-  .hotspot__pop-name{ font-size: .98rem; font-weight: 500; line-height: 1.3; margin-top: 2px; }
-  .hotspot__pop-price{ margin-top: 6px; font-size: .95rem; }
-  .hotspot__pop-price del{ color: var(--ink-soft); font-size: .82rem; margin-inline-end: 6px; }
-  .hotspot__pop-price ins{ text-decoration: none; color: var(--teal-deep); font-weight: 600; }
-  .hotspot__pop .btn{ grid-column: 1 / -1; padding: .65rem 1rem; font-size: .88rem; }
-  .hero__copy{
-    position: absolute; left: 52%; top: 17%; width: 42%;
-    animation: heroIn .9s ease-out .15s both;
-  }
-  @keyframes heroIn{ from{ opacity: 0; transform: translateY(14px); } to{ opacity: 1; transform: none; } }
-  .hero__title{
-    font-weight: 400; line-height: 1.08; color: var(--ink); letter-spacing: -.005em;
-    font-size: clamp(2rem, 4.5vw, 4.2rem);
-    font-size: clamp(2rem, 4.5cqw, 4.2rem);
-  }
-  .hero__tag{
-    margin-top: 1.1em; font-weight: 400; letter-spacing: .03em; color: var(--teal-deep);
-    font-size: clamp(1rem, 1.6vw, 1.45rem);
-    font-size: clamp(1rem, 1.6cqw, 1.45rem);
-  }
-  .hero__actions{ margin-top: 2.2em; display: flex; flex-wrap: wrap; gap: 12px; }
-
-  .hero__focus{ margin-top: 32px; }
-  .hero__focus-tabs{ display: flex; flex-wrap: wrap; gap: 8px; }
-  .hero__focus-tab{
-    padding: .55rem 1.2rem; font-size: .92rem; font-weight: 500; border-radius: 999px;
-    border: 1px solid var(--teal); background: transparent;
-    transition: background .2s ease, color .2s ease, border-color .2s ease;
-  }
-  .hero__focus-tab:hover{ background: var(--mint); }
-  .hero__focus-tab[aria-selected="true"]{ background: var(--teal-deep); border-color: var(--teal-deep); color: var(--white); }
-  .hero__focus-text{ margin-top: 18px; font-size: 1.05rem; color: var(--ink-soft); line-height: 1.6; max-width: 48em; }
-  .hero__focus-brands{ list-style: none; display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
-  .hero__focus-brands li{ padding: .4rem 1.05rem; font-size: .9rem; border: 1px solid var(--teal); border-radius: 999px; background: transparent; color: var(--ink); }
-
-  @media (max-width: 899px){
-    .hero{ background: var(--mint); }
-    .hero__copy{ position: static; width: auto; padding: 32px 24px 48px; animation: none; }
-    .hero__title{ font-size: clamp(2.1rem, 9vw, 3rem); }
-    .hero__tag{ font-size: 1.1rem; }
+  .hero-static__cta:hover, .hero-static__cta:focus-visible{
+    box-shadow: 0 0 0 3px rgba(255,255,255,.9), 0 6px 18px rgba(44,44,44,.3);
+    outline: none;
   }
 
   /* =========================================================
      Section scaffolding
      ========================================================= */
+  .panel[hidden]{ display: none; }
   .section{ padding: 104px 0; }
   .section--mist{ background: var(--mint); }
   .h2{
@@ -297,6 +231,7 @@
 
   /* Departments (shop by) */
   .tiles{ margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .tiles--2{ grid-template-columns: repeat(2, 1fr); max-width: 760px; }
   .tile{
     display: flex; flex-direction: column; gap: 14px; padding: 32px 30px 28px;
     background: var(--mint); border: 1px solid var(--mint-2);
@@ -312,16 +247,13 @@
   .tile:hover .tile__go{ color: var(--white); }
   .tile__go svg{ width: 16px; height: 16px; stroke-width: 2; }
   [dir="rtl"] .tile__go svg{ transform: scaleX(-1); }
-  @media (max-width: 860px){ .tiles{ grid-template-columns: 1fr; } }
+  @media (max-width: 860px){ .tiles, .tiles--2{ grid-template-columns: 1fr; } }
 
   /* Department heads */
   .dept-head{ display: grid; gap: 48px; align-items: center; margin-bottom: 48px; }
   .dept-head--split{ grid-template-columns: 1.05fr .95fr; }
-  .dept-head--media{ grid-template-columns: .95fr 1.05fr; }
-  .dept-head--media .dept-head__img{ order: -1; }
-  .dept-head__img img{ width: 100%; height: auto; aspect-ratio: 736/504; object-fit: cover; }
   @media (max-width: 860px){
-    .dept-head--split,.dept-head--media{ grid-template-columns: 1fr; gap: 28px; }
+    .dept-head--split{ grid-template-columns: 1fr; gap: 28px; }
   }
 
   .advice{ background: var(--mint); padding: 30px 32px 28px; }
@@ -614,13 +546,12 @@
 
 <header class="site-header" id="siteHeader">
   <div class="site-header__in">
-    <a class="brand" href="#top" aria-label="AVARA"><img src="assets/logo.png" alt="AVARA" width="132" height="26"></a>
+    <a class="brand" href="#panel-medical" aria-label="AVARA"><img src="assets/logo.png" alt="AVARA" width="132" height="26"></a>
 
     <ul class="nav" id="nav">
-      <li><a href="#top" data-i18n="nav_home">Home</a></li>
-      <li><a href="#medical" data-i18n="nav_medical">Medical advice</a></li>
-      <li><a href="#athlete" data-i18n="nav_athlete">Athlete</a></li>
-      <li><a href="#beauty" data-i18n="nav_beauty">Beauty</a></li>
+      <li><a href="#panel-medical" data-nav-panel="medical" data-i18n="nav_medical">Medical care</a></li>
+      <li><a href="#panel-beauty" data-nav-panel="beauty" data-i18n="nav_beauty_full">Beauty care</a></li>
+      <li><a href="#panel-athlete" data-nav-panel="athlete" data-i18n="nav_athlete_full">Athlete care</a></li>
       <li><a href="#about" data-i18n="nav_about">About</a></li>
       <li><a href="#contact" data-i18n="nav_contact">Contact</a></li>
     </ul>
@@ -655,174 +586,150 @@
 
 <main>
 
-<!-- ============ HERO ============ -->
-<section class="hero" id="hero" aria-labelledby="heroTitle">
-  <div class="hero__inner">
-    <div class="hero__scene" id="heroScene">
-      <img class="hero__img" src="assets/hero-banner.jpg" width="1536" height="1024" fetchpriority="high"
-           alt="A woman with glowing skin beside AVARA serum, cream and mist bottles">
-      <div class="hero__pins" id="heroPins"></div>
-    </div>
-    <div class="hotspot__pop" id="hotspotPop" role="dialog" aria-label="Quick view" hidden></div>
-    <div class="hero__copy">
-      <h1 class="hero__title" id="heroTitle" data-i18n="hero_title">Your Health Matters</h1>
-      <p class="hero__tag" data-i18n="hero_tag">Inspired by Nature. Perfected by Science.</p>
-      <div class="hero__actions">
-        <a class="btn btn--solid" href="#departments" data-i18n="hero_cta1">Shop now</a>
-        <a class="btn btn--line" href="#chat" data-i18n="hero_cta2">Get medical advice</a>
+<!-- ============ PANEL: MEDICAL (home) ============ -->
+<div class="panel" data-panel="medical" id="panel-medical">
+
+  <section class="hero-static" aria-label="AVARA Medical care">
+    <img src="assets/hero-medical.jpg" width="1536" height="902"
+         alt="AVARA health essentials — vitamin D3, omega-3 fish oil, a digital thermometer and La Roche-Posay Cicaplast balm — with the Arabic headline 'Better health for a more beautiful life.'">
+    <a class="hero-static__cta" href="#medical" style="left:45.3%;top:46.6%;width:17.8%;height:10.3%" data-i18n-aria="hero_cta_medical" aria-label="Shop Medical care"></a>
+  </section>
+
+  <section class="section" id="departments" style="padding-bottom:40px">
+    <div class="wrap">
+      <h2 class="h2" data-i18n="dept_title">Shop by department</h2>
+      <div class="tiles tiles--2">
+        <a class="tile" href="#beauty">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 40C8 20 20 8 40 8c0 20-12 32-32 32z"/><path d="M8 40L28 20"/></svg>
+          <span class="tile__name" data-i18n="nav_beauty_full">Beauty care</span>
+          <span class="tile__desc" data-i18n="tile_beauty">Skin care inspired by nature and perfected by science.</span>
+          <span class="tile__go"><span data-i18n="shop">Shop</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
+        <a class="tile" href="#athlete">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M3 25h9l5-12 7 22 6-16 3 6h12"/></svg>
+          <span class="tile__name" data-i18n="nav_athlete_full">Athlete care</span>
+          <span class="tile__desc" data-i18n="tile_athlete">Recovery, hydration and everyday support for active bodies.</span>
+          <span class="tile__go"><span data-i18n="shop">Shop</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </a>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============ BRANDS ============ -->
-<section class="section" id="brands" style="padding-bottom:64px" aria-labelledby="brandsTitle">
-  <div class="wrap">
-    <h2 class="h2" id="brandsTitle" data-i18n="brands_title">Brands you already trust</h2>
-    <p class="lead" data-i18n="brands_lead">Real skincare and performance brands, alongside AVARA's own products.</p>
-    <div class="hero__focus">
-      <div class="hero__focus-tabs" id="heroFocusTabs" role="tablist"></div>
-      <p class="hero__focus-text" id="heroFocusText" aria-live="polite"></p>
-      <ul class="hero__focus-brands" id="heroFocusBrands" aria-live="polite"></ul>
+  <section class="section" id="medical" aria-labelledby="medicalTitle">
+    <div class="wrap">
+      <div class="dept-head dept-head--split">
+        <div>
+          <h2 class="h2" id="medicalTitle" data-i18n="nav_medical">Medical care</h2>
+          <p class="lead" data-i18n="lead_medical">Straight answers on symptoms, medication questions and everyday health care.</p>
+        </div>
+        <aside class="advice">
+          <h3 class="advice__title" data-i18n="advice_title">Ask before you decide</h3>
+          <ul class="advice__list">
+            <li><a href="#chat" data-i18n="advice_1">Symptoms, and when to see a doctor</a></li>
+            <li><a href="#chat" data-i18n="advice_2">Medication questions and interactions</a></li>
+            <li><a href="#chat" data-i18n="advice_3">Vitamins and supplements that suit you</a></li>
+          </ul>
+          <a class="btn btn--solid" href="#chat" data-i18n="chat_cta">Chat with us</a>
+          <p class="advice__note" data-i18n="advice_note">General guidance only. It does not replace your doctor.</p>
+        </aside>
+      </div>
+      <div class="toolbar" id="tools-medical"></div>
+      <div class="grid" id="grid-medical"></div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ============ DEPARTMENTS ============ -->
-<section class="section" id="departments" style="padding-bottom:40px">
-  <div class="wrap">
-    <h2 class="h2" data-i18n="dept_title">Shop by department</h2>
-    <div class="tiles">
-      <a class="tile" href="#medical">
-        <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="19"/><path d="M24 15v18M15 24h18"/></svg>
-        <span class="tile__name" data-i18n="nav_medical">Medical advice</span>
-        <span class="tile__desc" data-i18n="tile_medical">Health care essentials, with answers you can trust.</span>
-        <span class="tile__go"><span data-i18n="shop">Shop</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-      </a>
-      <a class="tile" href="#athlete">
-        <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M3 25h9l5-12 7 22 6-16 3 6h12"/></svg>
-        <span class="tile__name" data-i18n="nav_athlete_full">Athlete section</span>
-        <span class="tile__desc" data-i18n="tile_athlete">Recovery, hydration and everyday support for active bodies.</span>
-        <span class="tile__go"><span data-i18n="shop">Shop</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-      </a>
-      <a class="tile" href="#beauty">
-        <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 40C8 20 20 8 40 8c0 20-12 32-32 32z"/><path d="M8 40L28 20"/></svg>
-        <span class="tile__name" data-i18n="nav_beauty_full">Beauty section</span>
-        <span class="tile__desc" data-i18n="tile_beauty">Skin care inspired by nature and perfected by science.</span>
-        <span class="tile__go"><span data-i18n="shop">Shop</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-      </a>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 1 · MEDICAL ADVICE ============ -->
-<section class="section" id="medical" aria-labelledby="medicalTitle">
-  <div class="wrap">
-    <div class="dept-head dept-head--split">
+  <section class="section about" id="about" aria-labelledby="aboutTitle">
+    <div class="wrap about__grid">
+      <h2 class="h2" id="aboutTitle" data-i18n="about_title">About</h2>
       <div>
-        <h2 class="h2" id="medicalTitle" data-i18n="nav_medical">Medical advice</h2>
-        <p class="lead" data-i18n="lead_medical">Straight answers on symptoms, medication questions and everyday health care.</p>
+        <p class="about__text" data-i18n="about_text">I'm your medical assistant. I care about your health and your needs as much as you care for yourself.</p>
+        <p class="about__tag" data-i18n="hero_tag">Inspired by Nature. Perfected by Science.</p>
       </div>
-      <aside class="advice">
-        <h3 class="advice__title" data-i18n="advice_title">Ask before you decide</h3>
-        <ul class="advice__list">
-          <li><a href="#chat" data-i18n="advice_1">Symptoms, and when to see a doctor</a></li>
-          <li><a href="#chat" data-i18n="advice_2">Medication questions and interactions</a></li>
-          <li><a href="#chat" data-i18n="advice_3">Vitamins and supplements that suit you</a></li>
+    </div>
+  </section>
+
+  <section class="section" id="contact" aria-labelledby="contactTitle">
+    <div class="wrap contact__grid">
+      <div>
+        <h2 class="h2" id="contactTitle" data-i18n="contact_title">Let's connect</h2>
+        <p class="lead" data-i18n="contact_text">A question about a medication, a symptom you're unsure of, or simply where to start — reach out. Your health deserves a real answer, not a guess.</p>
+      </div>
+      <div>
+        <ul class="contact__list">
+          <li>
+            <span class="contact__label" data-i18n="c_email">Email</span>
+            <a class="contact__value" href="mailto:souna.92@gmail.com">souna.92@gmail.com</a>
+          </li>
+          <li>
+            <span class="contact__label" data-i18n="c_phone">Phone</span>
+            <a class="contact__value" href="tel:+96176681395" dir="ltr">76 681 395</a>
+          </li>
         </ul>
-        <a class="btn btn--solid" href="#chat" data-i18n="chat_cta">Chat with us</a>
-        <p class="advice__note" data-i18n="advice_note">General guidance only. It does not replace your doctor.</p>
-      </aside>
-    </div>
-    <div class="toolbar" id="tools-medical"></div>
-    <div class="grid" id="grid-medical"></div>
-  </div>
-</section>
-
-<!-- ============ 2 · ATHLETE ============ -->
-<section class="section section--mist" id="athlete" aria-labelledby="athleteTitle">
-  <div class="wrap">
-    <div class="dept-head">
-      <div>
-        <h2 class="h2" id="athleteTitle" data-i18n="nav_athlete_full">Athlete section</h2>
-        <p class="lead" data-i18n="lead_athlete">Recovery, hydration and protection for training days and rest days.</p>
+        <a class="btn btn--solid contact__wa" href="https://wa.me/96176681395" target="_blank" rel="noopener" data-i18n="c_wa">Message on WhatsApp</a>
       </div>
     </div>
-    <div class="toolbar" id="tools-athlete"></div>
-    <div class="grid" id="grid-athlete"></div>
-  </div>
-</section>
+  </section>
 
-<!-- ============ 3 · BEAUTY ============ -->
-<section class="section" id="beauty" aria-labelledby="beautyTitle">
-  <div class="wrap">
-    <div class="dept-head dept-head--media">
-      <div class="dept-head__img">
-        <img src="assets/beauty-banner.jpg" width="736" height="504" loading="lazy" alt="AVARA serum, cream and mist bottles on a stone shelf beside a folded towel">
+  <section class="section section--mist" id="chat" aria-labelledby="chatTitle">
+    <div class="wrap">
+      <div class="chat-head">
+        <h2 class="h2" id="chatTitle" data-i18n="chat_title">Chat with AVARA</h2>
+        <p class="lead" data-i18n="chat_sub">Ask about symptoms, medications, recovery or skin care. Our assistant is here to help.</p>
       </div>
-      <div>
-        <h2 class="h2" id="beautyTitle" data-i18n="nav_beauty_full">Beauty section</h2>
-        <p class="lead" data-i18n="lead_beauty">Skin care where natural ingredients meet careful formulation.</p>
+      <div class="chat-panel">
+        <div class="chat-log" id="chatLog" role="log" aria-live="polite"></div>
+        <form class="chat-form" id="chatForm">
+          <label class="sr-only" for="chatInput" data-i18n="chat_ph">Type your question…</label>
+          <textarea id="chatInput" rows="1" maxlength="1000" required data-i18n-ph="chat_ph" placeholder="Type your question…"></textarea>
+          <button class="btn btn--solid" type="submit" id="chatSend" data-i18n="chat_send">Send</button>
+        </form>
       </div>
+      <p class="chat-note" data-i18n="chat_note">General guidance only, not a medical diagnosis. For emergencies, contact local emergency services.</p>
     </div>
-    <div class="subtabs" id="collTabs-beauty"></div>
-    <div class="toolbar" id="tools-beauty"></div>
-    <div class="grid" id="grid-beauty"></div>
-  </div>
-</section>
+  </section>
 
-<!-- ============ ABOUT ============ -->
-<section class="section about" id="about" aria-labelledby="aboutTitle">
-  <div class="wrap about__grid">
-    <h2 class="h2" id="aboutTitle" data-i18n="about_title">About</h2>
-    <div>
-      <p class="about__text" data-i18n="about_text">I'm your medical assistant. I care about your health and your needs as much as you care for yourself.</p>
-      <p class="about__tag" data-i18n="hero_tag">Inspired by Nature. Perfected by Science.</p>
-    </div>
-  </div>
-</section>
+</div>
 
-<!-- ============ CONTACT ============ -->
-<section class="section" id="contact" aria-labelledby="contactTitle">
-  <div class="wrap contact__grid">
-    <div>
-      <h2 class="h2" id="contactTitle" data-i18n="contact_title">Let's connect</h2>
-      <p class="lead" data-i18n="contact_text">A question about a medication, a symptom you're unsure of, or simply where to start — reach out. Your health deserves a real answer, not a guess.</p>
-    </div>
-    <div>
-      <ul class="contact__list">
-        <li>
-          <span class="contact__label" data-i18n="c_email">Email</span>
-          <a class="contact__value" href="mailto:souna.92@gmail.com">souna.92@gmail.com</a>
-        </li>
-        <li>
-          <span class="contact__label" data-i18n="c_phone">Phone</span>
-          <a class="contact__value" href="tel:+96176681395" dir="ltr">76 681 395</a>
-        </li>
-      </ul>
-      <a class="btn btn--solid contact__wa" href="https://wa.me/96176681395" target="_blank" rel="noopener" data-i18n="c_wa">Message on WhatsApp</a>
-    </div>
-  </div>
-</section>
+<!-- ============ PANEL: BEAUTY ============ -->
+<div class="panel" data-panel="beauty" id="panel-beauty" hidden>
 
-<!-- ============ CHAT ============ -->
-<section class="section section--mist" id="chat" aria-labelledby="chatTitle">
-  <div class="wrap">
-    <div class="chat-head">
-      <h2 class="h2" id="chatTitle" data-i18n="chat_title">Chat with AVARA</h2>
-      <p class="lead" data-i18n="chat_sub">Ask about symptoms, medications, recovery or skin care. Our assistant is here to help.</p>
+  <section class="hero-static" aria-label="AVARA Beauty care">
+    <img src="assets/hero-beauty.jpg" width="1536" height="906"
+         alt="AVARA beauty banner featuring La Roche-Posay, Estée Lauder, Lancôme, Kérastase, MAC and NARS, with the Arabic headline 'The most famous global beauty brands, all in one place.'">
+    <a class="hero-static__cta" href="#beauty" style="left:48.8%;top:39.7%;width:23.7%;height:10.2%" data-i18n-aria="hero_cta_beauty" aria-label="Shop Beauty care"></a>
+  </section>
+
+  <section class="section" id="beauty" aria-labelledby="beautyTitle">
+    <div class="wrap">
+      <h2 class="h2" id="beautyTitle" data-i18n="nav_beauty_full">Beauty care</h2>
+      <p class="lead" data-i18n="lead_beauty">Skin care where natural ingredients meet careful formulation.</p>
+      <div class="subtabs" id="collTabs-beauty" style="margin-top:32px"></div>
+      <div class="toolbar" id="tools-beauty"></div>
+      <div class="grid" id="grid-beauty"></div>
     </div>
-    <div class="chat-panel">
-      <div class="chat-log" id="chatLog" role="log" aria-live="polite"></div>
-      <form class="chat-form" id="chatForm">
-        <label class="sr-only" for="chatInput" data-i18n="chat_ph">Type your question…</label>
-        <textarea id="chatInput" rows="1" maxlength="1000" required data-i18n-ph="chat_ph" placeholder="Type your question…"></textarea>
-        <button class="btn btn--solid" type="submit" id="chatSend" data-i18n="chat_send">Send</button>
-      </form>
+  </section>
+
+</div>
+
+<!-- ============ PANEL: ATHLETE ============ -->
+<div class="panel" data-panel="athlete" id="panel-athlete" hidden>
+
+  <section class="hero-static" aria-label="AVARA Athlete care">
+    <img src="assets/hero-athlete.jpg" width="1536" height="900"
+         alt="AVARA athlete banner featuring La Roche-Posay, Vichy, Kérastase and CeraVe beside a shaker bottle, with the Arabic headline 'Care that supports every step of your journey.'">
+    <a class="hero-static__cta" href="#athlete" style="left:55.9%;top:42.2%;width:18.7%;height:9.8%" data-i18n-aria="hero_cta_athlete" aria-label="Shop Athlete care"></a>
+  </section>
+
+  <section class="section" id="athlete" aria-labelledby="athleteTitle">
+    <div class="wrap">
+      <h2 class="h2" id="athleteTitle" data-i18n="nav_athlete_full">Athlete care</h2>
+      <p class="lead" data-i18n="lead_athlete">Recovery, hydration and protection for training days and rest days.</p>
+      <div class="toolbar" id="tools-athlete" style="margin-top:32px"></div>
+      <div class="grid" id="grid-athlete"></div>
     </div>
-    <p class="chat-note" data-i18n="chat_note">General guidance only, not a medical diagnosis. For emergencies, contact local emergency services.</p>
-  </div>
-</section>
+  </section>
+
+</div>
 
 </main>
 
@@ -898,12 +805,11 @@
   var I18N = {
     en: {
       announce:'Inspired by Nature. Perfected by Science',
-      nav_home:'Home', nav_medical:'Medical advice', nav_athlete:'Athlete', nav_beauty:'Beauty', nav_about:'About', nav_contact:'Contact',
-      nav_athlete_full:'Athlete section', nav_beauty_full:'Beauty section',
+      nav_medical:'Medical care', nav_about:'About', nav_contact:'Contact',
+      nav_athlete_full:'Athlete care', nav_beauty_full:'Beauty care',
+      hero_cta_medical:'Shop Medical care', hero_cta_beauty:'Shop Beauty care', hero_cta_athlete:'Shop Athlete care',
       search:'Search products', search_ph:'Search products', search_none:'No products match your search.', menu:'Menu', close:'Close',
-      hero_title:'Your Health Matters', hero_tag:'Inspired by Nature. Perfected by Science.',
-      hero_cta1:'Shop now', hero_cta2:'Get medical advice',
-      brands_title:'Brands you already trust', brands_lead:"Real skincare and performance brands, alongside AVARA's own products.",
+      hero_tag:'Inspired by Nature. Perfected by Science.',
       dept_title:'Shop by department', shop:'Shop',
       tile_medical:'Health care essentials, with answers you can trust.',
       tile_athlete:'Recovery, hydration and everyday support for active bodies.',
@@ -947,12 +853,11 @@
     },
     ar: {
       announce:'مستوحاة من الطبيعة، مصقولة بالعلم',
-      nav_home:'الرئيسية', nav_medical:'نصائح طبية', nav_athlete:'الرياضيين', nav_beauty:'الجمال', nav_about:'من نحن', nav_contact:'تواصل معنا',
-      nav_athlete_full:'قسم الرياضيين', nav_beauty_full:'قسم الجمال',
+      nav_medical:'الرعاية الطبية', nav_about:'من نحن', nav_contact:'تواصل معنا',
+      nav_athlete_full:'الرعاية الرياضية', nav_beauty_full:'العناية بالجمال',
+      hero_cta_medical:'تسوّقي الرعاية الطبية', hero_cta_beauty:'تسوّقي العناية بالجمال', hero_cta_athlete:'تسوّقي الرعاية الرياضية',
       search:'ابحث عن منتج', search_ph:'ابحث عن منتج', search_none:'لا توجد منتجات مطابقة لبحثك.', menu:'القائمة', close:'إغلاق',
-      hero_title:'صحتك تهمّنا', hero_tag:'مستوحاة من الطبيعة، مصقولة بالعلم.',
-      hero_cta1:'تسوّق الآن', hero_cta2:'احصل على نصيحة طبية',
-      brands_title:'علامات تجارية تثق بها', brands_lead:'علامات حقيقية للعناية بالبشرة والأداء الرياضي، إلى جانب منتجات أفارا الخاصة.',
+      hero_tag:'مستوحاة من الطبيعة، مصقولة بالعلم.',
       dept_title:'تسوّق حسب القسم', shop:'تسوّق',
       tile_medical:'أساسيات الرعاية الصحية مع إجابات تثق بها.',
       tile_athlete:'استشفاء وترطيب ودعم يومي للأجسام النشطة.',
@@ -1044,40 +949,11 @@
   var PRODUCTS = [];   // loaded from Supabase (table: products)
   var DEPTS = ['medical','athlete','beauty'];
   var DEPT_LABEL = {
-    medical:{en:'Medical advice', ar:'نصائح طبية'},
-    athlete:{en:'Athlete section', ar:'قسم الرياضيين'},
-    beauty: {en:'Beauty section', ar:'قسم الجمال'}
+    medical:{en:'Medical care', ar:'الرعاية الطبية'},
+    athlete:{en:'Athlete care', ar:'الرعاية الرياضية'},
+    beauty: {en:'Beauty care', ar:'العناية بالجمال'}
   };
   var WA_NUMBER = '96176681395';
-
-  // Real brands carried in each department, used by the hero's interactive toggle.
-  var HERO_FOCUS = {
-    beauty: {
-      text: {
-        en: 'Skincare, hair and makeup from CeraVe, La Roche-Posay, Kérastase and more.',
-        ar: 'عناية بالبشرة والشعر والمكياج من CeraVe وLa Roche-Posay وKérastase وغيرها.'
-      },
-      brands: ['CeraVe', 'La Roche-Posay', 'Kérastase', 'Maybelline', 'Moroccanoil']
-    },
-    athlete: {
-      text: {
-        en: 'Recovery and performance from Optimum Nutrition, Isostar and more.',
-        ar: 'استشفاء وأداء رياضي من Optimum Nutrition وIsostar وغيرها.'
-      },
-      brands: ['Optimum Nutrition', 'Isostar', 'La Roche-Posay']
-    }
-  };
-  var heroFocus = 'beauty';
-  function renderHeroFocus(){
-    var tabsEl = $('#heroFocusTabs'); if(!tabsEl) return;
-    tabsEl.innerHTML = ['beauty', 'athlete'].map(function(k){
-      return '<button class="hero__focus-tab" type="button" role="tab" data-focus="' + k + '" aria-selected="' + (heroFocus === k) + '">' +
-        t(k === 'beauty' ? 'nav_beauty' : 'nav_athlete') + '</button>';
-    }).join('');
-    var f = HERO_FOCUS[heroFocus];
-    $('#heroFocusText').textContent = f.text[lang];
-    $('#heroFocusBrands').innerHTML = f.brands.map(function(b){ return '<li>' + esc(b) + '</li>'; }).join('');
-  }
 
   /* ---------- State ---------- */
   var $  = function(s,r){ return (r||document).querySelector(s); };
@@ -1119,7 +995,7 @@
       .then(function(res){
         if(res.error){ throw res.error; }
         PRODUCTS = (res.data || []).map(mapRow); loadState = 'ok'; indexProducts();
-        DEPTS.forEach(renderDept); renderCart(); runSearch(); renderHeroPins();
+        DEPTS.forEach(renderDept); renderCart(); runSearch();
       })
       .catch(function(){ loadState = 'error'; DEPTS.forEach(renderGrid); });
   }
@@ -1307,13 +1183,33 @@
       return '<li><button type="button" data-goto="' + esc(p.id) + '"><span>' + esc(name(p)) + '<br><small>' + esc(pick(DEPT_LABEL[p.dept])) + '</small></span><span dir="ltr">' + money(p.price) + '</span></button></li>';
     }).join('') : '<li class="search-empty">' + t('search_none') + '</li>';
   }
+  /* ---------- Panels (Medical / Beauty / Athlete are separate screens, not scroll anchors) ---------- */
+  var activePanel = 'medical';
+  function showPanel(name){
+    if(!name || name === activePanel){ return; }
+    $$('.panel').forEach(function(p){ p.hidden = p.getAttribute('data-panel') !== name; });
+    $$('#nav a[data-nav-panel]').forEach(function(a){
+      if(a.getAttribute('data-nav-panel') === name) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    activePanel = name;
+  }
+  function jumpTo(id){
+    var elx = document.getElementById(id); if(!elx) return;
+    var panel = elx.closest('.panel');
+    if(panel) showPanel(panel.getAttribute('data-panel'));
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ elx.scrollIntoView({behavior: 'smooth', block: 'start'}); }); });
+  }
+
   function goTo(id){
     var p = byId[id]; view[p.dept].cat = 'all';
     if(p.dept === 'beauty') view.beauty.collection = p.collection || 'avara_care';
     renderDept(p.dept); closeSearch();
+    showPanel(p.dept);
     var el = document.getElementById('p-' + id); if(!el) return;
-    el.scrollIntoView({behavior:'smooth', block:'center'});
-    el.classList.add('is-found'); setTimeout(function(){ el.classList.remove('is-found'); }, 2400);
+    requestAnimationFrame(function(){
+      el.scrollIntoView({behavior: 'smooth', block: 'center'});
+      el.classList.add('is-found'); setTimeout(function(){ el.classList.remove('is-found'); }, 2400);
+    });
   }
 
   /* ---------- Language ---------- */
@@ -1329,8 +1225,6 @@
     DEPTS.forEach(renderDept);
     renderCart();
     runSearch();
-    renderHeroFocus();
-    renderHeroPins();
   }
 
   /* ---------- Events ---------- */
@@ -1355,9 +1249,16 @@
     }
     if((el = e.target.closest('[data-rm]'))){ delete cart[el.getAttribute('data-rm')]; saveCart(); renderCart(); return; }
     if(e.target.closest('[data-close-cart]')){ closeCart(); return; }
-    if((el = e.target.closest('[data-focus]'))){ heroFocus = el.getAttribute('data-focus'); renderHeroFocus(); return; }
     if((el = e.target.closest('[data-goto]'))){ goTo(el.getAttribute('data-goto')); return; }
-    if(e.target.closest('#nav a')){ $('#siteHeader').classList.remove('nav-open'); $('#menuBtn').setAttribute('aria-expanded','false'); }
+    if((el = e.target.closest('a[href^="#"]'))){
+      var hashId = el.getAttribute('href').slice(1);
+      if(hashId && document.getElementById(hashId)){
+        e.preventDefault();
+        jumpTo(hashId);
+        history.replaceState(null, '', '#' + hashId);
+      }
+      $('#siteHeader').classList.remove('nav-open'); $('#menuBtn').setAttribute('aria-expanded', 'false');
+    }
   });
 
   document.addEventListener('change', function(e){
@@ -1439,88 +1340,6 @@
     });
   }
 
-  /* ---------- Hero: shop-the-photo pins ---------- */
-  // Where the three bottles sit in assets/hero-banner.jpg, as % of the image.
-  var HERO_PINS = [{x:'73%', y:'69%'}, {x:'80%', y:'71%'}, {x:'91%', y:'74%'}];
-  var openPinId = null;
-
-  // One product from each Beauty collection, topped up from the rest of Beauty.
-  function pickHeroSpot(){
-    var beauty = PRODUCTS.filter(function(p){ return p.dept === 'beauty'; }), chosen = [];
-    COLLECTIONS.beauty.forEach(function(c){
-      var f = beauty.filter(function(p){ return p.collection === c.id; })[0];
-      if(f) chosen.push(f);
-    });
-    beauty.forEach(function(p){ if(chosen.length < 3 && chosen.indexOf(p) < 0) chosen.push(p); });
-    return chosen.slice(0, 3);
-  }
-  function renderHeroPins(){
-    var el = $('#heroPins'); if(!el) return;
-    closePin();
-    el.innerHTML = pickHeroSpot().map(function(p, i){
-      return '<button class="hotspot" type="button" style="--x:' + HERO_PINS[i].x + ';--y:' + HERO_PINS[i].y + '" data-pin="' + esc(p.id) +
-        '" aria-expanded="false" aria-controls="hotspotPop" aria-label="' + esc(name(p)) + '"><span class="hotspot__dot"></span></button>';
-    }).join('');
-  }
-  function closePin(){
-    var pop = $('#hotspotPop'); if(!pop) return;
-    pop.hidden = true; openPinId = null;
-    $$('.hotspot').forEach(function(b){ b.setAttribute('aria-expanded', 'false'); });
-  }
-  function openPinCard(id, btn){
-    var p = byId[id]; if(!p) return;
-    var pop = $('#hotspotPop');
-    var priceHtml = p.salePrice != null ? '<del>' + money(p.price) + '</del><ins>' + money(p.salePrice) + '</ins>' : money(p.price);
-    pop.innerHTML =
-      '<button class="hotspot__pop-close" type="button" data-pin-close aria-label="' + t('close') + '">×</button>' +
-      '<div class="hotspot__pop-media">' + media(p) + '</div>' +
-      '<div><p class="hotspot__pop-cat">' + (p.brand ? esc(p.brand) + ' · ' : '') + esc(catLabel(p)) + '</p>' +
-        '<h3 class="hotspot__pop-name">' + esc(name(p)) + '</h3>' +
-        '<p class="hotspot__pop-price" dir="ltr">' + priceHtml + '</p></div>' +
-      '<button class="btn btn--solid" type="button" data-add="' + esc(p.id) + '">' + t('add') + '</button>';
-    pop.hidden = false;
-
-    // Sit above the pin (below if there's no room), kept inside the hero.
-    var inner = pop.parentNode.getBoundingClientRect(), b = btn.getBoundingClientRect();
-    var w = pop.offsetWidth, h = pop.offsetHeight;
-    var top = b.top - inner.top - h - 16;
-    if(top < 8) top = b.bottom - inner.top + 16;
-    top = Math.max(8, Math.min(inner.height - h - 8, top));
-    var left = Math.max(8, Math.min(inner.width - w - 8, b.left + b.width / 2 - inner.left - w / 2));
-    pop.style.left = left + 'px'; pop.style.top = top + 'px';
-
-    $$('.hotspot').forEach(function(x){ x.setAttribute('aria-expanded', String(x === btn)); });
-    openPinId = id;
-  }
-
-  document.addEventListener('click', function(e){
-    var pin = e.target.closest('[data-pin]');
-    if(pin){
-      var id = pin.getAttribute('data-pin');
-      if(openPinId === id) closePin(); else openPinCard(id, pin);
-      return;
-    }
-    if(e.target.closest('[data-pin-close]') || e.target.closest('#hotspotPop [data-add]')){ closePin(); return; }
-    if(openPinId && !e.target.closest('#hotspotPop')) closePin();
-  });
-  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && openPinId) closePin(); });
-  var lastW = window.innerWidth;
-  window.addEventListener('resize', function(){ if(window.innerWidth !== lastW){ lastW = window.innerWidth; closePin(); } });
-
-  // Gentle cursor parallax on the photo (mouse devices only, never with reduced motion).
-  (function(){
-    var scene = $('#heroScene'), heroEl = $('#hero');
-    if(!scene || !window.matchMedia('(hover: hover) and (pointer: fine)').matches || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    var raf = 0;
-    heroEl.addEventListener('mousemove', function(e){
-      if(openPinId) return;   // hold still while a product card is open
-      var r = heroEl.getBoundingClientRect(), nx = (e.clientX - r.left) / r.width - .5, ny = (e.clientY - r.top) / r.height - .5;
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(function(){ scene.style.transform = 'translate(' + (-nx * 14).toFixed(1) + 'px,' + (-ny * 10).toFixed(1) + 'px) scale(1.03)'; });
-    });
-    heroEl.addEventListener('mouseleave', function(){ if(!openPinId) scene.style.transform = ''; });
-  })();
-
   /* ---------- Install app (PWA) ---------- */
   var deferredInstall = null;
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -1564,6 +1383,19 @@
       navigator.serviceWorker.register('/sw.js').catch(function(){});
     });
   }
+
+  // Deep link support: open straight into the right panel if the URL
+  // already points at something inside Beauty or Athlete (e.g. a shared link).
+  (function(){
+    var id = location.hash.slice(1), elx = id && document.getElementById(id);
+    var panel = elx && elx.closest('.panel');
+    if(panel) showPanel(panel.getAttribute('data-panel'));
+  })();
+  window.addEventListener('hashchange', function(){
+    var id = location.hash.slice(1), elx = id && document.getElementById(id);
+    var panel = elx && elx.closest('.panel');
+    if(panel) showPanel(panel.getAttribute('data-panel'));
+  });
 
   window.AVARA_I18N = I18N;
   applyLang();
