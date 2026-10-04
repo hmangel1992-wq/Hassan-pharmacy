@@ -92,7 +92,7 @@
   .table-wrap{ overflow-x:auto; }
 
   /* ---------- Settings ---------- */
-  var SETTING_TEXT = ['address_en','address_ar','map_url','hours_en','hours_ar','delivery_en','delivery_ar','payment_en','payment_ar','trust_en','trust_ar'];
+  var SETTING_TEXT = ['address_en','address_ar','map_url','hours_en','hours_ar','delivery_en','delivery_ar','payment_en','payment_ar','returns_en','returns_ar','trust_en','trust_ar'];
   var setForm = $('#settingsForm');
   function loadSettings(){
     return sb.from('settings').select('*').eq('id', 1).maybeSingle().then(function(r){
@@ -204,6 +204,19 @@
   </form>
 </section>
 
+<!-- ============ TWO-STEP CODE ============ -->
+<section class="login" id="viewMfa" hidden>
+  <form class="login__box" id="mfaForm">
+    <img src="assets/logo.png" alt="AVARA">
+    <h1>Two-step sign-in</h1>
+    <p class="sub">Enter the 6-digit code from your authenticator app.</p>
+    <label class="field">Code<input name="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" required></label>
+    <p class="msg msg--err" id="mfaLoginErr" role="alert" hidden></p>
+    <button class="btn btn--solid" style="width:100%" type="submit" id="mfaLoginBtn">Verify</button>
+    <button class="btn" style="width:100%;margin-top:10px" type="button" id="mfaSignOut">Cancel and sign out</button>
+  </form>
+</section>
+
 <!-- ============ DASHBOARD ============ -->
 <div id="viewApp" hidden>
   <header class="top">
@@ -291,6 +304,10 @@
           <label class="field">Payment methods (Arabic)<input class="ar" name="payment_ar" maxlength="300"></label>
         </div>
         <div class="row2">
+          <label class="field">Returns policy (English)<textarea name="returns_en" rows="3" maxlength="500"></textarea></label>
+          <label class="field">Returns policy (Arabic)<textarea class="ar" name="returns_ar" rows="3" maxlength="500"></textarea></label>
+        </div>
+        <div class="row2">
           <label class="field">Trust statement (English)<textarea name="trust_en" rows="3" maxlength="400"></textarea></label>
           <label class="field">Trust statement (Arabic)<textarea class="ar" name="trust_ar" rows="3" maxlength="400"></textarea></label>
         </div>
@@ -301,6 +318,22 @@
           <span class="msg msg--ok" id="settingsOk" hidden style="margin:0">Saved.</span>
         </div>
       </form>
+
+      <div class="settings" id="mfaBox" style="margin-top:20px">
+        <h3>Two-step sign-in</h3>
+        <p class="hint" id="mfaStatus" style="margin-bottom:12px">Checking…</p>
+        <div id="mfaEnroll" hidden>
+          <p class="hint">Scan this QR code with an authenticator app (Google Authenticator, Microsoft Authenticator or Authy), then type the 6-digit code it shows.</p>
+          <img id="mfaQr" alt="QR code for the authenticator app" style="width:180px;height:180px;margin:12px 0;background:#fff">
+          <p class="hint">Cannot scan? Enter this key in the app instead: <code id="mfaSecret"></code></p>
+          <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin:10px 0 8px">
+            <label class="field" style="margin:0">6-digit code<input id="mfaCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code"></label>
+            <button class="btn btn--solid" id="mfaVerify" type="button">Confirm</button>
+          </div>
+        </div>
+        <p class="msg msg--err" id="mfaErr" role="alert" hidden></p>
+        <div style="padding-bottom:18px"><button class="btn" id="mfaStart" type="button" hidden>Set up two-step sign-in</button></div>
+      </div>
     </section>
   </main>
 </div>
@@ -417,7 +450,7 @@
     if(d.length <= 8) d = '961' + d.replace(/^0+/, '');
     return d;
   }
-  function show(id){ ['viewSetup','viewLogin','viewApp'].forEach(function(v){ $('#' + v).hidden = v !== id; }); }
+  function show(id){ ['viewSetup','viewLogin','viewMfa','viewApp'].forEach(function(v){ $('#' + v).hidden = v !== id; }); }
 
   if(!configured){ show('viewSetup'); return; }
   var sb = window.supabase.createClient(cfg.url, cfg.anonKey);
@@ -437,11 +470,82 @@
         var e = $('#loginErr'); e.textContent = 'This account does not have admin access.'; e.hidden = false;
         return;
       }
-      $('#who').textContent = user.email; show('viewApp');
-      loadProducts(); loadOrders(); loadSettings();
-      clearInterval(timer); timer = setInterval(loadOrders, 60000);
+      return ensureMfa().then(function(passed){
+        if(!passed) return;
+        $('#who').textContent = user.email; show('viewApp');
+        loadProducts(); loadOrders(); loadSettings(); refreshMfaStatus();
+        clearInterval(timer); timer = setInterval(loadOrders, 60000);
+      });
     });
   }
+
+  /* ---------- Two-step sign-in (TOTP) ---------- */
+  // If the account has a verified authenticator, a code is required before the dashboard opens.
+  // If the MFA service is unavailable we do not lock the owner out; the optional
+  // require-mfa-for-admin.sql is what makes the database itself insist on it.
+  var mfaResolve = null, mfaFactorId = null, enrollId = null;
+  function ensureMfa(){
+    if(!sb.auth.mfa) return Promise.resolve(true);
+    return sb.auth.mfa.getAuthenticatorAssuranceLevel().then(function(r){
+      if(r.error || !r.data) return true;
+      if(r.data.nextLevel === 'aal2' && r.data.currentLevel !== 'aal2') return askMfaCode();
+      return true;
+    }).catch(function(){ return true; });
+  }
+  function askMfaCode(){
+    return sb.auth.mfa.listFactors().then(function(r){
+      var f = r.data && r.data.totp && r.data.totp[0];
+      if(!f) return true;
+      mfaFactorId = f.id; show('viewMfa'); $('#mfaForm').elements.code.focus();
+      return new Promise(function(resolve){ mfaResolve = resolve; });
+    });
+  }
+  $('#mfaForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var code = this.elements.code.value.trim(), err = $('#mfaLoginErr'), btn = $('#mfaLoginBtn');
+    err.hidden = true; btn.disabled = true;
+    sb.auth.mfa.challengeAndVerify({factorId: mfaFactorId, code: code}).then(function(r){
+      btn.disabled = false;
+      if(r.error){ err.textContent = 'That code did not work. Check the code and try again.'; err.hidden = false; return; }
+      $('#mfaForm').elements.code.value = '';
+      if(mfaResolve){ var done = mfaResolve; mfaResolve = null; done(true); }
+    });
+  });
+  $('#mfaSignOut').addEventListener('click', function(){
+    mfaResolve = null; clearInterval(timer); sb.auth.signOut().then(function(){ show('viewLogin'); });
+  });
+
+  function mfaMsg(text, isErr){ var e = $('#mfaErr'); e.textContent = text || ''; e.hidden = !text; e.className = 'msg ' + (isErr ? 'msg--err' : 'msg--ok'); }
+  function refreshMfaStatus(){
+    if(!sb.auth.mfa){ $('#mfaStatus').textContent = 'Two-step sign-in is not supported by this version of the sign-in library.'; return; }
+    sb.auth.mfa.listFactors().then(function(r){
+      var st = $('#mfaStatus'), start = $('#mfaStart');
+      if(r.error){
+        st.textContent = 'Two-step sign-in is not available on this project. In Supabase open Authentication > Sign In / Providers and make sure TOTP (MFA) is enabled.';
+        start.hidden = true; return;
+      }
+      var on = (r.data && r.data.totp || []).length > 0;
+      st.textContent = on ? 'Two-step sign-in is ON. A code from your authenticator app is asked every time you sign in.'
+                          : 'Two-step sign-in is OFF. Turning it on is strongly recommended, because this account can see customer names, phones and addresses.';
+      start.hidden = on; $('#mfaEnroll').hidden = true;
+    });
+  }
+  $('#mfaStart').addEventListener('click', function(){
+    mfaMsg('');
+    sb.auth.mfa.enroll({factorType: 'totp', friendlyName: 'AVARA admin ' + Date.now()}).then(function(r){
+      if(r.error || !r.data){ mfaMsg('Could not start setup: ' + ((r.error && r.error.message) || 'unknown error'), true); return; }
+      enrollId = r.data.id;
+      $('#mfaQr').src = r.data.totp.qr_code; $('#mfaSecret').textContent = r.data.totp.secret;
+      $('#mfaEnroll').hidden = false; $('#mfaStart').hidden = true; $('#mfaCode').value = ''; $('#mfaCode').focus();
+    });
+  });
+  $('#mfaVerify').addEventListener('click', function(){
+    var code = $('#mfaCode').value.trim(); if(!enrollId || code.length < 6){ mfaMsg('Enter the 6-digit code from the app.', true); return; }
+    sb.auth.mfa.challengeAndVerify({factorId: enrollId, code: code}).then(function(r){
+      if(r.error){ mfaMsg('That code did not work. Check the app and try again.', true); return; }
+      enrollId = null; mfaMsg('Two-step sign-in is now on.', false); refreshMfaStatus();
+    });
+  });
   sb.auth.getSession().then(function(r){
     if(r.data && r.data.session) enter(r.data.session.user); else show('viewLogin');
   });

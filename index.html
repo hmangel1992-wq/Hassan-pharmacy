@@ -388,6 +388,10 @@
   .pdp__rel button:hover{ color: var(--teal-deep); }
   @media (max-width: 760px){ .pdp__grid{ grid-template-columns: 1fr; gap: 20px; padding: 20px; } .pdp__name{ font-size: 1.5rem; } }
 
+  .rx-note{ margin-top: 14px; font-size: .9rem; color: var(--ink-soft); max-width: 46ch; }
+  .chat-emergency{ max-width: 760px; margin: 0 auto 14px; padding: 12px 16px; background: #FFF4E5; border: 1px solid #E8C88A; font-size: .92rem; text-align: center; }
+  .consent a{ text-decoration: underline; text-underline-offset: 3px; }
+
   /* About */
   .about{ background: var(--teal-deep); color: var(--white); }
   .about__grid{ display: grid; grid-template-columns: .55fr 1.45fr; gap: 64px; align-items: start; }
@@ -662,6 +666,7 @@
         <div>
           <h2 class="h2" id="medicalTitle" data-i18n="nav_medical">Medical care</h2>
           <p class="lead" data-i18n="lead_medical">Straight answers on symptoms, medication questions and everyday health care.</p>
+          <p class="rx-note" data-i18n="rx_note">Prescription-only medicines are not sold online. For prescriptions, please contact the pharmacy.</p>
         </div>
         <aside class="advice">
           <h3 class="advice__title" data-i18n="advice_title">Ask before you decide</h3>
@@ -722,6 +727,7 @@
         <h2 class="h2" id="chatTitle" data-i18n="chat_title">Chat with AVARA</h2>
         <p class="lead" data-i18n="chat_sub">Ask about symptoms, medications, recovery or skin care. Our assistant is here to help.</p>
       </div>
+      <p class="chat-emergency" role="note" data-i18n="chat_emergency">Emergency? Call the Lebanese Red Cross on 140, Civil Defence on 125 or the police on 112.</p>
       <div class="chat-panel">
         <div class="chat-log" id="chatLog" role="log" aria-live="polite"></div>
         <form class="chat-form" id="chatForm">
@@ -800,6 +806,7 @@
         <li><a href="mailto:souna.92@gmail.com">souna.92@gmail.com</a></li>
         <li><a href="tel:+96176681395" dir="ltr">76 681 395</a></li>
         <li><a href="#chat" data-i18n="chat_cta">Chat with us</a></li>
+        <li><a href="policies.html" data-i18n="f_policies">Privacy and policies</a></li>
       </ul>
     </div>
   </div>
@@ -834,6 +841,7 @@
         <textarea name="notes" rows="2" maxlength="500"></textarea></label>
       <p class="form-error" id="orderError" role="alert" hidden></p>
       <button class="btn btn--solid btn--block" id="placeBtn" type="submit" data-i18n="place_order">Place order</button>
+      <p class="drawer__note consent"><span data-i18n="consent_pre">By placing an order you accept our </span><a href="policies.html" target="_blank" rel="noopener" data-i18n="policies">Privacy and policies</a></p>
       <p class="drawer__note" data-i18n="cart_note">We'll contact you to confirm your order, delivery and payment.</p>
     </form>
   </div>
@@ -899,7 +907,12 @@
       c_email:'Email', c_phone:'Phone', c_wa:'Message on WhatsApp',
       chat_title:'Chat with AVARA', chat_sub:'Ask about symptoms, medications, recovery or skin care. Our assistant is here to help.',
       chat_ph:'Type your question…', chat_send:'Send', chat_typing:'Typing…',
-      chat_note:'General guidance only, not a medical diagnosis. For emergencies, contact local emergency services.',
+      chat_note:'General guidance only, not a medical diagnosis. Please do not share your name, phone number or other personal details in the chat; messages are processed by an AI service.',
+      chat_emergency:'Emergency? Call the Lebanese Red Cross on 140, Civil Defence on 125 or the police on 112.',
+      chat_rate:'You have sent many messages in a short time. Please wait a few minutes, or message us on WhatsApp.',
+      order_rate:'Too many orders from this number in a short time. Please wait a little or message us on WhatsApp.',
+      rx_note:'Prescription-only medicines are not sold online. For prescriptions, please contact the pharmacy.',
+      consent_pre:'By placing an order you accept our ', policies:'Privacy and policies', f_policies:'Privacy and policies',
       chat_greet:'Hello, welcome to AVARA. Ask me about medical advice, athlete recovery or beauty care — I\'m here to help.',
       chat_err:'Sorry, something went wrong. Please try again, or message us on WhatsApp.',
       install_app:'Install app', install_added:'AVARA is installed on your device',
@@ -957,7 +970,12 @@
       c_email:'البريد الإلكتروني', c_phone:'الهاتف', c_wa:'راسلنا عبر واتساب',
       chat_title:'تحدّث مع AVARA', chat_sub:'اسأل عن الأعراض أو الأدوية أو الاستشفاء أو العناية بالبشرة. مساعدنا هنا لمساعدتك.',
       chat_ph:'اكتب سؤالك…', chat_send:'إرسال', chat_typing:'يكتب…',
-      chat_note:'إرشادات عامة فقط، وليست تشخيصاً طبياً. في حالات الطوارئ تواصل فوراً مع الطوارئ المحلية.',
+      chat_note:'إرشادات عامة فقط، وليست تشخيصاً طبياً. يرجى عدم مشاركة اسمك أو رقم هاتفك أو بياناتك الشخصية في المحادثة، إذ تُعالج الرسائل بواسطة خدمة ذكاء اصطناعي.',
+      chat_emergency:'حالة طارئة؟ اتصل بالصليب الأحمر اللبناني على 140 أو الدفاع المدني على 125 أو الشرطة على 112.',
+      chat_rate:'أرسلت عدداً كبيراً من الرسائل خلال وقت قصير. يرجى الانتظار بضع دقائق أو مراسلتنا عبر واتساب.',
+      order_rate:'عدد كبير من الطلبات من هذا الرقم خلال وقت قصير. يرجى الانتظار قليلاً أو مراسلتنا عبر واتساب.',
+      rx_note:'لا تُباع الأدوية التي تُصرف بوصفة طبية عبر الإنترنت. للوصفات الطبية يرجى التواصل مع الصيدلية.',
+      consent_pre:'بإرسال الطلب فإنك توافق على ', policies:'الخصوصية والسياسات', f_policies:'الخصوصية والسياسات',
       chat_greet:'مرحباً بك في AVARA. اسألني عن النصائح الطبية أو استشفاء الرياضيين أو العناية بالجمال، أنا هنا للمساعدة.',
       chat_err:'عذراً، حدث خطأ ما. يرجى المحاولة مجدداً أو مراسلتنا عبر واتساب.',
       install_app:'تثبيت التطبيق', install_added:'تم تثبيت AVARA على جهازك',
@@ -1300,8 +1318,9 @@
         btn.disabled = false; btn.textContent = t('place_order');
         if(res.error){
           var msg = res.error.message || '';
-          var noStock = /not enough stock/i.test(msg), unavailable = /unavailable/i.test(msg), belowMin = /minimum order/i.test(msg);
-          if(belowMin){
+          var noStock = /not enough stock/i.test(msg), unavailable = /unavailable/i.test(msg), belowMin = /minimum order/i.test(msg), tooMany = /too many orders/i.test(msg);
+          if(tooMany){ showOrderError('order_rate'); }
+          else if(belowMin){
             var be = $('#orderError'); be.textContent = t('order_min').replace('{amt}', money(Number(store.min_order) || 0)); be.hidden = false; loadStore();
           } else showOrderError(noStock ? 'order_stock' : unavailable ? 'order_unavail' : 'order_err');
           if(noStock || unavailable) loadProducts();
@@ -1559,10 +1578,11 @@
       method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({messages: apiMsgs, lang: lang})
     })
-      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return {ok: r.ok, data: d}; }); })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return {ok: r.ok, status: r.status, data: d}; }); })
       .then(function(res){
         chatBusy = false;
-        if(!res.ok || !res.data || !res.data.reply) chatLog.push({role: 'error', text: t('chat_err')});
+        if(res.status === 429) chatLog.push({role: 'error', text: t('chat_rate')});
+        else if(!res.ok || !res.data || !res.data.reply) chatLog.push({role: 'error', text: t('chat_err')});
         else chatLog.push({role: 'model', text: res.data.reply});
         renderChat();
       })

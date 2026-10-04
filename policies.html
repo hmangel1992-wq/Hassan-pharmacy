@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVARA — Privacy and policies</title>
+<meta name="theme-color" content="#2F8F9D">
+<link rel="icon" href="assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+  :root{ --teal:#2F8F9D; --teal-deep:#1F5F6B; --mint:#DFF4F1; --mint-2:#C6E5E0; --ivory:#FAF9F6; --ink:#2C2C2C; --ink-soft:#5B5F5F;
+         --font:'Jost','Tajawal',system-ui,-apple-system,'Segoe UI',sans-serif; }
+  [lang="ar"]{ --font:'Tajawal','Jost',system-ui,-apple-system,'Segoe UI',sans-serif; }
+  [lang="ar"] *{ letter-spacing:0 !important; }
+  *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:var(--font); line-height:1.7; color:var(--ink); background:var(--ivory); -webkit-font-smoothing:antialiased; }
+  a{ color:var(--teal-deep); }
+  :focus-visible{ outline:2px solid var(--teal-deep); outline-offset:3px; }
+  .bar{ background:var(--teal-deep); color:#fff; text-align:center; font-size:.84rem; letter-spacing:.12em; padding:9px 16px; }
+  header{ background:rgba(250,249,246,.96); border-bottom:1px solid var(--mint-2); }
+  .head{ width:min(820px,100% - 48px); margin-inline:auto; padding:16px 0; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .head img{ height:26px; width:auto; display:block; }
+  .head nav{ display:flex; align-items:center; gap:18px; }
+  .head a, .head button{ font:inherit; font-size:.95rem; text-decoration:none; color:var(--ink); background:none; border:0; cursor:pointer; padding:6px 2px; border-bottom:1px solid transparent; }
+  .head a:hover, .head button:hover{ border-color:var(--teal); color:var(--teal-deep); }
+  main{ width:min(820px,100% - 48px); margin-inline:auto; padding:56px 0 96px; }
+  h1{ font-weight:300; font-size:clamp(2rem,4vw,2.8rem); line-height:1.15; margin-bottom:8px; }
+  .updated{ color:var(--ink-soft); font-size:.92rem; margin-bottom:36px; }
+  section{ margin-top:34px; }
+  h2{ font-size:1.25rem; font-weight:500; margin-bottom:10px; }
+  p{ margin-bottom:10px; }
+  ul{ margin:0 0 10px; padding-inline-start:1.3em; }
+  li{ margin-bottom:6px; }
+  .box{ background:var(--mint); border-inline-start:3px solid var(--teal-deep); padding:16px 20px; margin-top:34px; }
+  dl{ display:grid; gap:12px; }
+  dt{ font-weight:500; }
+  dd{ color:var(--ink-soft); }
+  footer{ background:var(--teal-deep); color:#fff; text-align:center; font-size:.88rem; padding:20px 16px; }
+</style>
+</head>
+<body>
+<div class="bar" id="tag">Inspired by Nature. Perfected by Science</div>
+<header>
+  <div class="head">
+    <a href="index.html" aria-label="AVARA"><img src="assets/logo.png" alt="AVARA" width="132" height="26"></a>
+    <nav>
+      <a href="index.html" id="back">Back to store</a>
+      <button type="button" id="langBtn">العربية</button>
+    </nav>
+  </div>
+</header>
+
+<main id="content"></main>
+<footer id="foot">© 2026 AVARA. All rights reserved.</footer>
+
+<script>
+(function(){
+  'use strict';
+  var lang = 'en';
+  try{ lang = localStorage.getItem('avara-lang') === 'ar' ? 'ar' : 'en'; }catch(e){}
+  var cfg = window.AVARA_CONFIG || {};
+  var sb = (window.supabase && cfg.url && cfg.anonKey) ? window.supabase.createClient(cfg.url, cfg.anonKey) : null;
+  var store = {};
+
+  function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function st(k){ return String(store[k + '_' + lang] || store[k + '_en'] || '').trim(); }
+  function money(n){ return '$' + Number(n).toFixed(2); }
+
+  var T = {
+    en:{
+      tag:'Inspired by Nature. Perfected by Science', back:'Back to store', lang:'العربية',
+      title:'Privacy and policies', updated:'Last updated: October 2026',
+      foot:'© 2026 AVARA. All rights reserved.',
+      sections:[
+        {h:'Who we are', p:['AVARA is a health care and cosmetics store. This page explains what personal information we collect through this website and how we use it.'], contact:true},
+        {h:'What we collect', p:['We only collect what we need to deal with your order or your question:'],
+         ul:['When you place an order: your name, phone number, delivery address (optional), notes (optional), and the products you ordered.',
+             'When you use the chat assistant: the messages you type. Please do not include your name, phone number or personal health details in the chat.',
+             'On your own device: your cart and your language choice are saved in your browser so the site remembers them. This is not sent to us.']},
+        {h:'Why we use it', p:['We use your order details to prepare and deliver your order, to contact you to confirm delivery and payment, and to keep our order records. We use chat messages only to answer your question.']},
+        {h:'Who else handles it', p:['We use trusted services to run the website. They process data on our behalf and only for this purpose:'],
+         ul:['Supabase, which stores the product catalogue and the orders.',
+             'Vercel, which hosts the website.',
+             'Telegram and/or email, which we use to alert the store when a new order arrives. These alerts include the customer name, phone, address and items.',
+             'Google, whose AI service (Gemini) generates the chat assistant’s replies from the messages you type.'],
+         p2:['We do not sell your information. This website does not currently use advertising or analytics trackers.']},
+        {h:'How long we keep it', p:['We keep order details for up to 24 months. After that we remove the customer’s name, phone, address and notes from the order, and keep only the items and totals for our accounts.']},
+        {h:'Your choices', p:['You can ask us to show you the information we hold about you, to correct it, or to delete it, by contacting us using the details above. Please give the phone number you used so we can find your order.']},
+        {h:'Security', p:['The website uses encrypted connections. Orders can only be read by the store’s administrator accounts, which are protected by a password and, where enabled, two-step sign-in.']},
+        {h:'Health information', p:['The chat assistant and the website give general information only. They are not medical advice, a diagnosis or a substitute for your doctor or pharmacist. In an emergency call the Lebanese Red Cross on 140, the Civil Defence on 125 or the police on 112.']}
+      ],
+      d_title:'Delivery, payment and returns',
+      d_rows:[['hours','Opening hours'],['delivery','Delivery'],['payment','Payment'],['returns','Returns']],
+      d_fee:'Delivery fee', d_free:'Free delivery on orders over', d_min:'Minimum order',
+      c_title:'Contact', c_email:'Email', c_phone:'Phone', c_addr:'Address'
+    },
+    ar:{
+      tag:'مستوحاة من الطبيعة، مصقولة بالعلم', back:'العودة إلى المتجر', lang:'English',
+      title:'الخصوصية والسياسات', updated:'آخر تحديث: تشرين الأول 2026',
+      foot:'© 2026 AVARA. جميع الحقوق محفوظة.',
+      sections:[
+        {h:'من نحن', p:['AVARA متجر للرعاية الصحية ومستحضرات التجميل. توضح هذه الصفحة المعلومات الشخصية التي نجمعها عبر هذا الموقع وكيف نستخدمها.'], contact:true},
+        {h:'ما الذي نجمعه', p:['نجمع فقط ما نحتاجه للتعامل مع طلبك أو سؤالك:'],
+         ul:['عند إرسال طلب: اسمك ورقم هاتفك وعنوان التوصيل (اختياري) وملاحظاتك (اختيارية) والمنتجات التي طلبتها.',
+             'عند استخدام مساعد المحادثة: الرسائل التي تكتبها. يرجى عدم كتابة اسمك أو رقم هاتفك أو بياناتك الصحية الشخصية في المحادثة.',
+             'على جهازك: تُحفظ سلّتك ولغتك في المتصفح ليتذكرها الموقع، ولا تُرسل إلينا.']},
+        {h:'لماذا نستخدمها', p:['نستخدم بيانات طلبك لتجهيز الطلب وتوصيله والتواصل معك لتأكيد التوصيل والدفع والاحتفاظ بسجلات الطلبات. ونستخدم رسائل المحادثة للإجابة عن سؤالك فقط.']},
+        {h:'من يتعامل معها أيضاً', p:['نستعين بخدمات موثوقة لتشغيل الموقع، وهي تعالج البيانات نيابة عنا ولهذا الغرض فقط:'],
+         ul:['Supabase: تخزّن كتالوج المنتجات والطلبات.',
+             'Vercel: تستضيف الموقع.',
+             'Telegram و/أو البريد الإلكتروني: نستخدمهما لتنبيه المتجر عند وصول طلب جديد، وتتضمن التنبيهات اسم العميل وهاتفه وعنوانه والمنتجات.',
+             'Google: تولّد خدمة الذكاء الاصطناعي لديها (Gemini) ردود المساعد انطلاقاً من الرسائل التي تكتبها.'],
+         p2:['لا نبيع معلوماتك. ولا يستخدم هذا الموقع حالياً أدوات إعلانات أو تحليلات تتبّع.']},
+        {h:'مدة الاحتفاظ بها', p:['نحتفظ ببيانات الطلبات مدة تصل إلى 24 شهراً. بعد ذلك نزيل اسم العميل وهاتفه وعنوانه وملاحظاته من الطلب، ونُبقي المنتجات والمجاميع فقط لحساباتنا.']},
+        {h:'خياراتك', p:['يمكنك أن تطلب منا الاطلاع على المعلومات التي نحتفظ بها عنك أو تصحيحها أو حذفها عبر التواصل معنا بالبيانات أعلاه. يرجى ذكر رقم الهاتف الذي استخدمته لنتمكن من إيجاد طلبك.']},
+        {h:'الأمان', p:['يستخدم الموقع اتصالات مشفّرة. ولا يمكن الاطلاع على الطلبات إلا من حسابات مسؤولي المتجر، وهي محمية بكلمة مرور وبتسجيل دخول بخطوتين حيثما فُعّل.']},
+        {h:'المعلومات الصحية', p:['يقدّم مساعد المحادثة والموقع معلومات عامة فقط، وهي ليست نصيحة طبية ولا تشخيصاً ولا بديلاً عن طبيبك أو صيدلانيك. في الحالات الطارئة اتصل بالصليب الأحمر اللبناني على 140 أو الدفاع المدني على 125 أو الشرطة على 112.']}
+      ],
+      d_title:'التوصيل والدفع والإرجاع',
+      d_rows:[['hours','ساعات العمل'],['delivery','التوصيل'],['payment','الدفع'],['returns','الإرجاع']],
+      d_fee:'رسوم التوصيل', d_free:'توصيل مجاني للطلبات التي تزيد عن', d_min:'الحد الأدنى للطلب',
+      c_title:'التواصل', c_email:'البريد الإلكتروني', c_phone:'الهاتف', c_addr:'العنوان'
+    }
+  };
+
+  function contactHtml(L){
+    var out = '<p><strong>' + L.c_email + ':</strong> <a href="mailto:souna.92@gmail.com">souna.92@gmail.com</a><br>' +
+      '<strong>' + L.c_phone + ':</strong> <a href="tel:+96176681395" dir="ltr">76 681 395</a>';
+    if(st('address')) out += '<br><strong>' + L.c_addr + ':</strong> ' + esc(st('address'));
+    return out + '</p>';
+  }
+
+  function render(){
+    var L = T[lang], h = '<h1>' + esc(L.title) + '</h1><p class="updated">' + esc(L.updated) + '</p>';
+    L.sections.forEach(function(s){
+      h += '<section><h2>' + esc(s.h) + '</h2>' + (s.p || []).map(function(x){ return '<p>' + esc(x) + '</p>'; }).join('');
+      if(s.ul) h += '<ul>' + s.ul.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+      if(s.p2) h += s.p2.map(function(x){ return '<p>' + esc(x) + '</p>'; }).join('');
+      if(s.contact) h += contactHtml(L);
+      h += '</section>';
+    });
+    // Delivery, payment and returns come from what the owner entered in admin > Settings.
+    var rows = L.d_rows.filter(function(r){ return st(r[0]); });
+    var fee = Number(store.delivery_fee) || 0, free = Number(store.free_delivery_over) || 0, min = Number(store.min_order) || 0;
+    if(rows.length || fee > 0 || min > 0){
+      h += '<section><h2>' + esc(L.d_title) + '</h2><dl>';
+      rows.forEach(function(r){ h += '<div><dt>' + esc(r[1]) + '</dt><dd>' + esc(st(r[0])) + '</dd></div>'; });
+      if(fee > 0) h += '<div><dt>' + esc(L.d_fee) + '</dt><dd dir="ltr">' + money(fee) + (free > 0 ? ' · ' + esc(L.d_free) + ' ' + money(free) : '') + '</dd></div>';
+      if(min > 0) h += '<div><dt>' + esc(L.d_min) + '</dt><dd dir="ltr">' + money(min) + '</dd></div>';
+      h += '</dl></section>';
+    }
+    document.getElementById('content').innerHTML = h;
+    var html = document.documentElement; html.lang = lang; html.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.title = 'AVARA — ' + L.title;
+    document.getElementById('tag').textContent = L.tag;
+    document.getElementById('back').textContent = L.back;
+    document.getElementById('langBtn').textContent = L.lang;
+    document.getElementById('foot').textContent = L.foot;
+  }
+
+  document.getElementById('langBtn').addEventListener('click', function(){
+    lang = lang === 'ar' ? 'en' : 'ar';
+    try{ localStorage.setItem('avara-lang', lang); }catch(e){}
+    render();
+  });
+
+  render();
+  if(sb){
+    sb.from('settings').select('*').eq('id', 1).maybeSingle().then(function(r){
+      if(r && r.data){ store = r.data; render(); }
+    }).catch(function(){});
+  }
+})();
+</script>
+</body>
+</html>
