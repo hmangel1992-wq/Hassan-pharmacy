@@ -91,6 +91,44 @@
   .actions{ display:flex; gap:6px; justify-content:flex-end; }
   .table-wrap{ overflow-x:auto; }
 
+  /* ---------- Settings ---------- */
+  var SETTING_TEXT = ['address_en','address_ar','map_url','hours_en','hours_ar','delivery_en','delivery_ar','payment_en','payment_ar','trust_en','trust_ar'];
+  var setForm = $('#settingsForm');
+  function loadSettings(){
+    return sb.from('settings').select('*').eq('id', 1).maybeSingle().then(function(r){
+      var err = $('#settingsErr');
+      if(r.error){
+        err.textContent = 'Settings are not available yet. Run phase1-settings-and-delivery.sql in the Supabase SQL Editor.'; err.hidden = false; return;
+      }
+      err.hidden = true;
+      var d = r.data || {}, el = setForm.elements;
+      el.delivery_fee.value = d.delivery_fee != null ? d.delivery_fee : 0;
+      el.free_delivery_over.value = d.free_delivery_over != null ? d.free_delivery_over : '';
+      el.min_order.value = d.min_order != null ? d.min_order : 0;
+      SETTING_TEXT.forEach(function(k){ el[k].value = d[k] || ''; });
+    });
+  }
+  setForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    var el = setForm.elements, err = $('#settingsErr'), ok = $('#settingsOk'), btn = $('#settingsSave');
+    err.hidden = true; ok.hidden = true;
+    var fee = parseFloat(el.delivery_fee.value || '0'), min = parseFloat(el.min_order.value || '0');
+    var freeRaw = el.free_delivery_over.value.trim(), free = freeRaw === '' ? null : parseFloat(freeRaw);
+    if(isNaN(fee) || fee < 0 || isNaN(min) || min < 0 || (free != null && (isNaN(free) || free < 0))){
+      err.textContent = 'Please enter valid amounts (0 or more).'; err.hidden = false; return;
+    }
+    var map = el.map_url.value.trim();
+    if(map && !/^https?:\/\//i.test(map)){ err.textContent = 'The map link must start with http:// or https://'; err.hidden = false; return; }
+    var row = {id: 1, delivery_fee: fee, free_delivery_over: free, min_order: min};
+    SETTING_TEXT.forEach(function(k){ row[k] = el[k].value.trim() || null; });
+    btn.disabled = true; btn.textContent = 'Saving…';
+    sb.from('settings').upsert(row).then(function(r){
+      btn.disabled = false; btn.textContent = 'Save settings';
+      if(r.error){ err.textContent = 'Could not save: ' + r.error.message; err.hidden = false; return; }
+      ok.hidden = false; setTimeout(function(){ ok.hidden = true; }, 2500);
+    });
+  });
+
   /* ---------- Orders ---------- */
   .orders{ display:grid; gap:14px; }
   .order{ background:var(--white); border:1px solid var(--mist-2); padding:20px 22px; display:grid; gap:12px; }
@@ -134,6 +172,10 @@
   .price-cell del{ display:block; color:var(--ink-soft); font-size:.85rem; text-decoration:line-through; }
   .price-cell ins{ display:block; text-decoration:none; color:var(--moss); font-weight:600; }
   .hint{ font-size:.82rem; color:var(--ink-soft); }
+  .settings{ background:var(--white); border:1px solid var(--mist-2); padding:24px 26px 8px; max-width:880px; }
+  .settings h3{ font-size:1.05rem; font-weight:500; margin:6px 0 12px; }
+  .settings .sep{ border:0; border-top:1px solid var(--mist-2); margin:8px 0 18px; }
+  .settings__foot{ display:flex; align-items:center; gap:14px; padding:6px 0 18px; }
   [dir="rtl-field"]{ direction:rtl; }
   .ar{ direction:rtl; text-align:right; }
 </style>
@@ -170,6 +212,7 @@
       <div class="tabs" role="tablist">
         <button class="tab" role="tab" id="tabProducts" aria-selected="true">Products</button>
         <button class="tab" role="tab" id="tabOrders" aria-selected="false">Orders <span class="pill" id="newPill" hidden>0</span></button>
+        <button class="tab" role="tab" id="tabSettings" aria-selected="false">Settings</button>
       </div>
       <span class="spacer"></span>
       <span class="who" id="who"></span>
@@ -215,6 +258,49 @@
       </div>
       <div class="orders" id="orderList"></div>
       <p class="empty" id="ordersEmpty" hidden>No orders yet.</p>
+    </section>
+
+    <!-- Settings -->
+    <section id="panelSettings" hidden>
+      <div class="bar"><h2>Store settings</h2></div>
+      <form class="settings" id="settingsForm" novalidate>
+        <h3>Delivery and orders</h3>
+        <div class="row3">
+          <label class="field">Delivery fee (USD)<input name="delivery_fee" type="number" min="0" step="0.01" value="0"></label>
+          <label class="field">Free delivery over (USD)<input name="free_delivery_over" type="number" min="0" step="0.01" placeholder="Blank = never free"></label>
+          <label class="field">Minimum order (USD)<input name="min_order" type="number" min="0" step="0.01" value="0"></label>
+        </div>
+        <p class="hint" style="margin:-6px 0 16px">A fee of 0 means no delivery charge. These are enforced when the order is placed, so customers cannot change them.</p>
+        <hr class="sep">
+        <h3>Shown on the website (leave blank to hide a line)</h3>
+        <div class="row2">
+          <label class="field">Address (English)<input name="address_en" maxlength="300"></label>
+          <label class="field">Address (Arabic)<input class="ar" name="address_ar" maxlength="300"></label>
+        </div>
+        <label class="field">Google Maps link (optional)<input name="map_url" type="url" maxlength="500" placeholder="https://maps.app.goo.gl/..."></label>
+        <div class="row2">
+          <label class="field">Opening hours (English)<input name="hours_en" maxlength="300" placeholder="e.g. Mon–Sat, 9:00–20:00"></label>
+          <label class="field">Opening hours (Arabic)<input class="ar" name="hours_ar" maxlength="300"></label>
+        </div>
+        <div class="row2">
+          <label class="field">Delivery areas and time (English)<input name="delivery_en" maxlength="300"></label>
+          <label class="field">Delivery areas and time (Arabic)<input class="ar" name="delivery_ar" maxlength="300"></label>
+        </div>
+        <div class="row2">
+          <label class="field">Payment methods (English)<input name="payment_en" maxlength="300" placeholder="e.g. Cash on delivery"></label>
+          <label class="field">Payment methods (Arabic)<input class="ar" name="payment_ar" maxlength="300"></label>
+        </div>
+        <div class="row2">
+          <label class="field">Trust statement (English)<textarea name="trust_en" rows="3" maxlength="400"></textarea></label>
+          <label class="field">Trust statement (Arabic)<textarea class="ar" name="trust_ar" rows="3" maxlength="400"></textarea></label>
+        </div>
+        <p class="hint" style="margin:-6px 0 14px">Only write things that are true for your store (for example your pharmacist or licence details).</p>
+        <p class="msg msg--err" id="settingsErr" role="alert" hidden></p>
+        <div class="settings__foot">
+          <button class="btn btn--solid" type="submit" id="settingsSave">Save settings</button>
+          <span class="msg msg--ok" id="settingsOk" hidden style="margin:0">Saved.</span>
+        </div>
+      </form>
     </section>
   </main>
 </div>
@@ -324,6 +410,13 @@
 
   function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   function money(n){ return '$' + Number(n).toFixed(2); }
+  // Lebanese local numbers (8 digits) need the 961 country code for wa.me links.
+  function waNumber(phone){
+    var d = String(phone || '').replace(/\D/g, '');
+    if(d.indexOf('00') === 0) d = d.slice(2);
+    if(d.length <= 8) d = '961' + d.replace(/^0+/, '');
+    return d;
+  }
   function show(id){ ['viewSetup','viewLogin','viewApp'].forEach(function(v){ $('#' + v).hidden = v !== id; }); }
 
   if(!configured){ show('viewSetup'); return; }
@@ -345,7 +438,7 @@
         return;
       }
       $('#who').textContent = user.email; show('viewApp');
-      loadProducts(); loadOrders();
+      loadProducts(); loadOrders(); loadSettings();
       clearInterval(timer); timer = setInterval(loadOrders, 60000);
     });
   }
@@ -380,9 +473,12 @@
   function tab(name){
     $('#tabProducts').setAttribute('aria-selected', name === 'products');
     $('#tabOrders').setAttribute('aria-selected', name === 'orders');
+    $('#tabSettings').setAttribute('aria-selected', name === 'settings');
     $('#panelProducts').hidden = name !== 'products';
     $('#panelOrders').hidden = name !== 'orders';
+    $('#panelSettings').hidden = name !== 'settings';
   }
+  $('#tabSettings').addEventListener('click', function(){ tab('settings'); });
   $('#tabProducts').addEventListener('click', function(){ tab('products'); });
   $('#tabOrders').addEventListener('click', function(){ tab('orders'); loadOrders(); });
 
@@ -612,7 +708,7 @@
       var d = new Date(o.created_at);
       var items = (o.items || []).map(function(i){
         return '<li><span>' + esc(i.name_en) + ' × ' + esc(i.qty) + '</span><span>' + money(i.price * i.qty) + '</span></li>';
-      }).join('');
+      }).join('') + (Number(o.delivery_fee) > 0 ? '<li><span>Delivery</span><span>' + money(o.delivery_fee) + '</span></li>' : '');
       var opts = STATUSES.map(function(s){ return '<option value="' + s + '"' + (s === o.status ? ' selected' : '') + '>' + s.charAt(0).toUpperCase() + s.slice(1) + '</option>'; }).join('');
       return '<article class="order">' +
         '<div class="order__head"><span class="order__no">#' + esc(o.order_no) + '</span>' +
@@ -620,7 +716,7 @@
         '<span class="order__date">' + esc(d.toLocaleString([], {dateStyle:'medium', timeStyle:'short'})) + '</span></div>' +
         '<div class="order__grid">' +
           '<div><h4>Customer</h4><div>' + esc(o.customer_name) + '</div><div><a href="tel:' + esc(o.phone) + '">' + esc(o.phone) + '</a> · ' +
-            '<a href="https://wa.me/' + esc(String(o.phone).replace(/\D/g, '')) + '" target="_blank" rel="noopener">WhatsApp</a></div>' +
+            '<a href="https://wa.me/' + esc(waNumber(o.phone)) + '" target="_blank" rel="noopener">WhatsApp</a></div>' +
             (o.address ? '<div>' + esc(o.address) + '</div>' : '') +
             (o.notes ? '<div class="hint" style="margin-top:6px">Note: ' + esc(o.notes) + '</div>' : '') + '</div>' +
           '<div><h4>Items</h4><ul>' + items + '</ul></div>' +
