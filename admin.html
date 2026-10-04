@@ -509,42 +509,51 @@
       if(r.error){ err.textContent = 'That code did not work. Check the code and try again.'; err.hidden = false; return; }
       $('#mfaForm').elements.code.value = '';
       if(mfaResolve){ var done = mfaResolve; mfaResolve = null; done(true); }
-    });
+    }).catch(function(){ btn.disabled = false; err.textContent = 'Could not reach Supabase. Try again.'; err.hidden = false; });
   });
   $('#mfaSignOut').addEventListener('click', function(){
     mfaResolve = null; clearInterval(timer); sb.auth.signOut().then(function(){ show('viewLogin'); });
   });
 
   function mfaMsg(text, isErr){ var e = $('#mfaErr'); e.textContent = text || ''; e.hidden = !text; e.className = 'msg ' + (isErr ? 'msg--err' : 'msg--ok'); }
+  function withTimeout(promise, ms){
+    return Promise.race([promise, new Promise(function(_, reject){ setTimeout(function(){ reject(new Error('timeout')); }, ms); })]);
+  }
   function refreshMfaStatus(){
-    if(!sb.auth.mfa){ $('#mfaStatus').textContent = 'Two-step sign-in is not supported by this version of the sign-in library.'; return; }
-    sb.auth.mfa.listFactors().then(function(r){
-      var st = $('#mfaStatus'), start = $('#mfaStart');
+    var st = $('#mfaStatus'), start = $('#mfaStart');
+    if(!sb.auth.mfa){ st.textContent = 'Two-step sign-in is not supported by this version of the sign-in library.'; start.hidden = true; return; }
+    st.textContent = 'Checking…';
+    withTimeout(sb.auth.mfa.listFactors(), 8000).then(function(r){
       if(r.error){
-        st.textContent = 'Two-step sign-in is not available on this project. In Supabase open Authentication > Sign In / Providers and make sure TOTP (MFA) is enabled.';
-        start.hidden = true; return;
+        st.textContent = 'Could not check two-step sign-in (' + (r.error.message || 'unknown error') + '). In Supabase open Authentication > Sign In / Providers and make sure TOTP (MFA) is enabled, then reopen this tab.';
+        start.hidden = false; return;
       }
       var on = (r.data && r.data.totp || []).length > 0;
       st.textContent = on ? 'Two-step sign-in is ON. A code from your authenticator app is asked every time you sign in.'
                           : 'Two-step sign-in is OFF. Turning it on is strongly recommended, because this account can see customer names, phones and addresses.';
       start.hidden = on; $('#mfaEnroll').hidden = true;
+    }).catch(function(e){
+      console.error('MFA status check failed', e);
+      st.textContent = 'Could not check two-step sign-in: ' + (e && e.message === 'timeout' ? 'no response from Supabase.' : ((e && e.message) || 'unknown error')) +
+        ' Reload the page or reopen this tab to try again.';
+      start.hidden = false;
     });
   }
   $('#mfaStart').addEventListener('click', function(){
     mfaMsg('');
-    sb.auth.mfa.enroll({factorType: 'totp', friendlyName: 'AVARA admin ' + Date.now()}).then(function(r){
+    withTimeout(sb.auth.mfa.enroll({factorType: 'totp', friendlyName: 'AVARA admin ' + Date.now()}), 10000).then(function(r){
       if(r.error || !r.data){ mfaMsg('Could not start setup: ' + ((r.error && r.error.message) || 'unknown error'), true); return; }
       enrollId = r.data.id;
       $('#mfaQr').src = r.data.totp.qr_code; $('#mfaSecret').textContent = r.data.totp.secret;
       $('#mfaEnroll').hidden = false; $('#mfaStart').hidden = true; $('#mfaCode').value = ''; $('#mfaCode').focus();
-    });
+    }).catch(function(e){ console.error('MFA enroll failed', e); mfaMsg('Could not start setup: ' + ((e && e.message === 'timeout') ? 'no response from Supabase.' : ((e && e.message) || 'unknown error')), true); });
   });
   $('#mfaVerify').addEventListener('click', function(){
     var code = $('#mfaCode').value.trim(); if(!enrollId || code.length < 6){ mfaMsg('Enter the 6-digit code from the app.', true); return; }
-    sb.auth.mfa.challengeAndVerify({factorId: enrollId, code: code}).then(function(r){
+    withTimeout(sb.auth.mfa.challengeAndVerify({factorId: enrollId, code: code}), 10000).then(function(r){
       if(r.error){ mfaMsg('That code did not work. Check the app and try again.', true); return; }
       enrollId = null; mfaMsg('Two-step sign-in is now on.', false); refreshMfaStatus();
-    });
+    }).catch(function(e){ console.error('MFA verify failed', e); mfaMsg('Could not verify the code: ' + ((e && e.message) || 'unknown error'), true); });
   });
   sb.auth.getSession().then(function(r){
     if(r.data && r.data.session) enter(r.data.session.user); else show('viewLogin');
@@ -582,7 +591,7 @@
     $('#panelOrders').hidden = name !== 'orders';
     $('#panelSettings').hidden = name !== 'settings';
   }
-  $('#tabSettings').addEventListener('click', function(){ tab('settings'); });
+  $('#tabSettings').addEventListener('click', function(){ tab('settings'); if(!/is ON/.test($('#mfaStatus').textContent)) refreshMfaStatus(); });
   $('#tabProducts').addEventListener('click', function(){ tab('products'); });
   $('#tabOrders').addEventListener('click', function(){ tab('orders'); loadOrders(); });
 
