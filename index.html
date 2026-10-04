@@ -1116,14 +1116,18 @@
   function renderDept(d){ renderTools(d); renderGrid(d); }
 
   /* ---------- Cart ---------- */
+  // Only cart lines whose product is loaded. Before the catalogue arrives (or if a
+  // saved cart holds an id that no longer exists) byId[id] is undefined, which used
+  // to throw and stop the whole page from loading products.
+  function cartIds(){ return Object.keys(cart).filter(function(id){ return byId[id]; }); }
   function cartTotals(){
     var n = 0, sum = 0;
-    Object.keys(cart).forEach(function(id){ n += cart[id]; sum += cart[id] * effPrice(byId[id]); });
+    cartIds().forEach(function(id){ n += cart[id]; sum += cart[id] * effPrice(byId[id]); });
     return {n:n, sum:sum};
   }
 
   function renderCart(){
-    var ids = Object.keys(cart), tot = cartTotals();
+    var ids = cartIds(), tot = cartTotals();
     var badge = $('#cartCount');
     badge.textContent = tot.n; badge.hidden = tot.n === 0;
 
