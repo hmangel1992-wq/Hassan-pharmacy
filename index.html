@@ -19,8 +19,11 @@
 
 <meta property="og:title" content="AVARA — Your Health Matters">
 <meta property="og:description" content="Inspired by Nature. Perfected by Science.">
-<meta property="og:image" content="assets/hero-banner.jpg">
+<meta property="og:image" content="https://avara-nu-beige.vercel.app/assets/hero-banner.jpg">
+<meta property="og:url" content="https://avara-nu-beige.vercel.app/">
 <meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://avara-nu-beige.vercel.app/">
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -322,6 +325,10 @@
   .card__price{ font-size: 1.15rem; font-weight: 500; }
   .card.is-found .card__media{ outline: 2px solid var(--teal-deep); outline-offset: 4px; }
   .card .btn{ padding: .7rem 1rem; font-size: .88rem; }
+  .badge--out{ background: var(--ink); }
+  .card__stock{ font-size: .84rem; font-weight: 500; color: #9A5B00; margin-bottom: 6px; }
+  .card.is-soldout .card__media .photo, .card.is-soldout .card__media .pack, .card.is-soldout .card__media .gallery{ opacity: .5; }
+  .btn.is-soldout[disabled]{ cursor: not-allowed; }
 
   .gallery{ position: absolute; inset: 0; }
   .gallery__track{
@@ -822,6 +829,8 @@
       advice_note:'General guidance only. It does not replace your doctor.', chat_cta:'Chat with us',
       cat_all:'All', sort_label:'Sort by', sort_feat:'Featured', sort_low:'Price, low to high', sort_high:'Price, high to low', sort_az:'Name, A–Z',
       count:'{n} products', add:'Add to cart', added:'Added to cart', badge_new:'New',
+      out_of_stock:'Out of stock', only_left:'Only {n} left', stock_max:'Only {n} available',
+      order_stock:'Some items in your cart are no longer available in that quantity. We refreshed the list, please check your cart.',
       gallery_prev:'Previous photo', gallery_next:'Next photo',
       cart_title:'Your cart', cart_empty:'Your cart is empty. Add a product to get started.', subtotal:'Subtotal',
       remove:'Remove', dec:'Decrease quantity', inc:'Increase quantity',
@@ -870,6 +879,8 @@
       advice_note:'إرشادات عامة فقط، ولا تغني عن استشارة الطبيب.', chat_cta:'تحدّث معنا',
       cat_all:'الكل', sort_label:'ترتيب حسب', sort_feat:'المميّزة', sort_low:'السعر: من الأقل إلى الأعلى', sort_high:'السعر: من الأعلى إلى الأقل', sort_az:'الاسم: أ – ي',
       count:'{n} منتج', add:'أضف إلى السلة', added:'أُضيف إلى السلة', badge_new:'جديد',
+      out_of_stock:'غير متوفر', only_left:'متبقّي {n} فقط', stock_max:'الكمية المتوفرة {n} فقط',
+      order_stock:'بعض المنتجات في سلّتك لم تعد متوفرة بهذه الكمية. حدّثنا القائمة، يرجى مراجعة سلّتك.',
       gallery_prev:'الصورة السابقة', gallery_next:'الصورة التالية',
       cart_title:'سلّتك', cart_empty:'سلّتك فارغة. أضف منتجاً للبدء.', subtotal:'المجموع',
       remove:'إزالة', dec:'إنقاص الكمية', inc:'زيادة الكمية',
@@ -978,13 +989,19 @@
     var images = (Array.isArray(r.images) && r.images.length) ? r.images.filter(Boolean) : (r.image_url ? [r.image_url] : []);
     return {id:r.id, dept:r.dept, cat:r.cat, collection:r.collection || null, brand:r.brand || '', type:r.type || 'box',
       price:Number(r.price), salePrice: r.sale_price != null ? Number(r.sale_price) : null, isNew:!!r.is_new,
+      stock: r.stock != null ? Number(r.stock) : null,
       size:[r.size_en || '', r.size_ar || r.size_en || ''], en:r.name_en, ar:r.name_ar || r.name_en,
       de:r.desc_en || '', da:r.desc_ar || r.desc_en || '', images:images, img:images[0] || ''};
   }
   function effPrice(p){ return p.salePrice != null ? p.salePrice : p.price; }
+  // stock === null means the column is not available yet: treat as unlimited.
+  function avail(p){ return p.stock == null ? Infinity : p.stock; }
   function indexProducts(){
     byId = {}; PRODUCTS.forEach(function(p){ byId[p.id] = p; });
-    Object.keys(cart).forEach(function(id){ if(!byId[id] || !(cart[id] > 0)) delete cart[id]; });
+    Object.keys(cart).forEach(function(id){
+      if(!byId[id] || !(cart[id] > 0) || avail(byId[id]) <= 0){ delete cart[id]; return; }
+      if(cart[id] > avail(byId[id])) cart[id] = avail(byId[id]);
+    });
     saveCart();
   }
   function loadProducts(){
@@ -1079,14 +1096,17 @@
       var priceHtml = p.salePrice != null
         ? '<span class="card__price card__price--sale" dir="ltr"><span class="card__price-was">' + money(p.price) + '</span><span class="card__price-now">' + money(p.salePrice) + '</span></span>'
         : '<span class="card__price" dir="ltr">' + money(p.price) + '</span>';
-      return '<article class="card" id="p-' + esc(p.id) + '">' +
-        '<div class="card__media">' + cardMedia(p) + (p.isNew ? '<span class="badge">' + t('badge_new') + '</span>' : '') + '</div>' +
+      var out = avail(p) <= 0, low = !out && avail(p) <= 5;
+      return '<article class="card' + (out ? ' is-soldout' : '') + '" id="p-' + esc(p.id) + '">' +
+        '<div class="card__media">' + cardMedia(p) + (out ? '<span class="badge badge--out">' + t('out_of_stock') + '</span>' : (p.isNew ? '<span class="badge">' + t('badge_new') + '</span>' : '')) + '</div>' +
         '<div class="card__body">' +
           '<p class="card__cat">' + (p.brand ? esc(p.brand) + ' · ' : '') + esc(catLabel(p)) + '</p>' +
           '<h3 class="card__name">' + esc(name(p)) + '</h3>' +
           '<p class="card__desc">' + esc(lang === 'ar' ? p.da : p.de) + '</p>' +
+          (low ? '<p class="card__stock">' + t('only_left').replace('{n}', p.stock) + '</p>' : '') +
           '<div class="card__foot"><span class="card__size">' + esc(pick({en:p.size[0], ar:p.size[1]})) + '</span>' + priceHtml + '</div>' +
-          '<button class="btn btn--line" type="button" data-add="' + esc(p.id) + '">' + t('add') + '</button>' +
+          (out ? '<button class="btn btn--line is-soldout" type="button" disabled>' + t('out_of_stock') + '</button>'
+               : '<button class="btn btn--line" type="button" data-add="' + esc(p.id) + '">' + t('add') + '</button>') +
         '</div></article>';
     }).join('') : '<p class="state-msg">' + t('no_products') + '</p>';
     countEl.textContent = t('count').replace('{n}', list.length);
@@ -1148,9 +1168,10 @@
       .then(function(res){
         btn.disabled = false; btn.textContent = t('place_order');
         if(res.error){
-          var unavailable = /unavailable/i.test(res.error.message || '');
-          showOrderError(unavailable ? 'order_unavail' : 'order_err');
-          if(unavailable) loadProducts();
+          var msg = res.error.message || '';
+          var noStock = /not enough stock/i.test(msg), unavailable = /unavailable/i.test(msg);
+          showOrderError(noStock ? 'order_stock' : unavailable ? 'order_unavail' : 'order_err');
+          if(noStock || unavailable) loadProducts();
           return;
         }
         lastOrder = res.data; cart = {}; saveCart(); e.target.reset(); renderCart();
@@ -1231,7 +1252,9 @@
   document.addEventListener('click', function(e){
     var el;
     if((el = e.target.closest('[data-add]'))){
-      var id = el.getAttribute('data-add'); lastOrder = null; cart[id] = (cart[id] || 0) + 1; saveCart(); renderCart(); toast(t('added')); return;
+      var id = el.getAttribute('data-add'), prod = byId[id]; if(!prod) return;
+      if((cart[id] || 0) + 1 > avail(prod)){ toast(avail(prod) <= 0 ? t('out_of_stock') : t('stock_max').replace('{n}', avail(prod))); return; }
+      lastOrder = null; cart[id] = (cart[id] || 0) + 1; saveCart(); renderCart(); toast(t('added')); return;
     }
     if((el = e.target.closest('[data-chip]'))){
       var parts = el.getAttribute('data-chip').split(':'); view[parts[0]].cat = parts[1]; renderDept(parts[0]);
@@ -1245,7 +1268,9 @@
     }
     if((el = e.target.closest('[data-qty]'))){
       var q = el.getAttribute('data-qty').split(':'), pid = q[0];
-      cart[pid] = (cart[pid] || 0) + parseInt(q[1], 10); if(cart[pid] <= 0) delete cart[pid]; saveCart(); renderCart(); return;
+      var next = (cart[pid] || 0) + parseInt(q[1], 10);
+      if(byId[pid] && next > avail(byId[pid])){ toast(t('stock_max').replace('{n}', avail(byId[pid]))); return; }
+      cart[pid] = next; if(cart[pid] <= 0) delete cart[pid]; saveCart(); renderCart(); return;
     }
     if((el = e.target.closest('[data-rm]'))){ delete cart[el.getAttribute('data-rm')]; saveCart(); renderCart(); return; }
     if(e.target.closest('[data-close-cart]')){ closeCart(); return; }
