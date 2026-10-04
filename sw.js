@@ -1,7 +1,7 @@
 // AVARA service worker.
 // Bump CACHE_VERSION whenever index.html or config.js changes, so returning
 // visitors get the new file instead of a stale cached copy.
-const CACHE_VERSION = 'avara-v2';
+const CACHE_VERSION = 'avara-v3';
 const PRECACHE = [
   '/',
   '/index.html',
@@ -22,7 +22,11 @@ const PRECACHE = [
 self.addEventListener('install', function(event){
   event.waitUntil(
     caches.open(CACHE_VERSION)
-      .then(function(cache){ return cache.addAll(PRECACHE); })
+      // Add files one by one: cache.addAll() rejects as a whole if a single
+      // file is missing, which would stop the app from installing at all.
+      .then(function(cache){
+        return Promise.all(PRECACHE.map(function(u){ return cache.add(u).catch(function(){}); }));
+      })
       .then(function(){ return self.skipWaiting(); })
   );
 });
