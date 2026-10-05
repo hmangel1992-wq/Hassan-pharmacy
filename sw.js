@@ -1,7 +1,7 @@
 // AVARA service worker.
 // Bump CACHE_VERSION whenever index.html or config.js changes, so returning
 // visitors get the new file instead of a stale cached copy.
-const CACHE_VERSION = 'avara-v6';
+const CACHE_VERSION = 'avara-v7';
 const PRECACHE = [
   '/',
   '/config.js',
@@ -9,9 +9,9 @@ const PRECACHE = [
   '/manifest.webmanifest',
   '/assets/logo.png',
   '/assets/logo-white.png',
-  '/assets/hero-medical.jpg',
-  '/assets/hero-beauty.jpg',
-  '/assets/hero-athlete.jpg',
+  '/assets/hero-medical-1536.webp',
+  '/assets/hero-beauty-1536.webp',
+  '/assets/hero-athlete-1536.webp',
   '/assets/icon-192.png',
   '/assets/icon-384.png',
   '/assets/icon-512.png',

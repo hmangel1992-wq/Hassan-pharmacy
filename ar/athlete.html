@@ -206,15 +206,31 @@
   /* =========================================================
      Hero — the banner IS the layout; copy sits in the wall space
      ========================================================= */
-  .hero-static{ position: relative; background: var(--wall); overflow: hidden; animation: heroIn .7s ease-out both; }
-  .hero-static img{ display: block; width: 100%; height: auto; }
+  .hero{ position: relative; background: var(--wall); overflow: hidden; animation: heroIn .7s ease-out both; }
+  .hero__img{ display: block; width: 100%; height: auto; }
   @keyframes heroIn{ from{ opacity: 0; } to{ opacity: 1; } }
-  .hero-static__cta{
-    position: absolute; border-radius: 999px; transition: box-shadow .18s ease;
+  /* Text sits in the empty wall space of each photo. Positions are percentages of the photo,
+     and sizes use vw, so the layout scales with the picture. Physical left/top (not logical)
+     keeps it clear of the model in Arabic (right-to-left) too. */
+  .hero__copy{
+    position: absolute; left: var(--x); top: var(--y); width: var(--w); text-align: center;
+    text-shadow: 0 0 22px rgba(255,255,255,.7);
   }
-  .hero-static__cta:hover, .hero-static__cta:focus-visible{
-    box-shadow: 0 0 0 3px rgba(255,255,255,.9), 0 6px 18px rgba(44,44,44,.3);
-    outline: none;
+  .hero__h{ font-weight: 300; line-height: 1.14; font-size: clamp(1.3rem, 2.9vw, 2.9rem); color: var(--ink); }
+  [lang="ar"] .hero__h{ line-height: 1.35; font-weight: 400; }
+  .hero__s{ margin-top: .7em; font-size: clamp(.85rem, 1.15vw, 1.1rem); color: var(--ink); opacity: .82; }
+  .hero__cta{
+    margin-top: 1.1em; padding: .8em 1.9em; border-radius: 999px; text-shadow: none;
+    font-size: clamp(.78rem, 1.1vw, 1.02rem); box-shadow: 0 6px 20px rgba(31,95,107,.28);
+  }
+  .hero__cta:focus-visible{ box-shadow: 0 0 0 3px rgba(255,255,255,.95), 0 6px 18px rgba(44,44,44,.3); outline: none; }
+  @media (max-width: 1000px){ .hero__s{ display: none; } }
+  @media (max-width: 760px){
+    .hero{ display: flex; flex-direction: column; background: var(--mint); }
+    .hero__copy{ position: static; order: 2; width: auto; padding: 26px 24px 30px; text-shadow: none; }
+    .hero__h{ font-size: 1.7rem; }
+    .hero__s{ display: block; font-size: .98rem; }
+    .hero__cta{ margin: 18px 0 8px; padding: .95rem 1.8rem; font-size: .95rem; box-shadow: none; }
   }
 
   /* =========================================================
@@ -508,7 +524,7 @@
   .toast.show{ opacity: 1; transform: translate(-50%, 0); }
   [dir="rtl"] .toast.show{ transform: translate(50%, 0); }
 </style>
-<title>الرعاية الرياضية | AVARA: استشفاء وترطيب وحماية</title><meta name="description" content="استشفاء وترطيب وتغذية وحماية من الشمس لأيام التمرين وأيام الراحة. تسوّق الرعاية الرياضية من AVARA."><link rel="canonical" href="https://avara-nu-beige.vercel.app/ar/athlete"><link rel="alternate" hreflang="en" href="https://avara-nu-beige.vercel.app/athlete"><link rel="alternate" hreflang="ar" href="https://avara-nu-beige.vercel.app/ar/athlete"><link rel="alternate" hreflang="x-default" href="https://avara-nu-beige.vercel.app/athlete"><meta property="og:site_name" content="AVARA"><meta property="og:type" content="website"><meta property="og:title" content="الرعاية الرياضية | AVARA: استشفاء وترطيب وحماية"><meta property="og:description" content="استشفاء وترطيب وتغذية وحماية من الشمس لأيام التمرين وأيام الراحة. تسوّق الرعاية الرياضية من AVARA."><meta property="og:url" content="https://avara-nu-beige.vercel.app/ar/athlete"><meta property="og:image" content="https://avara-nu-beige.vercel.app/assets/hero-athlete.jpg"><meta property="og:locale" content="ar_AR"><meta property="og:locale:alternate" content="en_US"><meta name="twitter:card" content="summary_large_image"><link rel="preload" as="image" href="/assets/hero-athlete.jpg" fetchpriority="high"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AVARA","item":"https://avara-nu-beige.vercel.app/ar/"},{"@type":"ListItem","position":2,"name":"الرعاية الرياضية","item":"https://avara-nu-beige.vercel.app/ar/athlete"}]}</script></head>
+<title>الرعاية الرياضية | AVARA: استشفاء وترطيب وحماية</title><meta name="description" content="استشفاء وترطيب وتغذية وحماية من الشمس لأيام التمرين وأيام الراحة. تسوّق الرعاية الرياضية من AVARA."><link rel="canonical" href="https://avara-nu-beige.vercel.app/ar/athlete"><link rel="alternate" hreflang="en" href="https://avara-nu-beige.vercel.app/athlete"><link rel="alternate" hreflang="ar" href="https://avara-nu-beige.vercel.app/ar/athlete"><link rel="alternate" hreflang="x-default" href="https://avara-nu-beige.vercel.app/athlete"><meta property="og:site_name" content="AVARA"><meta property="og:type" content="website"><meta property="og:title" content="الرعاية الرياضية | AVARA: استشفاء وترطيب وحماية"><meta property="og:description" content="استشفاء وترطيب وتغذية وحماية من الشمس لأيام التمرين وأيام الراحة. تسوّق الرعاية الرياضية من AVARA."><meta property="og:url" content="https://avara-nu-beige.vercel.app/ar/athlete"><meta property="og:image" content="https://avara-nu-beige.vercel.app/assets/hero-athlete.jpg"><meta property="og:locale" content="ar_AR"><meta property="og:locale:alternate" content="en_US"><meta name="twitter:card" content="summary_large_image"><link rel="preload" as="image" href="/assets/hero-athlete-1536.webp" imagesrcset="/assets/hero-athlete-800.webp 800w, /assets/hero-athlete-1536.webp 1536w" imagesizes="100vw" fetchpriority="high"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AVARA","item":"https://avara-nu-beige.vercel.app/ar/"},{"@type":"ListItem","position":2,"name":"الرعاية الرياضية","item":"https://avara-nu-beige.vercel.app/ar/athlete"}]}</script></head>
 <body id="top">
 
 <!-- ============ SVG PACKSHOT LIBRARY ============ -->
@@ -632,9 +648,13 @@
 <!-- ============ PANEL: MEDICAL (home) ============ -->
 <div class="panel" data-panel="medical" id="panel-medical" hidden="">
 
-  <section class="hero-static" aria-label="AVARA Medical care">
-    <img src="/assets/hero-medical.jpg" width="1536" height="902" alt="منتجات AVARA الصحية الأساسية: فيتامين D3 وزيت السمك أوميغا 3 وميزان حرارة رقمي ومرطّب لا روش بوزيه سيكابلاست، مع عبارة «صحة أفضل لحياة أجمل»." loading="lazy">
-    <a class="hero-static__cta" href="/ar/" style="left:45.3%;top:46.6%;width:17.8%;height:10.3%" data-i18n-aria="hero_cta_medical" aria-label="تسوّقي الرعاية الطبية"></a>
+  <section class="hero" aria-label="AVARA Medical care">
+    <img class="hero__img" src="/assets/hero-medical-1536.webp" srcset="/assets/hero-medical-800.webp 800w, /assets/hero-medical-1536.webp 1536w" sizes="100vw" width="1536" height="900" alt="امرأة مبتسمة بجانب فيتامين D3 وزيت السمك أوميغا 3 وميزان حرارة رقمي ومرطّب لا روش بوزيه سيكابلاست." loading="lazy">
+    <div class="hero__copy" style="--x:36.2%;--y:23%;--w:36%">
+      <p class="hero__h" data-i18n="hero_h_medical">صحة أفضل لحياة أجمل.</p>
+      <p class="hero__s" data-i18n="hero_s_medical">نصائح طبية وفيتامينات وأساسيات يومية.</p>
+      <a class="btn btn--solid hero__cta" href="/ar/" data-i18n="hero_cta_medical">تسوّق الرعاية الطبية</a>
+    </div>
   </section>
 
   <section class="section" id="departments" style="padding-bottom:40px">
@@ -742,9 +762,13 @@
 <!-- ============ PANEL: BEAUTY ============ -->
 <div class="panel" data-panel="beauty" id="panel-beauty" hidden="">
 
-  <section class="hero-static" aria-label="AVARA Beauty care">
-    <img src="/assets/hero-beauty.jpg" width="1536" height="906" alt="بانر AVARA للجمال يضم لا روش بوزيه وإستي لودر ولانكوم وكيراستاز وماك ونارس، مع عبارة «أشهر ماركات الجمال العالمية في مكان واحد»." loading="lazy">
-    <a class="hero-static__cta" href="/ar/beauty" style="left:48.8%;top:39.7%;width:23.7%;height:10.2%" data-i18n-aria="hero_cta_beauty" aria-label="تسوّقي العناية بالجمال"></a>
+  <section class="hero" aria-label="AVARA Beauty care">
+    <img class="hero__img" src="/assets/hero-beauty-1536.webp" srcset="/assets/hero-beauty-800.webp 800w, /assets/hero-beauty-1536.webp 1536w" sizes="100vw" width="1536" height="900" alt="امرأة ببشرة مشرقة بجانب منتجات جمال من لا روش بوزيه وإستي لودر ولانكوم وكيراستاز وماك ونارس." loading="lazy">
+    <div class="hero__copy" style="--x:42.6%;--y:10%;--w:36%">
+      <p class="hero__h" data-i18n="hero_h_beauty">أشهر ماركات الجمال العالمية في مكان واحد.</p>
+      <p class="hero__s" data-i18n="hero_s_beauty">لا روش بوزيه، إستي لودر، لانكوم، كيراستاز، ماك ونارس.</p>
+      <a class="btn btn--solid hero__cta" href="/ar/beauty" data-i18n="hero_cta_beauty">تسوّق العناية بالجمال</a>
+    </div>
   </section>
 
   <section class="section" id="beauty" aria-labelledby="beautyTitle">
@@ -762,9 +786,13 @@
 <!-- ============ PANEL: ATHLETE ============ -->
 <div class="panel" data-panel="athlete" id="panel-athlete"><h1 class="sr-only">AVARA — الرعاية الرياضية</h1>
 
-  <section class="hero-static" aria-label="AVARA Athlete care">
-    <img src="/assets/hero-athlete.jpg" width="1536" height="900" alt="بانر AVARA للرياضيين يضم لا روش بوزيه وفيشي وكيراستاز وسيرافي بجانب زجاجة شيكر، مع عبارة «عناية تدعم كل خطوة في رحلتك»." fetchpriority="high">
-    <a class="hero-static__cta" href="#athlete" style="left:55.9%;top:42.2%;width:18.7%;height:9.8%" data-i18n-aria="hero_cta_athlete" aria-label="تسوّقي الرعاية الرياضية"></a>
+  <section class="hero" aria-label="AVARA Athlete care">
+    <img class="hero__img" src="/assets/hero-athlete-1536.webp" srcset="/assets/hero-athlete-800.webp 800w, /assets/hero-athlete-1536.webp 1536w" sizes="100vw" width="1536" height="900" alt="امرأة بملابس رياضية مع منشفة وزجاجة ماء بجانب منتجات لا روش بوزيه وفيشي وكيراستاز وسيرافي وشيكر." fetchpriority="high">
+    <div class="hero__copy" style="--x:45.3%;--y:14%;--w:40%">
+      <p class="hero__h" data-i18n="hero_h_athlete">عناية تدعم كل خطوة في رحلتك.</p>
+      <p class="hero__s" data-i18n="hero_s_athlete">استشفاء وترطيب وحماية لأيام التمرين وأيام الراحة.</p>
+      <a class="btn btn--solid hero__cta" href="#athlete" data-i18n="hero_cta_athlete">تسوّق الرعاية الرياضية</a>
+    </div>
   </section>
 
   <section class="section" id="athlete" aria-labelledby="athleteTitle">
@@ -870,6 +898,9 @@ document.addEventListener('DOMContentLoaded', function(){
       hero_cta_medical:'Shop Medical care', hero_cta_beauty:'Shop Beauty care', hero_cta_athlete:'Shop Athlete care',
       search:'Search products', search_ph:'Search products', search_none:'No products match your search.', menu:'Menu', close:'Close',
       hero_tag:'Inspired by Nature. Perfected by Science.',
+      hero_h_medical:'Better health for a more beautiful life.', hero_s_medical:'Medical advice, vitamins and everyday essentials.',
+      hero_h_beauty:'The most famous global beauty brands, all in one place.', hero_s_beauty:'La Roche-Posay, Estée Lauder, Lancôme, Kérastase, MAC and NARS.',
+      hero_h_athlete:'Care that supports every step of your journey.', hero_s_athlete:'Recovery, hydration and protection for training days and rest days.',
       dept_title:'Shop by department', shop:'Shop',
       tile_medical:'Health care essentials, with answers you can trust.',
       tile_athlete:'Recovery, hydration and everyday support for active bodies.',
@@ -930,9 +961,12 @@ document.addEventListener('DOMContentLoaded', function(){
       announce:'مستوحاة من الطبيعة، مصقولة بالعلم',
       nav_medical:'الرعاية الطبية', nav_about:'من نحن', nav_contact:'تواصل معنا',
       nav_athlete_full:'الرعاية الرياضية', nav_beauty_full:'العناية بالجمال',
-      hero_cta_medical:'تسوّقي الرعاية الطبية', hero_cta_beauty:'تسوّقي العناية بالجمال', hero_cta_athlete:'تسوّقي الرعاية الرياضية',
+      hero_cta_medical:'تسوّق الرعاية الطبية', hero_cta_beauty:'تسوّق العناية بالجمال', hero_cta_athlete:'تسوّق الرعاية الرياضية',
       search:'ابحث عن منتج', search_ph:'ابحث عن منتج', search_none:'لا توجد منتجات مطابقة لبحثك.', menu:'القائمة', close:'إغلاق',
       hero_tag:'مستوحاة من الطبيعة، مصقولة بالعلم.',
+      hero_h_medical:'صحة أفضل لحياة أجمل.', hero_s_medical:'نصائح طبية وفيتامينات وأساسيات يومية.',
+      hero_h_beauty:'أشهر ماركات الجمال العالمية في مكان واحد.', hero_s_beauty:'لا روش بوزيه، إستي لودر، لانكوم، كيراستاز، ماك ونارس.',
+      hero_h_athlete:'عناية تدعم كل خطوة في رحلتك.', hero_s_athlete:'استشفاء وترطيب وحماية لأيام التمرين وأيام الراحة.',
       dept_title:'تسوّق حسب القسم', shop:'تسوّق',
       tile_medical:'أساسيات الرعاية الصحية مع إجابات تثق بها.',
       tile_athlete:'استشفاء وترطيب ودعم يومي للأجسام النشطة.',

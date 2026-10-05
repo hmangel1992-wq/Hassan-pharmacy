@@ -47,19 +47,19 @@ const META = {
       title: 'AVARA | Health care and cosmetics: medical care, beauty and athlete care',
       desc: 'AVARA is a health care and cosmetics store. Medical advice and everyday essentials, beauty and hair care, and recovery for athletes. Inspired by Nature. Perfected by Science.',
       h1: 'AVARA — Medical care', image: 'hero-banner.jpg', hero: 'hero-medical.jpg',
-      alt: 'AVARA health essentials — vitamin D3, omega-3 fish oil, a digital thermometer and La Roche-Posay Cicaplast balm — with the Arabic headline "Better health for a more beautiful life."',
+      alt: 'A smiling woman beside vitamin D3, omega-3 fish oil, a digital thermometer and La Roche-Posay Cicaplast balm.',
     },
     beauty: {
       title: 'Beauty care | AVARA: skin care, hair care and cosmetics',
       desc: 'Shop skin care, hair care and cosmetics at AVARA: Avara Care, Avara Hair and Avara Cosmetics, with brands such as La Roche-Posay, CeraVe and Kérastase.',
       h1: 'AVARA — Beauty care', image: 'hero-beauty.jpg', hero: 'hero-beauty.jpg',
-      alt: 'AVARA beauty banner featuring La Roche-Posay, Estée Lauder, Lancôme, Kérastase, MAC and NARS, with the Arabic headline "The most famous global beauty brands, all in one place."',
+      alt: 'A woman with glowing skin beside beauty products from La Roche-Posay, Estée Lauder, Lancôme, Kérastase, MAC and NARS.',
     },
     athlete: {
       title: 'Athlete care | AVARA: recovery, hydration and protection',
       desc: 'Recovery, hydration, nutrition and sun protection for training days and rest days. Shop athlete care at AVARA.',
       h1: 'AVARA — Athlete care', image: 'hero-athlete.jpg', hero: 'hero-athlete.jpg',
-      alt: 'AVARA athlete banner featuring La Roche-Posay, Vichy, Kérastase and CeraVe beside a shaker bottle, with the Arabic headline "Care that supports every step of your journey."',
+      alt: 'A woman in sportswear with a towel and a water bottle, beside La Roche-Posay, Vichy, Kérastase and CeraVe products and a shaker.',
     },
   },
   ar: {
@@ -67,19 +67,19 @@ const META = {
       title: 'AVARA | رعاية صحية ومستحضرات تجميل: الرعاية الطبية والجمال والرياضة',
       desc: 'AVARA متجر للرعاية الصحية ومستحضرات التجميل. نصائح طبية وأساسيات يومية، وعناية بالبشرة والشعر، واستشفاء للرياضيين. مستوحاة من الطبيعة، مصقولة بالعلم.',
       h1: 'AVARA — الرعاية الطبية', image: 'hero-banner.jpg', hero: 'hero-medical.jpg',
-      alt: 'منتجات AVARA الصحية الأساسية: فيتامين D3 وزيت السمك أوميغا 3 وميزان حرارة رقمي ومرطّب لا روش بوزيه سيكابلاست، مع عبارة «صحة أفضل لحياة أجمل».',
+      alt: 'امرأة مبتسمة بجانب فيتامين D3 وزيت السمك أوميغا 3 وميزان حرارة رقمي ومرطّب لا روش بوزيه سيكابلاست.',
     },
     beauty: {
       title: 'العناية بالجمال | AVARA: بشرة وشعر ومستحضرات تجميل',
       desc: 'تسوّقي العناية بالبشرة والشعر ومستحضرات التجميل من AVARA: أفارا كير وأفارا هير وأفارا كوزمتكس، مع ماركات مثل لا روش بوزيه وسيرافي وكيراستاز.',
       h1: 'AVARA — العناية بالجمال', image: 'hero-beauty.jpg', hero: 'hero-beauty.jpg',
-      alt: 'بانر AVARA للجمال يضم لا روش بوزيه وإستي لودر ولانكوم وكيراستاز وماك ونارس، مع عبارة «أشهر ماركات الجمال العالمية في مكان واحد».',
+      alt: 'امرأة ببشرة مشرقة بجانب منتجات جمال من لا روش بوزيه وإستي لودر ولانكوم وكيراستاز وماك ونارس.',
     },
     athlete: {
       title: 'الرعاية الرياضية | AVARA: استشفاء وترطيب وحماية',
       desc: 'استشفاء وترطيب وتغذية وحماية من الشمس لأيام التمرين وأيام الراحة. تسوّق الرعاية الرياضية من AVARA.',
       h1: 'AVARA — الرعاية الرياضية', image: 'hero-athlete.jpg', hero: 'hero-athlete.jpg',
-      alt: 'بانر AVARA للرياضيين يضم لا روش بوزيه وفيشي وكيراستاز وسيرافي بجانب زجاجة شيكر، مع عبارة «عناية تدعم كل خطوة في رحلتك».',
+      alt: 'امرأة بملابس رياضية مع منشفة وزجاجة ماء بجانب منتجات لا روش بوزيه وفيشي وكيراستاز وسيرافي وشيكر.',
     },
   },
 };
@@ -127,6 +127,13 @@ PAGES.forEach((page) => {
     const lb = doc.getElementById('langBtn'); lb.textContent = D.langBtn; lb.setAttribute('lang', 'en');
   }
 
+  // ---- English pages: fill any text that the template leaves to the script (e.g. the hero headlines) ----
+  if (!ar) {
+    doc.querySelectorAll('[data-i18n]').forEach((el) => {
+      if (!el.textContent.trim()) { const v = I18N.en[el.getAttribute('data-i18n')]; if (v) el.textContent = v; }
+    });
+  }
+
   // ---- Which department is showing ----
   doc.querySelectorAll('.panel').forEach((p) => {
     if (p.getAttribute('data-panel') === page.panel) p.removeAttribute('hidden'); else p.setAttribute('hidden', '');
@@ -136,7 +143,7 @@ PAGES.forEach((page) => {
   });
 
   // ---- Hero images: the visible one loads first, the hidden ones wait ----
-  doc.querySelectorAll('.hero-static img').forEach((img) => {
+  doc.querySelectorAll('.hero img').forEach((img) => {
     const panelName = img.closest('.panel').getAttribute('data-panel');
     if (panelName === page.panel) {
       img.setAttribute('fetchpriority', 'high');
@@ -183,7 +190,8 @@ PAGES.forEach((page) => {
   addMeta(doc, { property: 'og:locale', content: ar ? 'ar_AR' : 'en_US' });
   addMeta(doc, { property: 'og:locale:alternate', content: ar ? 'en_US' : 'ar_AR' });
   addMeta(doc, { name: 'twitter:card', content: 'summary_large_image' });
-  addLink(doc, { rel: 'preload', as: 'image', href: '/assets/' + meta.hero, fetchpriority: 'high' });
+  const heroBase = '/assets/' + meta.hero.replace(/\.jpg$/, '');
+  addLink(doc, { rel: 'preload', as: 'image', href: heroBase + '-1536.webp', imagesrcset: heroBase + '-800.webp 800w, ' + heroBase + '-1536.webp 1536w', imagesizes: '100vw', fetchpriority: 'high' });
 
   // ---- Structured data ----
   if (page.panel === 'medical') {
