@@ -1,11 +1,11 @@
 // AVARA service worker.
 // Bump CACHE_VERSION whenever index.html or config.js changes, so returning
 // visitors get the new file instead of a stale cached copy.
-const CACHE_VERSION = 'avara-v5';
+const CACHE_VERSION = 'avara-v6';
 const PRECACHE = [
   '/',
-  '/index.html',
   '/config.js',
+  '/vendor/supabase-2.45.4.js',
   '/manifest.webmanifest',
   '/assets/logo.png',
   '/assets/logo-white.png',
@@ -48,7 +48,7 @@ self.addEventListener('fetch', function(event){
   var url = new URL(req.url);
   if(url.origin !== self.location.origin) return;           // let Supabase, fonts, CDN scripts pass through untouched
   if(url.pathname.indexOf('/api/') === 0) return;             // never cache the chat endpoint
-  if(url.pathname.indexOf('/admin.html') === 0) return;       // admin dashboard stays out of the offline cache
+  if(url.pathname.indexOf('/admin') === 0) return;       // admin dashboard stays out of the offline cache
 
   // HTML documents: try the network first, so people get new products,
   // prices and site changes as soon as they're online; fall back to the
@@ -59,7 +59,7 @@ self.addEventListener('fetch', function(event){
         var copy = res.clone();
         caches.open(CACHE_VERSION).then(function(cache){ cache.put(req, copy); });
         return res;
-      }).catch(function(){ return caches.match(req).then(function(r){ return r || caches.match('/index.html'); }); })
+      }).catch(function(){ return caches.match(req).then(function(r){ return r || caches.match('/'); }); })
     );
     return;
   }

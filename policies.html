@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AVARA — Privacy and policies</title>
 <meta name="theme-color" content="#2F8F9D">
-<link rel="icon" href="assets/favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
-<script src="config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="/config.js"></script>
+<script src="/vendor/supabase-2.45.4.js"></script>
 <style>
   :root{ --teal:#2F8F9D; --teal-deep:#1F5F6B; --mint:#DFF4F1; --mint-2:#C6E5E0; --ivory:#FAF9F6; --ink:#2C2C2C; --ink-soft:#5B5F5F;
          --font:'Jost','Tajawal',system-ui,-apple-system,'Segoe UI',sans-serif; }
@@ -47,9 +47,9 @@
 <div class="bar" id="tag">Inspired by Nature. Perfected by Science</div>
 <header>
   <div class="head">
-    <a href="index.html" aria-label="AVARA"><img src="assets/logo.png" alt="AVARA" width="132" height="26"></a>
+    <a href="/" id="logoLink" aria-label="AVARA"><img src="/assets/logo.png" alt="AVARA" width="132" height="26"></a>
     <nav>
-      <a href="index.html" id="back">Back to store</a>
+      <a href="/" id="back">Back to store</a>
       <button type="button" id="langBtn">العربية</button>
     </nav>
   </div>
@@ -159,6 +159,8 @@
     document.title = 'AVARA — ' + L.title;
     document.getElementById('tag').textContent = L.tag;
     document.getElementById('back').textContent = L.back;
+    var home = lang === 'ar' ? '/ar/' : '/';
+    document.getElementById('back').setAttribute('href', home); document.getElementById('logoLink').setAttribute('href', home);
     document.getElementById('langBtn').textContent = L.lang;
     document.getElementById('foot').textContent = L.foot;
   }
