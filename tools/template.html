@@ -382,6 +382,11 @@
   .cart-sum__row[hidden]{ display: none; }
   .drawer__note[hidden]{ display: none; }
 
+  .cart-store{ margin-top: 20px; }
+  .cart-trust{ padding: 14px 16px; background: var(--mint); border-inline-start: 3px solid var(--teal-deep); font-size: .92rem; line-height: 1.55; margin-bottom: 8px; }
+  .cart-facts{ list-style: none; font-size: .9rem; color: var(--ink-soft); }
+  .cart-facts li{ display: grid; gap: 2px; padding: 9px 0; border-bottom: 1px solid var(--mint-2); }
+  .cart-facts strong{ color: var(--ink); font-weight: 500; }
   .contact__text{ max-width: 34ch; text-align: end; line-height: 1.5; }
   .contact__text a{ border-bottom: 1px solid var(--teal); text-decoration: none; }
   .contact__list li[hidden]{ display: none; }
@@ -1300,12 +1305,12 @@ document.addEventListener('DOMContentLoaded', function(){
       var wa = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(t('wa_order').replace('{no}', lastOrder));
       $('#cartBody').innerHTML = '<div class="done"><h3>' + t('order_ok_title') + '</h3><p>' + t('order_ok_text').replace('{no}', '<strong dir="ltr">#' + esc(lastOrder) + '</strong>') + '</p>' +
         '<a class="btn btn--solid btn--block" href="' + wa + '" target="_blank" rel="noopener">' + t('order_wa_confirm') + '</a>' +
-        '<button class="btn btn--line btn--block" type="button" data-close-cart>' + t('continue') + '</button></div>';
+        '<button class="btn btn--line btn--block" type="button" data-close-cart>' + t('continue') + '</button></div>' + storeInfoHtml();
       $('#cartFoot').hidden = true;
       return;
     }
     if(!ids.length){
-      $('#cartBody').innerHTML = '<p class="drawer__empty">' + t('cart_empty') + '</p>';
+      $('#cartBody').innerHTML = '<p class="drawer__empty">' + t('cart_empty') + '</p>' + storeInfoHtml();
       $('#cartFoot').hidden = true;
       return;
     }
@@ -1317,7 +1322,7 @@ document.addEventListener('DOMContentLoaded', function(){
           '<div class="qty"><button type="button" data-qty="' + esc(id) + ':-1" aria-label="' + t('dec') + '">−</button><span>' + cart[id] + '</span><button type="button" data-qty="' + esc(id) + ':1" aria-label="' + t('inc') + '">+</button></div></div>' +
         '<div><div class="line__total" dir="ltr">' + money(effPrice(p) * cart[id]) + '</div><button class="line__rm" type="button" data-rm="' + esc(id) + '">' + t('remove') + '</button></div>' +
       '</div>';
-    }).join('');
+    }).join('') + storeInfoHtml();
     var fee = deliveryFor(tot.sum), baseFee = Number(store.delivery_fee) || 0;
     var minO = Number(store.min_order) || 0, th = Number(store.free_delivery_over) || 0;
     $('#cartSub').textContent = money(tot.sum);
@@ -1327,10 +1332,20 @@ document.addEventListener('DOMContentLoaded', function(){
     var notes = [];
     if(minO > 0 && tot.sum < minO) notes.push(t('min_order_note').replace('{amt}', money(minO)));
     if(baseFee > 0 && th > 0) notes.push(tot.sum < th ? t('add_for_free').replace('{amt}', money(th - tot.sum)) : t('free_over').replace('{amt}', money(th)));
-    if(storeText('delivery')) notes.push(t('deliv_info').replace('{text}', storeText('delivery')));
-    if(storeText('payment')) notes.push(t('pay_with').replace('{text}', storeText('payment')));
     var info = $('#cartInfo'); info.innerHTML = notes.map(esc).join('<br>'); info.hidden = !notes.length;
     $('#cartFoot').hidden = false;
+  }
+
+  // Store details the customer should see while ordering: trust statement, delivery, payment, hours, address.
+  function storeInfoHtml(){
+    var rows = [['delivery','c_delivery'],['payment','c_payment'],['hours','c_hours'],['address','c_address']];
+    var h = '', tt = storeText('trust');
+    if(tt) h += '<p class="cart-trust">' + esc(tt) + '</p>';
+    var list = rows.filter(function(r){ return storeText(r[0]); }).map(function(r){
+      return '<li><strong>' + t(r[1]) + '</strong><span>' + esc(storeText(r[0])) + '</span></li>';
+    }).join('');
+    if(list) h += '<ul class="cart-facts">' + list + '</ul>';
+    return h ? '<div class="cart-store">' + h + '</div>' : '';
   }
 
   function showOrderError(key){ var el = $('#orderError'); el.textContent = t(key); el.hidden = false; }
