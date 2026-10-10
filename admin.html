@@ -92,44 +92,7 @@
   .table-wrap{ overflow-x:auto; }
 
   /* ---------- Settings ---------- */
-  var SETTING_TEXT = ['address_en','address_ar','map_url','hours_en','hours_ar','delivery_en','delivery_ar','payment_en','payment_ar','returns_en','returns_ar','trust_en','trust_ar'];
-  var setForm = $('#settingsForm');
-  function loadSettings(){
-    return sb.from('settings').select('*').eq('id', 1).maybeSingle().then(function(r){
-      var err = $('#settingsErr');
-      if(r.error){
-        err.textContent = 'Settings are not available yet. Run phase1-settings-and-delivery.sql in the Supabase SQL Editor.'; err.hidden = false; return;
-      }
-      err.hidden = true;
-      var d = r.data || {}, el = setForm.elements;
-      el.delivery_fee.value = d.delivery_fee != null ? d.delivery_fee : 0;
-      el.free_delivery_over.value = d.free_delivery_over != null ? d.free_delivery_over : '';
-      el.min_order.value = d.min_order != null ? d.min_order : 0;
-      SETTING_TEXT.forEach(function(k){ el[k].value = d[k] || ''; });
-    });
-  }
-  setForm.addEventListener('submit', function(e){
-    e.preventDefault();
-    var el = setForm.elements, err = $('#settingsErr'), ok = $('#settingsOk'), btn = $('#settingsSave');
-    err.hidden = true; ok.hidden = true;
-    var fee = parseFloat(el.delivery_fee.value || '0'), min = parseFloat(el.min_order.value || '0');
-    var freeRaw = el.free_delivery_over.value.trim(), free = freeRaw === '' ? null : parseFloat(freeRaw);
-    if(isNaN(fee) || fee < 0 || isNaN(min) || min < 0 || (free != null && (isNaN(free) || free < 0))){
-      err.textContent = 'Please enter valid amounts (0 or more).'; err.hidden = false; return;
-    }
-    var map = el.map_url.value.trim();
-    if(map && !/^https?:\/\//i.test(map)){ err.textContent = 'The map link must start with http:// or https://'; err.hidden = false; return; }
-    var row = {id: 1, delivery_fee: fee, free_delivery_over: free, min_order: min};
-    SETTING_TEXT.forEach(function(k){ row[k] = el[k].value.trim() || null; });
-    btn.disabled = true; btn.textContent = 'Saving…';
-    sb.from('settings').upsert(row).then(function(r){
-      btn.disabled = false; btn.textContent = 'Save settings';
-      if(r.error){ err.textContent = 'Could not save: ' + r.error.message; err.hidden = false; return; }
-      ok.hidden = false; setTimeout(function(){ ok.hidden = true; }, 2500);
-    });
-  });
-
-  /* ---------- Orders ---------- */
+    /* ---------- Orders ---------- */
   .orders{ display:grid; gap:14px; }
   .order{ background:var(--white); border:1px solid var(--mist-2); padding:20px 22px; display:grid; gap:12px; }
   .order__head{ display:flex; flex-wrap:wrap; gap:8px 18px; align-items:baseline; }
@@ -144,6 +107,8 @@
   .st{ display:inline-block; padding:2px 10px; font-size:.78rem; border-radius:999px; }
   .st--new{ background:var(--moss); color:var(--white); }
   .st--confirmed{ background:var(--sage); }
+  .st--out_for_delivery{ background:var(--sage-deep); color:var(--white); }
+  .order__note input{ width:100%; padding:9px 12px; border:1px solid var(--sage-deep); border-radius:2px; background:var(--white); }
   .st--delivered{ background:var(--mist-2); }
   .st--cancelled{ background:#EFE3E0; color:var(--danger); }
   .empty{ padding:48px 0; text-align:center; color:var(--ink-soft); }
@@ -264,6 +229,7 @@
           <option value="all">All statuses</option>
           <option value="new">New</option>
           <option value="confirmed">Confirmed</option>
+          <option value="out_for_delivery">Out for delivery</option>
           <option value="delivered">Delivered</option>
           <option value="cancelled">Cancelled</option>
         </select>
@@ -803,8 +769,46 @@
     }).then(function(){ btn.disabled = false; btn.textContent = 'Save product'; });
   });
 
+  /* ---------- Settings ---------- */
+  var SETTING_TEXT = ['address_en','address_ar','map_url','hours_en','hours_ar','delivery_en','delivery_ar','payment_en','payment_ar','returns_en','returns_ar','trust_en','trust_ar'];
+  var setForm = $('#settingsForm');
+  function loadSettings(){
+    return sb.from('settings').select('*').eq('id', 1).maybeSingle().then(function(r){
+      var err = $('#settingsErr');
+      if(r.error){
+        err.textContent = 'Settings are not available yet. Run phase1-settings-and-delivery.sql in the Supabase SQL Editor.'; err.hidden = false; return;
+      }
+      err.hidden = true;
+      var d = r.data || {}, el = setForm.elements;
+      el.delivery_fee.value = d.delivery_fee != null ? d.delivery_fee : 0;
+      el.free_delivery_over.value = d.free_delivery_over != null ? d.free_delivery_over : '';
+      el.min_order.value = d.min_order != null ? d.min_order : 0;
+      SETTING_TEXT.forEach(function(k){ el[k].value = d[k] || ''; });
+    });
+  }
+  setForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    var el = setForm.elements, err = $('#settingsErr'), ok = $('#settingsOk'), btn = $('#settingsSave');
+    err.hidden = true; ok.hidden = true;
+    var fee = parseFloat(el.delivery_fee.value || '0'), min = parseFloat(el.min_order.value || '0');
+    var freeRaw = el.free_delivery_over.value.trim(), free = freeRaw === '' ? null : parseFloat(freeRaw);
+    if(isNaN(fee) || fee < 0 || isNaN(min) || min < 0 || (free != null && (isNaN(free) || free < 0))){
+      err.textContent = 'Please enter valid amounts (0 or more).'; err.hidden = false; return;
+    }
+    var map = el.map_url.value.trim();
+    if(map && !/^https?:\/\//i.test(map)){ err.textContent = 'The map link must start with http:// or https://'; err.hidden = false; return; }
+    var row = {id: 1, delivery_fee: fee, free_delivery_over: free, min_order: min};
+    SETTING_TEXT.forEach(function(k){ row[k] = el[k].value.trim() || null; });
+    btn.disabled = true; btn.textContent = 'Saving…';
+    sb.from('settings').upsert(row).then(function(r){
+      btn.disabled = false; btn.textContent = 'Save settings';
+      if(r.error){ err.textContent = 'Could not save: ' + r.error.message; err.hidden = false; return; }
+      ok.hidden = false; setTimeout(function(){ ok.hidden = true; }, 2500);
+    });
+  });
+
   /* ---------- Orders ---------- */
-  var STATUSES = ['new','confirmed','delivered','cancelled'];
+  var STATUSES = ['new','confirmed','out_for_delivery','delivered','cancelled'];
   function loadOrders(){
     return sb.from('orders').select('*').order('created_at', {ascending:false}).limit(300).then(function(r){
       if(r.error){ return; }
@@ -822,10 +826,10 @@
       var items = (o.items || []).map(function(i){
         return '<li><span>' + esc(i.name_en) + ' × ' + esc(i.qty) + '</span><span>' + money(i.price * i.qty) + '</span></li>';
       }).join('') + (Number(o.delivery_fee) > 0 ? '<li><span>Delivery</span><span>' + money(o.delivery_fee) + '</span></li>' : '');
-      var opts = STATUSES.map(function(s){ return '<option value="' + s + '"' + (s === o.status ? ' selected' : '') + '>' + s.charAt(0).toUpperCase() + s.slice(1) + '</option>'; }).join('');
+      var opts = STATUSES.map(function(s){ return '<option value="' + s + '"' + (s === o.status ? ' selected' : '') + '>' + (s.charAt(0).toUpperCase() + s.slice(1)).replace(/_/g, ' ') + '</option>'; }).join('');
       return '<article class="order">' +
         '<div class="order__head"><span class="order__no">#' + esc(o.order_no) + '</span>' +
-        '<span class="st st--' + esc(o.status) + '">' + esc(o.status) + '</span>' +
+        '<span class="st st--' + esc(o.status) + '">' + esc(String(o.status).replace(/_/g, ' ')) + '</span>' +
         '<span class="order__date">' + esc(d.toLocaleString([], {dateStyle:'medium', timeStyle:'short'})) + '</span></div>' +
         '<div class="order__grid">' +
           '<div><h4>Customer</h4><div>' + esc(o.customer_name) + '</div><div><a href="tel:' + esc(o.phone) + '">' + esc(o.phone) + '</a> · ' +
@@ -834,6 +838,7 @@
             (o.notes ? '<div class="hint" style="margin-top:6px">Note: ' + esc(o.notes) + '</div>' : '') + '</div>' +
           '<div><h4>Items</h4><ul>' + items + '</ul></div>' +
         '</div>' +
+        '<div class="order__note"><input data-note="' + esc(o.id) + '" maxlength="300" value="' + esc(o.status_note || '') + '" placeholder="Message the customer sees on the tracking page (optional)"></div>' +
         '<div class="order__total"><span>Total ' + money(o.total) + '</span>' +
           '<label>Status <select data-status="' + esc(o.id) + '">' + opts + '</select></label></div>' +
       '</article>';
@@ -842,6 +847,13 @@
   $('#statusFilter').addEventListener('change', renderOrders);
   $('#refreshOrders').addEventListener('click', loadOrders);
   $('#orderList').addEventListener('change', function(e){
+    var n = e.target.closest('[data-note]');
+    if(n){
+      sb.from('orders').update({status_note: n.value.trim() || null}).eq('id', n.getAttribute('data-note')).then(function(r){
+        if(r.error) alert('Could not save the message: ' + r.error.message);
+      });
+      return;
+    }
     var s = e.target.closest('[data-status]'); if(!s) return;
     sb.from('orders').update({status: s.value}).eq('id', s.getAttribute('data-status')).then(function(r){
       if(r.error) alert('Could not update: ' + r.error.message);

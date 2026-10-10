@@ -1,5 +1,6 @@
 {
   "rewrites": [
+       { "source": "/track", "destination": "/track.html" },
     { "source": "/p/:slug", "destination": "/api/product?lang=en&slug=:slug" },
     { "source": "/ar/p/:slug", "destination": "/api/product?lang=ar&slug=:slug" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },

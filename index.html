@@ -834,6 +834,7 @@
         <li><a href="mailto:souna.92@gmail.com">souna.92@gmail.com</a></li>
         <li><a href="tel:+96176681395" dir="ltr">76 681 395</a></li>
         <li><a href="#chat" data-i18n="chat_cta">Chat with us</a></li>
+        <li><a href="/track" data-i18n="track_order">Track your order</a></li>
         <li><a href="/policies" data-i18n="f_policies">Privacy and policies</a></li>
       </ul>
     </div>
@@ -960,6 +961,7 @@ document.addEventListener('DOMContentLoaded', function(){
       order_unavail:'One of the products in your cart is no longer available. We refreshed the list, please check your cart.',
       order_ok_title:'Thank you, your order is in', order_ok_text:'Your order number is {no}. We will contact you soon to confirm delivery and payment.',
       order_wa_confirm:'Message us on WhatsApp', continue:'Continue shopping', wa_order:'Hello AVARA, my order number is #{no}.',
+      track_order:'Track your order',
       langBtn:'العربية'
     },
     ar: {
@@ -1026,6 +1028,7 @@ document.addEventListener('DOMContentLoaded', function(){
       order_unavail:'أحد المنتجات في سلّتك لم يعد متاحاً. حدّثنا القائمة، يرجى مراجعة سلّتك.',
       order_ok_title:'شكراً لك، وصلنا طلبك', order_ok_text:'رقم طلبك هو {no}. سنتواصل معك قريباً لتأكيد التوصيل والدفع.',
       order_wa_confirm:'راسلنا عبر واتساب', continue:'متابعة التسوق', wa_order:'مرحباً AVARA، رقم طلبي #{no}.',
+      track_order:'تتبّع طلبك',
       langBtn:'English'
     }
   };
@@ -1303,6 +1306,7 @@ document.addEventListener('DOMContentLoaded', function(){
       var wa = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(t('wa_order').replace('{no}', lastOrder));
       $('#cartBody').innerHTML = '<div class="done"><h3>' + t('order_ok_title') + '</h3><p>' + t('order_ok_text').replace('{no}', '<strong dir="ltr">#' + esc(lastOrder) + '</strong>') + '</p>' +
         '<a class="btn btn--solid btn--block" href="' + wa + '" target="_blank" rel="noopener">' + t('order_wa_confirm') + '</a>' +
+        '<a class="btn btn--line btn--block" href="/track?no=' + encodeURIComponent(lastOrder) + '">' + t('track_order') + '</a>' +
         '<button class="btn btn--line btn--block" type="button" data-close-cart>' + t('continue') + '</button></div>' + storeInfoHtml();
       $('#cartFoot').hidden = true;
       return;

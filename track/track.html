@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>AVARA — Track your order</title>
+<meta name="theme-color" content="#2F8F9D">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="/config.js"></script>
+<script src="/vendor/supabase-2.45.4.js"></script>
+<style>
+  :root{ --teal:#2F8F9D; --teal-deep:#1F5F6B; --mint:#DFF4F1; --mint-2:#C6E5E0; --ivory:#FAF9F6; --ink:#2C2C2C; --ink-soft:#5B5F5F; --danger:#8A2E20;
+         --font:'Jost','Tajawal',system-ui,-apple-system,'Segoe UI',sans-serif; }
+  [lang="ar"]{ --font:'Tajawal','Jost',system-ui,-apple-system,'Segoe UI',sans-serif; }
+  [lang="ar"] *{ letter-spacing:0 !important; }
+  *,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:var(--font); line-height:1.65; color:var(--ink); background:var(--ivory); -webkit-font-smoothing:antialiased; }
+  a{ color:var(--teal-deep); }
+  :focus-visible{ outline:2px solid var(--teal-deep); outline-offset:3px; }
+  [hidden]{ display:none !important; }
+  .bar{ background:var(--teal-deep); color:#fff; text-align:center; font-size:.84rem; letter-spacing:.12em; padding:9px 16px; }
+  header{ background:rgba(250,249,246,.96); border-bottom:1px solid var(--mint-2); }
+  .head{ width:min(640px,100% - 48px); margin-inline:auto; padding:16px 0; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .head img{ height:26px; width:auto; display:block; }
+  .head nav{ display:flex; align-items:center; gap:18px; }
+  .head a, .head button{ font:inherit; font-size:.95rem; text-decoration:none; color:var(--ink); background:none; border:0; cursor:pointer; padding:6px 2px; border-bottom:1px solid transparent; }
+  .head a:hover, .head button:hover{ border-color:var(--teal); color:var(--teal-deep); }
+  main{ width:min(640px,100% - 48px); margin-inline:auto; padding:48px 0 96px; }
+  h1{ font-weight:300; font-size:clamp(1.9rem,4vw,2.6rem); line-height:1.15; margin-bottom:8px; }
+  .lead{ color:var(--ink-soft); margin-bottom:28px; }
+  form{ display:grid; gap:14px; }
+  label{ display:grid; gap:5px; font-size:.9rem; color:var(--ink-soft); }
+  input{ width:100%; padding:11px 12px; font:inherit; font-size:1rem; color:var(--ink); background:#fff; border:1px solid var(--teal); border-radius:2px; }
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:.5rem; padding:.85rem 1.7rem; font:inherit; font-weight:500; font-size:.95rem; text-decoration:none; cursor:pointer;
+        border:1px solid var(--teal-deep); border-radius:2px; background:var(--teal-deep); color:#fff; transition:background .25s ease; }
+  .btn:hover{ background:var(--ink); border-color:var(--ink); }
+  .btn[disabled]{ opacity:.6; cursor:progress; }
+  .btn--line{ background:transparent; color:var(--ink); }
+  .btn--line:hover{ background:var(--mint); color:var(--ink); border-color:var(--teal-deep); }
+  .err{ color:var(--danger); font-size:.92rem; }
+  .card{ margin-top:32px; background:#fff; border:1px solid var(--mint-2); padding:26px 26px 22px; }
+  .card__no{ font-size:1.3rem; font-weight:500; }
+  .card__date{ color:var(--ink-soft); font-size:.9rem; margin-bottom:18px; }
+  .steps{ list-style:none; display:grid; gap:0; margin:6px 0 18px; }
+  .steps li{ position:relative; display:flex; gap:12px; align-items:center; padding:9px 0; color:var(--ink-soft); }
+  .steps li::before{ content:""; width:14px; height:14px; border-radius:50%; border:2px solid var(--mint-2); background:#fff; flex:none; }
+  .steps li.done{ color:var(--ink); }
+  .steps li.done::before{ background:var(--teal); border-color:var(--teal); }
+  .steps li.now{ color:var(--teal-deep); font-weight:500; }
+  .steps li.now::before{ background:var(--teal-deep); border-color:var(--teal-deep); box-shadow:0 0 0 4px var(--mint); }
+  .status-msg{ padding:14px 16px; background:var(--mint); border-inline-start:3px solid var(--teal-deep); margin-bottom:12px; }
+  .status-msg--cancel{ background:#F4DEDA; border-color:var(--danger); }
+  .note{ padding:14px 16px; border:1px dashed var(--teal); margin-bottom:18px; }
+  .note small{ display:block; color:var(--ink-soft); font-size:.8rem; margin-bottom:2px; }
+  ul.items{ list-style:none; border-top:1px solid var(--mint-2); }
+  ul.items li{ display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-bottom:1px solid var(--mint-2); }
+  .total{ display:flex; justify-content:space-between; padding-top:12px; font-weight:500; font-size:1.1rem; }
+  .actions{ display:grid; gap:10px; margin-top:22px; }
+  footer{ background:var(--teal-deep); color:#fff; text-align:center; font-size:.88rem; padding:20px 16px; }
+  footer a{ color:#fff; }
+</style>
+</head>
+<body>
+<div class="bar" id="tag">Inspired by Nature. Perfected by Science</div>
+<header>
+  <div class="head">
+    <a href="/" id="logoLink" aria-label="AVARA"><img src="/assets/logo.png" alt="AVARA" width="132" height="26"></a>
+    <nav>
+      <a href="/" id="back">Back to store</a>
+      <button type="button" id="langBtn">العربية</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <h1 id="title"></h1>
+  <p class="lead" id="lead"></p>
+  <form id="trackForm" novalidate>
+    <label><span id="lNo"></span><input name="no" inputmode="numeric" autocomplete="off" dir="ltr" required></label>
+    <label><span id="lPhone"></span><input name="phone" type="tel" autocomplete="tel" dir="ltr" required></label>
+    <p class="err" id="err" role="alert" hidden></p>
+    <button class="btn" type="submit" id="go"></button>
+  </form>
+  <section class="card" id="result" hidden aria-live="polite"></section>
+</main>
+<footer id="foot"></footer>
+
+<script>
+(function(){
+  'use strict';
+  var lang = 'en';
+  try{ lang = localStorage.getItem('avara-lang') === 'ar' ? 'ar' : 'en'; }catch(e){}
+  var cfg = window.AVARA_CONFIG || {};
+  var sb = (window.supabase && cfg.url && cfg.anonKey) ? window.supabase.createClient(cfg.url, cfg.anonKey) : null;
+  var WA = '96176681395', lastData = null;
+
+  function $(s){ return document.querySelector(s); }
+  function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function money(n){ return '$' + Number(n).toFixed(2); }
+
+  var T = {
+    en:{
+      tag:'Inspired by Nature. Perfected by Science', back:'Back to store', lang:'العربية',
+      title:'Track your order', lead:'Enter the order number you received when you ordered, and the phone number you used.',
+      lNo:'Order number', lPhone:'Phone number', go:'Track order', going:'Checking…',
+      invalid:'Please enter your order number and the phone number you used.',
+      notfound:'We could not find an order with those details. Please check the number and phone, or message us on WhatsApp.',
+      busy:'Too many attempts. Please wait a few minutes or message us on WhatsApp.',
+      fail:'Something went wrong. Please try again, or message us on WhatsApp.',
+      order:'Order', placed:'Placed on', noteLabel:'Message from AVARA', items:'Items', delivery:'Delivery', total:'Total',
+      wa:'Message us on WhatsApp', again:'Track another order', waText:'Hello AVARA, I have a question about order #{no}.',
+      steps:['Order received','Confirmed','Out for delivery','Delivered'],
+      status:{
+        new:'We received your order and will contact you soon to confirm it.',
+        confirmed:'Your order is confirmed and being prepared.',
+        out_for_delivery:'Your order is out for delivery.',
+        delivered:'Your order has been delivered. Thank you!',
+        cancelled:'This order was cancelled. If you did not expect this, please message us.'
+      },
+      foot:'© 2026 AVARA. All rights reserved.'
+    },
+    ar:{
+      tag:'مستوحاة من الطبيعة، مصقولة بالعلم', back:'العودة إلى المتجر', lang:'English',
+      title:'تتبّع طلبك', lead:'أدخل رقم الطلب الذي وصلك عند الطلب، ورقم الهاتف الذي استخدمته.',
+      lNo:'رقم الطلب', lPhone:'رقم الهاتف', go:'تتبّع الطلب', going:'جارٍ التحقق…',
+      invalid:'يرجى إدخال رقم الطلب ورقم الهاتف الذي استخدمته.',
+      notfound:'لم نعثر على طلب بهذه البيانات. يرجى التأكد من الرقم والهاتف، أو مراسلتنا عبر واتساب.',
+      busy:'محاولات كثيرة. يرجى الانتظار بضع دقائق أو مراسلتنا عبر واتساب.',
+      fail:'حدث خطأ ما. يرجى المحاولة مجدداً أو مراسلتنا عبر واتساب.',
+      order:'الطلب', placed:'تاريخ الطلب', noteLabel:'رسالة من AVARA', items:'المنتجات', delivery:'التوصيل', total:'المجموع الكلي',
+      wa:'راسلنا عبر واتساب', again:'تتبّع طلباً آخر', waText:'مرحباً AVARA، لدي سؤال عن الطلب رقم #{no}.',
+      steps:['تم استلام الطلب','تم التأكيد','في الطريق إليك','تم التسليم'],
+      status:{
+        new:'وصلنا طلبك وسنتواصل معك قريباً لتأكيده.',
+        confirmed:'تم تأكيد طلبك وهو قيد التجهيز.',
+        out_for_delivery:'طلبك في الطريق إليك.',
+        delivered:'تم تسليم طلبك. شكراً لك!',
+        cancelled:'تم إلغاء هذا الطلب. إذا لم تكن تتوقع ذلك، يرجى مراسلتنا.'
+      },
+      foot:'© 2026 AVARA. جميع الحقوق محفوظة.'
+    }
+  };
+  var STEP_OF = {new:0, confirmed:1, out_for_delivery:2, delivered:3};
+
+  function paintStatic(){
+    var L = T[lang], h = document.documentElement;
+    h.lang = lang; h.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.title = 'AVARA — ' + L.title;
+    $('#tag').textContent = L.tag; $('#back').textContent = L.back; $('#langBtn').textContent = L.lang;
+    $('#title').textContent = L.title; $('#lead').textContent = L.lead;
+    $('#lNo').textContent = L.lNo; $('#lPhone').textContent = L.lPhone;
+    if(!$('#go').disabled) $('#go').textContent = L.go;
+    $('#foot').innerHTML = '<a href="/policies">' + (lang === 'ar' ? 'الخصوصية والسياسات' : 'Privacy and policies') + '</a><br>' + esc(L.foot);
+    var home = lang === 'ar' ? '/ar/' : '/';
+    $('#back').setAttribute('href', home); $('#logoLink').setAttribute('href', home);
+  }
+
+  function showErr(key){ var e = $('#err'); e.textContent = T[lang][key]; e.hidden = false; }
+
+  function render(d){
+    var L = T[lang], res = $('#result'), st = d.status, cancelled = st === 'cancelled';
+    var date = new Date(d.created_at).toLocaleDateString(lang === 'ar' ? 'ar' : 'en', {dateStyle:'medium'});
+    var steps = '';
+    if(!cancelled){
+      var cur = STEP_OF[st] != null ? STEP_OF[st] : 0;
+      steps = '<ul class="steps">' + L.steps.map(function(s, i){
+        return '<li class="' + (i < cur || st === 'delivered' ? 'done' : '') + (i === cur && st !== 'delivered' ? ' now' : '') + (i === cur && st === 'delivered' ? ' done now' : '') + '">' + esc(s) + '</li>';
+      }).join('') + '</ul>';
+    }
+    var items = (d.items || []).map(function(i){
+      var n = lang === 'ar' ? (i.name_ar || i.name_en) : i.name_en;
+      return '<li><span>' + esc(n) + ' × ' + esc(i.qty) + '</span><span dir="ltr">' + money(i.price * i.qty) + '</span></li>';
+    }).join('');
+    if(Number(d.delivery_fee) > 0) items += '<li><span>' + esc(L.delivery) + '</span><span dir="ltr">' + money(d.delivery_fee) + '</span></li>';
+    var wa = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(L.waText.replace('{no}', d.order_no));
+    res.innerHTML =
+      '<div class="card__no">' + esc(L.order) + ' <span dir="ltr">#' + esc(d.order_no) + '</span></div>' +
+      '<div class="card__date">' + esc(L.placed) + ' ' + esc(date) + '</div>' +
+      steps +
+      '<p class="status-msg' + (cancelled ? ' status-msg--cancel' : '') + '">' + esc(L.status[st] || '') + '</p>' +
+      (d.status_note ? '<div class="note"><small>' + esc(L.noteLabel) + '</small>' + esc(d.status_note) + '</div>' : '') +
+      '<ul class="items">' + items + '</ul>' +
+      '<div class="total"><span>' + esc(L.total) + '</span><span dir="ltr">' + money(d.total) + '</span></div>' +
+      '<div class="actions"><a class="btn" href="' + wa + '" target="_blank" rel="noopener">' + esc(L.wa) + '</a>' +
+      '<button class="btn btn--line" type="button" id="againBtn">' + esc(L.again) + '</button></div>';
+    res.hidden = false;
+    $('#againBtn').addEventListener('click', function(){
+      res.hidden = true; lastData = null; $('#trackForm').hidden = false; $('#trackForm').elements.no.focus();
+    });
+  }
+
+  $('#trackForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var f = e.target.elements, no = f.no.value.replace(/\D/g, ''), ph = f.phone.value.trim();
+    $('#err').hidden = true;
+    if(!no || ph.replace(/\D/g, '').length < 6){ showErr('invalid'); return; }
+    if(!sb){ showErr('fail'); return; }
+    var btn = $('#go'); btn.disabled = true; btn.textContent = T[lang].going;
+    sb.rpc('track_order', {p_order_no: Number(no), p_phone: ph}).then(function(r){
+      btn.disabled = false; btn.textContent = T[lang].go;
+      if(r.error){ showErr(/too many/i.test(r.error.message || '') ? 'busy' : 'fail'); return; }
+      if(!r.data){ showErr('notfound'); return; }
+      lastData = r.data; $('#trackForm').hidden = true; render(r.data);
+    }).catch(function(){ btn.disabled = false; btn.textContent = T[lang].go; showErr('fail'); });
+  });
+
+  $('#langBtn').addEventListener('click', function(){
+    lang = lang === 'ar' ? 'en' : 'ar';
+    try{ localStorage.setItem('avara-lang', lang); }catch(e){}
+    paintStatic(); $('#err').hidden = true;
+    if(lastData) render(lastData);
+  });
+
+  // Links from the order confirmation use /track?no=123
+  var q = new URLSearchParams(location.search).get('no');
+  if(q) $('#trackForm').elements.no.value = q.replace(/\D/g, '');
+
+  paintStatic();
+})();
+</script>
+</body>
+</html>
