@@ -109,6 +109,8 @@ ${ogImage ? `<meta property="og:image" content="${esc(ogImage)}">` : ''}
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 ${ld ? `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>` : ''}
+<script defer data-domain="avara-nu-beige.vercel.app" src="https://plausible.io/js/script.js"></script>
+<script>window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments)}</script>
 <style>${STYLE}</style>
 </head>
 <body>
@@ -119,6 +121,7 @@ ${ld ? `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\
 </div></header>
 ${body}
 <footer><a href="/policies">${esc(T.policies)}</a><br>${esc(T.rights)}</footer>
+<script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-ask]');if(a&&window.plausible)window.plausible('WhatsApp Product',{props:{product:a.getAttribute('data-ask')}})});</script>
 </body>
 </html>`;
 }
@@ -218,7 +221,7 @@ module.exports = async function handler(req, res) {
       ${desc ? `<p class="desc">${esc(desc)}</p>` : ''}
       <div class="btns">
         ${out ? '' : `<a class="btn solid" href="${esc(shopHref)}">${esc(T.shop)}</a>`}
-        <a class="btn line" href="${wa}" target="_blank" rel="noopener">${esc(T.ask)}</a>
+        <a class="btn line" data-ask="${esc(p.name_en)}" href="${wa}" target="_blank" rel="noopener">${esc(T.ask)}</a>
       </div>
       ${related.length ? `<div class="rel"><h2>${esc(T.related)}</h2>${related.map((r) => {
         const rn = lang === 'ar' ? (r.name_ar || r.name_en) : r.name_en;
