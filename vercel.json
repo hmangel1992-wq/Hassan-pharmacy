@@ -1,6 +1,5 @@
 {
   "rewrites": [
-       { "source": "/track", "destination": "/track.html" },
     { "source": "/p/:slug", "destination": "/api/product?lang=en&slug=:slug" },
     { "source": "/ar/p/:slug", "destination": "/api/product?lang=ar&slug=:slug" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
@@ -9,7 +8,8 @@
     { "source": "/ar", "destination": "/ar/index.html" },
     { "source": "/ar/beauty", "destination": "/ar/beauty.html" },
     { "source": "/ar/athlete", "destination": "/ar/athlete.html" },
-    { "source": "/policies", "destination": "/policies.html" }
+      { "source": "/policies", "destination": "/policies.html" },
+   { "source": "/track", "destination": "/track.html" }
   ],
   "headers": [
     {
