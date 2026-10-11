@@ -384,6 +384,14 @@
   .cart-sum{ display: grid; gap: 6px; }
   .cart-sum__row{ display: flex; justify-content: space-between; font-size: .98rem; color: var(--ink-soft); }
   .cart-sum__row[hidden]{ display: none; }
+  .cart-sum__row--disc{ color: var(--teal-deep); font-weight: 500; }
+  .code-box{ display: grid; gap: 6px; margin: 12px 0 4px; }
+  .code-box__row{ display: flex; gap: 8px; }
+  .code-box input{ flex: 1; min-width: 0; padding: 9px 11px; font: inherit; font-size: .92rem; text-transform: uppercase; color: var(--ink); background: var(--white); border: 1px solid var(--teal); border-radius: 2px; }
+  .code-box .btn{ padding: .55rem 1rem; font-size: .88rem; }
+  .code-box__msg{ font-size: .86rem; color: var(--ink-soft); }
+  .code-box__msg--ok{ color: var(--teal-deep); }
+  .code-box__msg--err{ color: #8A2E20; }
   .drawer__note[hidden]{ display: none; }
 
   .cart-store{ margin-top: 20px; }
@@ -869,7 +877,15 @@
     <div class="cart-sum">
       <div class="cart-sum__row"><span data-i18n="subtotal">Subtotal</span><span id="cartSub" dir="ltr">$0.00</span></div>
       <div class="cart-sum__row" id="feeRow" hidden=""><span data-i18n="delivery">Delivery</span><span id="cartFee" dir="ltr"></span></div>
+      <div class="cart-sum__row cart-sum__row--disc" id="discRow" hidden=""><span id="discLabel"></span><span id="cartDisc" dir="ltr"></span></div>
       <div class="subtotal"><span data-i18n="total">Total</span><span id="cartTotal" dir="ltr">$0.00</span></div>
+    </div>
+    <div class="code-box" id="codeBox">
+      <div class="code-box__row">
+        <input id="codeInput" type="text" maxlength="30" autocomplete="off" autocapitalize="characters" dir="ltr" data-i18n-ph="code_ph" placeholder="Discount code" aria-label="Discount code">
+        <button class="btn btn--line" id="codeBtn" type="button" data-i18n="code_apply">Apply</button>
+      </div>
+      <p class="code-box__msg" id="codeMsg" role="status" hidden=""></p>
     </div>
     <p class="drawer__note" id="cartInfo" hidden=""></p>
     <form class="order-form" id="orderForm" novalidate="">
@@ -934,6 +950,10 @@ document.addEventListener('DOMContentLoaded', function(){
       count:'{n} products', add:'Add to cart', added:'Added to cart', badge_new:'New',
       out_of_stock:'Out of stock', only_left:'Only {n} left', stock_max:'Only {n} available',
       delivery:'Delivery', total:'Total', free_word:'Free',
+      code_ph:'Discount code', code_apply:'Apply', code_remove:'Remove', disc_word:'Discount', code_ok:'Code applied: you save {amt}.',
+      code_invalid:'This code is not valid.', code_expired:'This code has expired.', code_used_up:'This code is no longer available.',
+      code_first:'This code is for first orders only.', code_already:'You have already used this code.', code_min:'Spend at least {amt} on products to use this code.',
+      code_busy:'Too many attempts. Please try again in a few minutes.', code_err:'We could not check the code. Please try again.',
       free_over:'Free delivery on orders over {amt}', add_for_free:'Add {amt} more for free delivery',
       min_order_note:'Minimum order: {amt}', order_min:'The minimum order is {amt}.',
       pay_with:'Payment: {text}', deliv_info:'Delivery: {text}',
@@ -1002,6 +1022,10 @@ document.addEventListener('DOMContentLoaded', function(){
       count:'{n} منتج', add:'أضف إلى السلة', added:'أُضيف إلى السلة', badge_new:'جديد',
       out_of_stock:'غير متوفر', only_left:'متبقّي {n} فقط', stock_max:'الكمية المتوفرة {n} فقط',
       delivery:'التوصيل', total:'المجموع الكلي', free_word:'مجاني',
+      code_ph:'رمز الخصم', code_apply:'تطبيق', code_remove:'إزالة', disc_word:'الخصم', code_ok:'تم تطبيق الرمز: وفّرت {amt}.',
+      code_invalid:'هذا الرمز غير صالح.', code_expired:'انتهت صلاحية هذا الرمز.', code_used_up:'هذا الرمز لم يعد متاحاً.',
+      code_first:'هذا الرمز مخصص للطلب الأول فقط.', code_already:'لقد استخدمت هذا الرمز من قبل.', code_min:'اشترِ منتجات بقيمة {amt} على الأقل لاستخدام هذا الرمز.',
+      code_busy:'محاولات كثيرة. يرجى المحاولة بعد بضع دقائق.', code_err:'تعذّر التحقق من الرمز. يرجى المحاولة مجدداً.',
       free_over:'توصيل مجاني للطلبات التي تزيد عن {amt}', add_for_free:'أضف {amt} للحصول على توصيل مجاني',
       min_order_note:'الحد الأدنى للطلب: {amt}', order_min:'الحد الأدنى للطلب هو {amt}.',
       pay_with:'الدفع: {text}', deliv_info:'التوصيل: {text}',
@@ -1354,7 +1378,14 @@ document.addEventListener('DOMContentLoaded', function(){
     $('#cartSub').textContent = money(tot.sum);
     $('#feeRow').hidden = baseFee <= 0;
     $('#cartFee').textContent = fee > 0 ? money(fee) : t('free_word');
-    $('#cartTotal').textContent = money(tot.sum + fee);
+    var disc = 0;
+    if(appliedCode){
+      if(appliedCode.forSub !== tot.sum) validateCode(true);   // cart changed: ask the server again
+      disc = Math.min(appliedCode.discount || 0, tot.sum);
+    }
+    $('#discRow').hidden = !(appliedCode && disc > 0);
+    if(appliedCode && disc > 0){ $('#discLabel').textContent = t('disc_word') + ' (' + appliedCode.code + ')'; $('#cartDisc').textContent = '−' + money(disc); }
+    $('#cartTotal').textContent = money(tot.sum - disc + fee);
     var notes = [];
     if(minO > 0 && tot.sum < minO) notes.push(t('min_order_note').replace('{amt}', money(minO)));
     if(baseFee > 0 && th > 0) notes.push(tot.sum < th ? t('add_for_free').replace('{amt}', money(th - tot.sum)) : t('free_over').replace('{amt}', money(th)));
@@ -1374,6 +1405,62 @@ document.addEventListener('DOMContentLoaded', function(){
     return h ? '<div class="cart-store">' + h + '</div>' : '';
   }
 
+  /* ---------- Discount code ---------- */
+  var appliedCode = null, codeBusy = false;   // appliedCode = {code, discount, forSub}
+  function codeMsg(text, kind){
+    var el = $('#codeMsg'); if(!el) return;
+    el.textContent = text || ''; el.hidden = !text;
+    el.className = 'code-box__msg' + (kind ? ' code-box__msg--' + kind : '');
+  }
+  function codeReason(r, min){
+    var map = {invalid:'code_invalid', expired:'code_expired', used_up:'code_used_up', first_order:'code_first', already_used:'code_already', min:'code_min'};
+    return t(map[r] || 'code_invalid').replace('{amt}', money(Number(min) || 0));
+  }
+  function setCodeUi(){
+    var on = !!appliedCode;
+    $('#codeBtn').textContent = on ? t('code_remove') : t('code_apply');
+    $('#codeInput').readOnly = on;
+    if(on) $('#codeInput').value = appliedCode.code;
+  }
+  function validateCode(silent){
+    var input = ($('#codeInput').value || '').trim().toUpperCase();
+    var code = appliedCode ? appliedCode.code : input;
+    if(!code){ codeMsg('', ''); return; }
+    if(!sb){ codeMsg(t('code_err'), 'err'); return; }
+    var sub = cartTotals().sum, phone = ($('#orderForm').elements.phone.value || '').trim();
+    if(appliedCode) appliedCode.forSub = sub;   // prevents asking again while this request is running
+    codeBusy = true;
+    sb.rpc('check_discount', {p_code: code, p_phone: phone || null, p_subtotal: sub}).then(function(res){
+      codeBusy = false;
+      if(res.error){
+        var busy = /too many/i.test(res.error.message || '');
+        if(!silent || busy){ codeMsg(t(busy ? 'code_busy' : 'code_err'), 'err'); }
+        if(!appliedCode) return;
+        return;
+      }
+      var d = res.data || {};
+      if(d.ok){
+        var first = !appliedCode;
+        appliedCode = {code: d.code || code, discount: Number(d.discount) || 0, forSub: sub};
+        codeMsg(t('code_ok').replace('{amt}', money(appliedCode.discount)), 'ok');
+        if(first) track('Discount Applied', {code: appliedCode.code});
+      } else {
+        appliedCode = null;
+        codeMsg(codeReason(d.reason, d.min), 'err');
+      }
+      setCodeUi(); renderCart();
+    }).catch(function(){ codeBusy = false; if(!silent) codeMsg(t('code_err'), 'err'); });
+  }
+  $('#codeBtn').addEventListener('click', function(){
+    if(appliedCode){ appliedCode = null; $('#codeInput').value = ''; codeMsg('', ''); setCodeUi(); renderCart(); return; }
+    if(!codeBusy) validateCode(false);
+  });
+  $('#codeInput').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); if(!appliedCode && !codeBusy) validateCode(false); }
+  });
+  // First-order and one-use-per-phone rules depend on the phone number: check again once it is typed.
+  $('#orderForm').elements.phone.addEventListener('change', function(){ if(appliedCode && !codeBusy) validateCode(true); });
+
   function showOrderError(key){ var el = $('#orderError'); el.textContent = t(key); el.hidden = false; }
 
   function submitOrder(e){
@@ -1389,22 +1476,32 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     var items = Object.keys(cart).map(function(id){ return {id:id, qty:cart[id]}; });
     btn.disabled = true; btn.textContent = t('placing');
-    var sumNow = cartTotals().sum, countNow = items.length;
-    sb.rpc('place_order', {p_name:nm, p_phone:ph, p_address:f.address.value.trim(), p_notes:f.notes.value.trim(), p_items:items})
+    var codeUsed = appliedCode ? appliedCode.code : '';
+    var sumNow = cartTotals().sum - (appliedCode ? Math.min(appliedCode.discount || 0, cartTotals().sum) : 0), countNow = items.length;
+    var args = {p_name:nm, p_phone:ph, p_address:f.address.value.trim(), p_notes:f.notes.value.trim(), p_items:items};
+    if(codeUsed) args.p_code = codeUsed;
+    sb.rpc('place_order', args)
       .then(function(res){
         btn.disabled = false; btn.textContent = t('place_order');
         if(res.error){
           var msg = res.error.message || '';
           var noStock = /not enough stock/i.test(msg), unavailable = /unavailable/i.test(msg), belowMin = /minimum order/i.test(msg), tooMany = /too many orders/i.test(msg);
-          if(tooMany){ showOrderError('order_rate'); }
+          var codeErr = msg.match(/discount code:\s*(\w+)/i);
+          if(codeErr){
+            // The order was not placed (nothing was reserved). Drop the code and tell the customer why.
+            var ce = $('#orderError'); ce.textContent = codeErr[1] === 'min' ? t('code_invalid') : codeReason(codeErr[1], 0); ce.hidden = false;
+            appliedCode = null; $('#codeInput').value = ''; codeMsg('', ''); setCodeUi(); renderCart();
+          }
+          else if(tooMany){ showOrderError('order_rate'); }
           else if(belowMin){
             var be = $('#orderError'); be.textContent = t('order_min').replace('{amt}', money(Number(store.min_order) || 0)); be.hidden = false; loadStore();
           } else showOrderError(noStock ? 'order_stock' : unavailable ? 'order_unavail' : 'order_err');
           if(noStock || unavailable) loadProducts();
           return;
         }
-        lastOrder = res.data; cart = {}; saveCart(); e.target.reset(); renderCart();
-        try{ if(window.plausible) window.plausible('Order Placed', {props: {items: String(countNow)}, revenue: {currency: 'USD', amount: sumNow}}); }catch(x){}
+        lastOrder = res.data; cart = {}; saveCart(); e.target.reset();
+        appliedCode = null; $('#codeInput').value = ''; codeMsg('', ''); setCodeUi(); renderCart();
+        try{ if(window.plausible) window.plausible('Order Placed', {props: {items: String(countNow), code: codeUsed || 'none'}, revenue: {currency: 'USD', amount: sumNow}}); }catch(x){}
       })
       .catch(function(){ btn.disabled = false; btn.textContent = t('place_order'); showOrderError('order_err'); });
   }
