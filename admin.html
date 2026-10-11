@@ -190,6 +190,7 @@
       <div class="tabs" role="tablist">
         <button class="tab" role="tab" id="tabProducts" aria-selected="true">Products</button>
         <button class="tab" role="tab" id="tabOrders" aria-selected="false">Orders <span class="pill" id="newPill" hidden>0</span></button>
+        <button class="tab" role="tab" id="tabDiscounts" aria-selected="false">Discounts</button>
         <button class="tab" role="tab" id="tabSettings" aria-selected="false">Settings</button>
       </div>
       <span class="spacer"></span>
@@ -237,6 +238,39 @@
       </div>
       <div class="orders" id="orderList"></div>
       <p class="empty" id="ordersEmpty" hidden>No orders yet.</p>
+    </section>
+
+    <!-- Discounts -->
+    <section id="panelDiscounts" hidden>
+      <div class="bar"><h2>Discount codes</h2></div>
+      <form class="settings" id="codeForm" novalidate>
+        <h3>New code</h3>
+        <div class="row3">
+          <label class="field">Code (letters and numbers)<input name="code" maxlength="30" placeholder="WELCOME10" autocomplete="off" style="text-transform:uppercase"></label>
+          <label class="field">Type
+            <select name="kind"><option value="percent">Percent off (%)</option><option value="amount">Fixed amount off (USD)</option></select></label>
+          <label class="field">Value<input name="value" type="number" min="0" step="0.01" placeholder="10"></label>
+        </div>
+        <div class="row3">
+          <label class="field">Minimum spend on products (USD, optional)<input name="min_subtotal" type="number" min="0" step="0.01" placeholder="0"></label>
+          <label class="field">Maximum number of uses (optional)<input name="max_uses" type="number" min="1" step="1" placeholder="Unlimited"></label>
+          <label class="field">Expires on (optional)<input name="expires" type="date"></label>
+        </div>
+        <label class="check"><input type="checkbox" name="first_order_only"> First orders only (the customer's phone number has no earlier order)</label>
+        <p class="hint" style="margin:0 0 14px">Every code can be used once per phone number. The discount applies to the products, not to delivery.</p>
+        <p class="msg msg--err" id="codeErr" role="alert" hidden></p>
+        <div class="settings__foot">
+          <button class="btn btn--solid" type="submit" id="codeSave">Create code</button>
+          <span class="msg msg--ok" id="codeOk" hidden style="margin:0">Created.</span>
+        </div>
+      </form>
+      <div class="table-wrap" style="margin-top:20px">
+        <table class="tbl">
+          <thead><tr><th>Code</th><th>Discount</th><th>Rules</th><th>Used</th><th>Status</th><th></th></tr></thead>
+          <tbody id="codeRows"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="codesEmpty" hidden>No codes yet. Create your first one above, for example WELCOME10 with 10 percent, first orders only.</p>
     </section>
 
     <!-- Settings -->
@@ -553,12 +587,15 @@
     $('#tabProducts').setAttribute('aria-selected', name === 'products');
     $('#tabOrders').setAttribute('aria-selected', name === 'orders');
     $('#tabSettings').setAttribute('aria-selected', name === 'settings');
+    $('#tabDiscounts').setAttribute('aria-selected', name === 'discounts');
+    $('#panelDiscounts').hidden = name !== 'discounts';
     $('#panelProducts').hidden = name !== 'products';
     $('#panelOrders').hidden = name !== 'orders';
     $('#panelSettings').hidden = name !== 'settings';
   }
   $('#tabSettings').addEventListener('click', function(){ tab('settings'); if(!/is ON/.test($('#mfaStatus').textContent)) refreshMfaStatus(); });
   $('#tabProducts').addEventListener('click', function(){ tab('products'); });
+  $('#tabDiscounts').addEventListener('click', function(){ tab('discounts'); loadCodes(); });
   $('#tabOrders').addEventListener('click', function(){ tab('orders'); loadOrders(); });
 
   /* ---------- Products list ---------- */
@@ -807,6 +844,78 @@
     });
   });
 
+  /* ---------- Discount codes ---------- */
+  var codes = [];
+  function codeRules(c){
+    var r = [];
+    if(c.first_order_only) r.push('First orders only');
+    if(Number(c.min_subtotal) > 0) r.push('Min spend ' + money(c.min_subtotal));
+    if(c.expires_at) r.push('Until ' + new Date(c.expires_at).toLocaleDateString([], {dateStyle:'medium'}));
+    return r.length ? r.join(' · ') : 'None';
+  }
+  function codeStatus(c){
+    if(!c.is_active) return '<span class="tag tag--off">Off</span>';
+    if(c.expires_at && new Date(c.expires_at) < new Date()) return '<span class="tag tag--off">Expired</span>';
+    if(c.max_uses != null && c.used_count >= c.max_uses) return '<span class="tag tag--off">Used up</span>';
+    return '<span class="tag">Active</span>';
+  }
+  function renderCodes(){
+    $('#codesEmpty').hidden = codes.length > 0;
+    $('#codeRows').innerHTML = codes.map(function(c){
+      return '<tr><td><strong>' + esc(c.code) + '</strong></td>' +
+        '<td>' + (c.percent != null ? esc(Number(c.percent)) + '% off' : money(c.amount) + ' off') + '</td>' +
+        '<td>' + esc(codeRules(c)) + '</td>' +
+        '<td>' + esc(c.used_count) + (c.max_uses != null ? ' / ' + esc(c.max_uses) : '') + '</td>' +
+        '<td>' + codeStatus(c) + '</td>' +
+        '<td><div class="actions"><button class="btn btn--sm" data-code-toggle="' + esc(c.code) + '">' + (c.is_active ? 'Turn off' : 'Turn on') + '</button>' +
+        '<button class="btn btn--sm btn--danger" data-code-del="' + esc(c.code) + '">Delete</button></div></td></tr>';
+    }).join('');
+  }
+  function loadCodes(){
+    return sb.from('discount_codes').select('*').order('created_at', {ascending:false}).then(function(r){
+      var err = $('#codeErr');
+      if(r.error){ err.textContent = 'Discount codes are not available yet. Run phase4-discount-codes.sql in the Supabase SQL Editor. (' + r.error.message + ')'; err.hidden = false; return; }
+      err.hidden = true; codes = r.data || []; renderCodes();
+    });
+  }
+  $('#codeForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var el = e.target.elements, err = $('#codeErr'), ok = $('#codeOk'), btn = $('#codeSave');
+    err.hidden = true; ok.hidden = true;
+    var code = el.code.value.trim().toUpperCase(), val = parseFloat(el.value.value);
+    if(!/^[A-Z0-9_-]{3,30}$/.test(code)){ err.textContent = 'The code needs 3 to 30 letters or numbers (no spaces).'; err.hidden = false; return; }
+    if(isNaN(val) || val <= 0 || (el.kind.value === 'percent' && val > 100)){ err.textContent = el.kind.value === 'percent' ? 'Enter a percentage between 1 and 100.' : 'Enter an amount greater than 0.'; err.hidden = false; return; }
+    var minS = el.min_subtotal.value.trim() === '' ? 0 : parseFloat(el.min_subtotal.value);
+    var maxU = el.max_uses.value.trim() === '' ? null : parseInt(el.max_uses.value, 10);
+    if(isNaN(minS) || minS < 0 || (maxU != null && (isNaN(maxU) || maxU < 1))){ err.textContent = 'Please check the minimum spend and the maximum uses.'; err.hidden = false; return; }
+    var row = {
+      code: code, percent: el.kind.value === 'percent' ? val : null, amount: el.kind.value === 'amount' ? val : null,
+      first_order_only: el.first_order_only.checked, min_subtotal: minS, max_uses: maxU,
+      expires_at: el.expires.value ? new Date(el.expires.value + 'T23:59:59').toISOString() : null
+    };
+    btn.disabled = true; btn.textContent = 'Creating…';
+    sb.from('discount_codes').insert(row).then(function(r){
+      btn.disabled = false; btn.textContent = 'Create code';
+      if(r.error){ err.textContent = /duplicate|unique/i.test(r.error.message) ? 'A code with this name already exists.' : 'Could not create: ' + r.error.message; err.hidden = false; return; }
+      e.target.reset(); ok.hidden = false; setTimeout(function(){ ok.hidden = true; }, 2500); loadCodes();
+    });
+  });
+  $('#codeRows').addEventListener('click', function(e){
+    var b;
+    if((b = e.target.closest('[data-code-toggle]'))){
+      var c = codes.filter(function(x){ return x.code === b.getAttribute('data-code-toggle'); })[0];
+      sb.from('discount_codes').update({is_active: !c.is_active}).eq('code', c.code).then(function(r){
+        if(r.error) alert('Could not update: ' + r.error.message); else loadCodes();
+      });
+    } else if((b = e.target.closest('[data-code-del]'))){
+      var code = b.getAttribute('data-code-del');
+      if(!confirm('Delete the code ' + code + '? Past orders keep their discount.')) return;
+      sb.from('discount_codes').delete().eq('code', code).then(function(r){
+        if(r.error) alert('Could not delete: ' + r.error.message); else loadCodes();
+      });
+    }
+  });
+
   /* ---------- Orders ---------- */
   var STATUSES = ['new','confirmed','out_for_delivery','delivered','cancelled'];
   function loadOrders(){
@@ -825,7 +934,8 @@
       var d = new Date(o.created_at);
       var items = (o.items || []).map(function(i){
         return '<li><span>' + esc(i.name_en) + ' × ' + esc(i.qty) + '</span><span>' + money(i.price * i.qty) + '</span></li>';
-      }).join('') + (Number(o.delivery_fee) > 0 ? '<li><span>Delivery</span><span>' + money(o.delivery_fee) + '</span></li>' : '');
+      }).join('') + (Number(o.discount) > 0 ? '<li><span>Discount (' + esc(o.discount_code || '') + ')</span><span>−' + money(o.discount) + '</span></li>' : '') +
+        (Number(o.delivery_fee) > 0 ? '<li><span>Delivery</span><span>' + money(o.delivery_fee) + '</span></li>' : '');
       var opts = STATUSES.map(function(s){ return '<option value="' + s + '"' + (s === o.status ? ' selected' : '') + '>' + (s.charAt(0).toUpperCase() + s.slice(1)).replace(/_/g, ' ') + '</option>'; }).join('');
       return '<article class="order">' +
         '<div class="order__head"><span class="order__no">#' + esc(o.order_no) + '</span>' +

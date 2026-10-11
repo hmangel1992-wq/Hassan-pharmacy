@@ -112,7 +112,7 @@
       notfound:'We could not find an order with those details. Please check the number and phone, or message us on WhatsApp.',
       busy:'Too many attempts. Please wait a few minutes or message us on WhatsApp.',
       fail:'Something went wrong. Please try again, or message us on WhatsApp.',
-      order:'Order', placed:'Placed on', noteLabel:'Message from AVARA', items:'Items', delivery:'Delivery', total:'Total',
+      order:'Order', placed:'Placed on', noteLabel:'Message from AVARA', items:'Items', delivery:'Delivery', discount:'Discount', total:'Total',
       wa:'Message us on WhatsApp', again:'Track another order', waText:'Hello AVARA, I have a question about order #{no}.',
       steps:['Order received','Confirmed','Out for delivery','Delivered'],
       status:{
@@ -132,7 +132,7 @@
       notfound:'لم نعثر على طلب بهذه البيانات. يرجى التأكد من الرقم والهاتف، أو مراسلتنا عبر واتساب.',
       busy:'محاولات كثيرة. يرجى الانتظار بضع دقائق أو مراسلتنا عبر واتساب.',
       fail:'حدث خطأ ما. يرجى المحاولة مجدداً أو مراسلتنا عبر واتساب.',
-      order:'الطلب', placed:'تاريخ الطلب', noteLabel:'رسالة من AVARA', items:'المنتجات', delivery:'التوصيل', total:'المجموع الكلي',
+      order:'الطلب', placed:'تاريخ الطلب', noteLabel:'رسالة من AVARA', items:'المنتجات', delivery:'التوصيل', discount:'الخصم', total:'المجموع الكلي',
       wa:'راسلنا عبر واتساب', again:'تتبّع طلباً آخر', waText:'مرحباً AVARA، لدي سؤال عن الطلب رقم #{no}.',
       steps:['تم استلام الطلب','تم التأكيد','في الطريق إليك','تم التسليم'],
       status:{
@@ -176,6 +176,7 @@
       var n = lang === 'ar' ? (i.name_ar || i.name_en) : i.name_en;
       return '<li><span>' + esc(n) + ' × ' + esc(i.qty) + '</span><span dir="ltr">' + money(i.price * i.qty) + '</span></li>';
     }).join('');
+    if(Number(d.discount) > 0) items += '<li><span>' + esc(L.discount) + (d.discount_code ? ' (' + esc(d.discount_code) + ')' : '') + '</span><span dir="ltr">−' + money(d.discount) + '</span></li>';
     if(Number(d.delivery_fee) > 0) items += '<li><span>' + esc(L.delivery) + '</span><span dir="ltr">' + money(d.delivery_fee) + '</span></li>';
     var wa = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(L.waText.replace('{no}', d.order_no));
     res.innerHTML =
