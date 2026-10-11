@@ -9,8 +9,9 @@
 --   * public.check_discount(code, phone, subtotal) - lets the cart preview a code
 --   * public.place_order(..., p_code) - the same checkout as before plus an optional code.
 --     It calls your existing 5-argument place_order first (so stock, minimum order, delivery
---     fee and rate limits all behave exactly as today), then applies the discount on the
---     SERVER, so the price can't be changed from the browser. If the code is not valid the
+--     fee and rate limits all behave exactly as today) and applies the discount on the
+--     SERVER while the order row is created, so the price can't be changed from the browser
+--     and the order alert / dashboard see the final total. If the code is not valid the
 --     whole order is cancelled and the stock is put back.
 --   * public.track_order now also returns the discount and the product ids.
 --
@@ -135,6 +136,48 @@ $$;
 revoke all on function public.check_discount(text, text, numeric) from public;
 grant execute on function public.check_discount(text, text, numeric) to anon, authenticated;
 
+-- The discount is applied the moment the order row is created (BEFORE INSERT), so the new order
+-- already has its final total and discount when it is saved. That matters for the order alert
+-- (Telegram / email) and the admin dashboard, which both read the row as it is first inserted.
+-- place_order(..., p_code) below hands the code to this trigger for the length of one checkout.
+create or replace function public.orders_apply_discount()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_code text := upper(trim(coalesce(current_setting('avara.discount_code', true), '')));
+  v_sub  numeric;
+  v_res  jsonb;
+  v_disc numeric;
+begin
+  if v_code = '' then
+    return new;
+  end if;
+
+  select coalesce(sum((i->>'price')::numeric * (i->>'qty')::integer), 0)
+    into v_sub from jsonb_array_elements(new.items) i;
+
+  v_res := public._discount_for(v_code, new.phone, v_sub, null);
+  if not (v_res->>'ok')::boolean then
+    raise exception 'Discount code: %', v_res->>'reason';   -- rolls back the whole order
+  end if;
+  v_disc := (v_res->>'discount')::numeric;
+
+  new.discount      := v_disc;
+  new.discount_code := v_code;
+  new.total         := greatest(new.total - v_disc, 0);
+  return new;
+end;
+$$;
+revoke all on function public.orders_apply_discount() from public;
+
+drop trigger if exists orders_apply_discount on public.orders;
+create trigger orders_apply_discount
+  before insert on public.orders
+  for each row execute function public.orders_apply_discount();
+
 -- Checkout with an optional discount code. Same arguments as the existing place_order, plus p_code.
 create or replace function public.place_order(
   p_name    text,
@@ -152,33 +195,24 @@ as $$
 declare
   v_code text := upper(trim(coalesce(p_code, '')));
   v_no   bigint;
-  v_row  public.orders;
-  v_sub  numeric;
-  v_res  jsonb;
-  v_disc numeric;
 begin
-  -- The normal checkout: stock, minimum order, delivery fee, rate limits.
-  v_no := public.place_order(p_name, p_phone, p_address, p_notes, p_items);
   if v_code = '' then
-    return v_no;
+    return public.place_order(p_name, p_phone, p_address, p_notes, p_items);
   end if;
 
   -- Lock the code so two orders can't both take its last use.
   perform 1 from public.discount_codes where code = v_code for update;
 
-  select * into v_row from public.orders where order_no = v_no for update;
-  select coalesce(sum((i->>'price')::numeric * (i->>'qty')::integer), 0)
-    into v_sub from jsonb_array_elements(v_row.items) i;
+  -- The normal checkout (stock, minimum order, delivery fee, rate limits). The trigger above
+  -- reads the code from this setting (valid for this checkout only) and applies the discount.
+  perform set_config('avara.discount_code', v_code, true);
+  v_no := public.place_order(p_name, p_phone, p_address, p_notes, p_items);
+  perform set_config('avara.discount_code', '', true);
 
-  v_res := public._discount_for(v_code, v_row.phone, v_sub, v_no);
-  if not (v_res->>'ok')::boolean then
-    raise exception 'Discount code: %', v_res->>'reason';   -- rolls back the whole order
+  -- Safety net: the order must carry the code, otherwise cancel everything.
+  if not exists (select 1 from public.orders where order_no = v_no and discount_code = v_code) then
+    raise exception 'Discount code: invalid';
   end if;
-  v_disc := (v_res->>'discount')::numeric;
-
-  update public.orders
-     set discount = v_disc, discount_code = v_code, total = greatest(v_row.total - v_disc, 0)
-   where order_no = v_no;
   update public.discount_codes set used_count = used_count + 1 where code = v_code;
 
   return v_no;

@@ -35,11 +35,15 @@ function buildText(o) {
   const lines = [
     `New AVARA order #${o.order_no}`,
     `Total: ${money(o.total)}` + (Number(o.delivery_fee) > 0 ? ` (includes delivery ${money(o.delivery_fee)})` : ''),
+  ];
+  // Discount code used on this order (the total above is already after the discount).
+  if (Number(o.discount) > 0) lines.push(`Discount: -${money(o.discount)} (code ${o.discount_code || 'used'})`);
+  lines.push(
     '',
     `Customer: ${o.customer_name}`,
     `Phone: ${o.phone}`,
-    `WhatsApp: https://wa.me/${waNumber(o.phone)}`,
-  ];
+    `WhatsApp: https://wa.me/${waNumber(o.phone)}`
+  );
   if (o.address) lines.push(`Address: ${o.address}`);
   if (o.notes) lines.push(`Notes: ${o.notes}`);
   lines.push('', 'Items:', items, '', `Manage: ${SITE}/admin.html`);
