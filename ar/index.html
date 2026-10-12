@@ -1604,6 +1604,43 @@ document.addEventListener('DOMContentLoaded', function(){
     if(!name || name === activePanel){ return; }
     routeTo(name);
   }
+
+  /* ---------- Swipe between departments (touch screens only) ---------- */
+  // A clear sideways swipe opens the neighbouring department: Medical > Athlete > Beauty.
+  // Ignored when the swipe starts on something that scrolls sideways (galleries, filter chips),
+  // on a form field, or while the cart, product window or search is open.
+  (function(){
+    var sx = 0, sy = 0, st = 0, ok = false;
+    function scrollsSideways(el){
+      for(; el && el !== document.body; el = el.parentElement){
+        if(el.matches && el.matches('input,textarea,select,[contenteditable],.gallery,.gallery__track')) return true;
+        if(el.scrollWidth > el.clientWidth + 4){
+          var ox = getComputedStyle(el).overflowX;
+          if(ox === 'auto' || ox === 'scroll') return true;
+        }
+      }
+      return false;
+    }
+    function blocked(){
+      var pd = document.getElementById('pdp'), sp = $('#searchPanel');
+      return document.body.classList.contains('cart-open') || (pd && pd.open) || (sp && !sp.hidden);
+    }
+    document.addEventListener('touchstart', function(e){
+      ok = false;
+      if(e.touches.length !== 1 || blocked() || scrollsSideways(e.target)) return;
+      var t0 = e.touches[0]; sx = t0.clientX; sy = t0.clientY; st = Date.now(); ok = true;
+    }, {passive:true});
+    document.addEventListener('touchend', function(e){
+      if(!ok) return; ok = false;
+      var t1 = e.changedTouches[0], dx = t1.clientX - sx, dy = t1.clientY - sy;
+      if(Date.now() - st > 700 || Math.abs(dx) < 80 || Math.abs(dx) < Math.abs(dy) * 2) return;
+      if(window.getSelection && String(window.getSelection())) return;      // text was being selected
+      var i = DEPTS.indexOf(activePanel); if(i < 0) return;
+      var forward = (lang === 'ar') ? dx > 0 : dx < 0;                     // Arabic pages are mirrored
+      var next = DEPTS[i + (forward ? 1 : -1)];
+      if(next) routeTo(next);
+    }, {passive:true});
+  })();
   function jumpTo(id){
     var elx = document.getElementById(id); if(!elx) return;
     var panel = elx.closest('.panel'), pn = panel && panel.getAttribute('data-panel');
