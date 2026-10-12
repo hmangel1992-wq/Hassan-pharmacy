@@ -192,6 +192,7 @@
         <button class="tab" role="tab" id="tabOrders" aria-selected="false">Orders <span class="pill" id="newPill" hidden>0</span></button>
         <button class="tab" role="tab" id="tabDiscounts" aria-selected="false">Discounts</button>
         <button class="tab" role="tab" id="tabWaiting" aria-selected="false">Waiting list <span class="pill" id="waitPill" hidden>0</span></button>
+        <button class="tab" role="tab" id="tabArticles" aria-selected="false">Articles</button>
         <button class="tab" role="tab" id="tabSettings" aria-selected="false">Settings</button>
       </div>
       <span class="spacer"></span>
@@ -239,6 +240,48 @@
       </div>
       <div class="orders" id="orderList"></div>
       <p class="empty" id="ordersEmpty" hidden>No orders yet.</p>
+    </section>
+
+    <!-- Articles -->
+    <section id="panelArticles" hidden>
+      <div class="bar">
+        <h2>Articles</h2>
+        <button class="btn btn--solid" id="newArticle" type="button">New article</button>
+      </div>
+      <p class="hint" style="margin:0 0 12px">Health and skin-care advice shown at /articles (English) and /ar/articles (Arabic). An article appears for a language only when that language has a title and text. Tick Published to make it visible.</p>
+      <p class="msg msg--err" id="artListErr" role="alert" hidden></p>
+      <form class="settings" id="articleForm" novalidate hidden>
+        <h3 id="artFormTitle">New article</h3>
+        <div class="row3">
+          <label class="field">Address (English letters, numbers, dashes)<input name="slug" maxlength="80" placeholder="daily-sun-protection" autocomplete="off"></label>
+          <label class="field">Section
+            <select name="category"><option value="medical">Medical advice</option><option value="athlete">Athlete section</option><option value="beauty">Beauty section</option></select></label>
+          <label class="field">Picture link (optional)<input name="image_url" type="url" placeholder="https://..." autocomplete="off"></label>
+        </div>
+        <h3>English</h3>
+        <label class="field">Title<input name="title_en" maxlength="140"></label>
+        <label class="field">Short summary (one or two sentences, shown in the list and on Google)<textarea name="summary_en" rows="2" maxlength="300"></textarea></label>
+        <label class="field">Text<textarea name="body_en" rows="12"></textarea></label>
+        <h3>العربية</h3>
+        <label class="field">العنوان<input name="title_ar" maxlength="140" dir="rtl"></label>
+        <label class="field">ملخص قصير<textarea name="summary_ar" rows="2" maxlength="300" dir="rtl"></textarea></label>
+        <label class="field">النص<textarea name="body_ar" rows="12" dir="rtl"></textarea></label>
+        <p class="hint" style="margin:0 0 12px">Writing tips: a blank line starts a new paragraph. A line starting with ## is a heading. Lines starting with - make a bullet list.</p>
+        <label class="check"><input type="checkbox" name="is_published"> Published (visible to visitors)</label>
+        <p class="msg msg--err" id="artErr" role="alert" hidden></p>
+        <div class="settings__foot">
+          <button class="btn btn--solid" type="submit" id="artSave">Save article</button>
+          <button class="btn" type="button" id="artCancel">Cancel</button>
+          <span class="msg msg--ok" id="artOk" hidden style="margin:0">Saved.</span>
+        </div>
+      </form>
+      <div class="table-wrap" style="margin-top:20px">
+        <table class="tbl">
+          <thead><tr><th>Title</th><th>Section</th><th>Languages</th><th>Status</th><th></th></tr></thead>
+          <tbody id="artRows"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="artEmpty" hidden>No articles yet. Tap New article to write one.</p>
     </section>
 
     <!-- Waiting list (back-in-stock requests) -->
@@ -614,6 +657,8 @@
     $('#tabDiscounts').setAttribute('aria-selected', name === 'discounts');
     $('#tabWaiting').setAttribute('aria-selected', name === 'waiting');
     $('#panelWaiting').hidden = name !== 'waiting';
+    $('#tabArticles').setAttribute('aria-selected', name === 'articles');
+    $('#panelArticles').hidden = name !== 'articles';
     $('#panelDiscounts').hidden = name !== 'discounts';
     $('#panelProducts').hidden = name !== 'products';
     $('#panelOrders').hidden = name !== 'orders';
@@ -623,6 +668,7 @@
   $('#tabProducts').addEventListener('click', function(){ tab('products'); });
   $('#tabDiscounts').addEventListener('click', function(){ tab('discounts'); loadCodes(); });
   $('#tabWaiting').addEventListener('click', function(){ tab('waiting'); loadWaiting(); });
+  $('#tabArticles').addEventListener('click', function(){ tab('articles'); loadArticles(); });
   $('#tabOrders').addEventListener('click', function(){ tab('orders'); loadOrders(); });
 
   /* ---------- Products list ---------- */
@@ -1008,6 +1054,84 @@
       if(!confirm('Remove this request?')) return;
       sb.from('stock_requests').delete().eq('id', b.getAttribute('data-wait-del')).then(function(r){
         if(r.error) alert('Could not delete: ' + r.error.message); else loadWaiting();
+      });
+    }
+  });
+
+  /* ---------- Articles ---------- */
+  var articles = [], editingArticle = null;
+  var CAT_NAME = {medical:'Medical advice', athlete:'Athlete section', beauty:'Beauty section'};
+  function artHas(a, l){ return !!(a['title_' + l] && a['body_' + l]); }
+  function renderArticles(){
+    $('#artEmpty').hidden = articles.length > 0;
+    $('#artRows').innerHTML = articles.map(function(a){
+      var langs = [artHas(a,'en') ? 'English' : '', artHas(a,'ar') ? 'Arabic' : ''].filter(Boolean).join(' + ') || '<em>incomplete</em>';
+      var title = a.title_en || a.title_ar || a.slug;
+      return '<tr><td><strong>' + esc(title) + '</strong><br><small dir="ltr">/' + esc(a.slug) + '</small></td>' +
+        '<td>' + esc(CAT_NAME[a.category] || a.category) + '</td><td>' + langs + '</td>' +
+        '<td>' + (a.is_published ? '<strong style="color:#1F5F6B">Published</strong>' : 'Draft') + '</td>' +
+        '<td><div class="actions">' +
+          (a.is_published && artHas(a,'en') ? '<a class="btn btn--sm" target="_blank" rel="noopener" href="/articles/' + esc(a.slug) + '">View</a>' : '') +
+          '<button class="btn btn--sm" data-art-edit="' + esc(a.id) + '">Edit</button>' +
+          '<button class="btn btn--sm" data-art-pub="' + esc(a.id) + '">' + (a.is_published ? 'Unpublish' : 'Publish') + '</button>' +
+          '<button class="btn btn--sm btn--danger" data-art-del="' + esc(a.id) + '">Delete</button></div></td></tr>';
+    }).join('');
+  }
+  function loadArticles(){
+    return sb.from('articles').select('*').order('created_at', {ascending:false}).then(function(r){
+      var err = $('#artListErr');
+      if(r.error){ err.textContent = 'Articles are not available yet. Run phase4-articles.sql in the Supabase SQL Editor. (' + r.error.message + ')'; err.hidden = false; return; }
+      err.hidden = true; articles = r.data || []; renderArticles();
+    });
+  }
+  function openArticleForm(a){
+    var f = $('#articleForm'), el = f.elements;
+    editingArticle = a || null;
+    $('#artFormTitle').textContent = a ? 'Edit article' : 'New article';
+    ['slug','category','image_url','title_en','summary_en','body_en','title_ar','summary_ar','body_ar'].forEach(function(k){
+      el[k].value = a ? (a[k] == null ? '' : a[k]) : (k === 'category' ? 'medical' : '');
+    });
+    el.is_published.checked = !!(a && a.is_published);
+    $('#artErr').hidden = true; f.hidden = false; f.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  $('#newArticle').addEventListener('click', function(){ openArticleForm(null); });
+  $('#artCancel').addEventListener('click', function(){ $('#articleForm').hidden = true; editingArticle = null; });
+  $('#articleForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var el = e.target.elements, err = $('#artErr'), btn = $('#artSave');
+    err.hidden = true;
+    var row = {slug: el.slug.value.trim().toLowerCase(), category: el.category.value, image_url: el.image_url.value.trim() || null, is_published: el.is_published.checked};
+    ['title_en','summary_en','body_en','title_ar','summary_ar','body_ar'].forEach(function(k){ row[k] = el[k].value.trim() || null; });
+    var fail = function(m){ err.textContent = m; err.hidden = false; };
+    if(!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(row.slug) || row.slug.length < 3 || row.slug.length > 80){ fail('The address needs 3 to 80 lowercase English letters or numbers, with dashes between words (for example daily-sun-protection).'); return; }
+    if(!artHas(row,'en') && !artHas(row,'ar')){ fail('Write at least one language: a title and the text.'); return; }
+    if((row.title_en && !row.body_en) || (!row.title_en && row.body_en) || (row.title_ar && !row.body_ar) || (!row.title_ar && row.body_ar)){ fail('Each language needs both a title and a text (or leave that language empty).'); return; }
+    if(row.image_url && !/^https:\/\//.test(row.image_url)){ fail('The picture link must start with https://'); return; }
+    btn.disabled = true; btn.textContent = 'Saving…';
+    var q = editingArticle ? sb.from('articles').update(row).eq('id', editingArticle.id) : sb.from('articles').insert(row);
+    q.then(function(r){
+      btn.disabled = false; btn.textContent = 'Save article';
+      if(r.error){ fail(/duplicate|unique/i.test(r.error.message) ? 'Another article already uses this address.' : 'Could not save: ' + r.error.message); return; }
+      $('#articleForm').hidden = true; editingArticle = null;
+      var ok = $('#artOk'); ok.hidden = false; $('#artListErr').hidden = true; setTimeout(function(){ ok.hidden = true; }, 2500);
+      loadArticles();
+    });
+  });
+  $('#artRows').addEventListener('click', function(e){
+    var b, a;
+    function byId(id){ return articles.filter(function(x){ return String(x.id) === String(id); })[0]; }
+    if((b = e.target.closest('[data-art-edit]'))){ openArticleForm(byId(b.getAttribute('data-art-edit'))); }
+    else if((b = e.target.closest('[data-art-pub]'))){
+      a = byId(b.getAttribute('data-art-pub'));
+      if(!a.is_published && !artHas(a,'en') && !artHas(a,'ar')){ alert('Add a title and text first.'); return; }
+      sb.from('articles').update({is_published: !a.is_published}).eq('id', a.id).then(function(r){
+        if(r.error) alert('Could not update: ' + r.error.message); else loadArticles();
+      });
+    } else if((b = e.target.closest('[data-art-del]'))){
+      a = byId(b.getAttribute('data-art-del'));
+      if(!confirm('Delete this article? This cannot be undone.')) return;
+      sb.from('articles').delete().eq('id', a.id).then(function(r){
+        if(r.error) alert('Could not delete: ' + r.error.message); else loadArticles();
       });
     }
   });

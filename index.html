@@ -864,6 +864,7 @@
         <li><a href="mailto:souna.92@gmail.com">souna.92@gmail.com</a></li>
         <li><a href="tel:+96176681395" dir="ltr">76 681 395</a></li>
         <li><a href="#chat" data-i18n="chat_cta">Chat with us</a></li>
+        <li><a href="/articles" id="articlesLink" data-i18n="f_articles">Health &amp; care advice</a></li>
         <li><a href="/track" data-i18n="track_order">Track your order</a></li>
         <li><a href="/policies" data-i18n="f_policies">Privacy and policies</a></li>
       </ul>
@@ -1008,7 +1009,7 @@ document.addEventListener('DOMContentLoaded', function(){
       order_unavail:'One of the products in your cart is no longer available. We refreshed the list, please check your cart.',
       order_ok_title:'Thank you, your order is in', order_ok_text:'Your order number is {no}. We will contact you soon to confirm delivery and payment.',
       order_wa_confirm:'Message us on WhatsApp', continue:'Continue shopping', wa_order:'Hello AVARA, my order number is #{no}.',
-      track_order:'Track your order',
+      track_order:'Track your order', f_articles:'Health & care advice',
       langBtn:'العربية'
     },
     ar: {
@@ -1084,7 +1085,7 @@ document.addEventListener('DOMContentLoaded', function(){
       order_unavail:'أحد المنتجات في سلّتك لم يعد متاحاً. حدّثنا القائمة، يرجى مراجعة سلّتك.',
       order_ok_title:'شكراً لك، وصلنا طلبك', order_ok_text:'رقم طلبك هو {no}. سنتواصل معك قريباً لتأكيد التوصيل والدفع.',
       order_wa_confirm:'راسلنا عبر واتساب', continue:'متابعة التسوق', wa_order:'مرحباً AVARA، رقم طلبي #{no}.',
-      track_order:'تتبّع طلبك',
+      track_order:'تتبّع طلبك', f_articles:'نصائح الصحة والعناية',
       langBtn:'English'
     }
   };
@@ -1705,6 +1706,7 @@ document.addEventListener('DOMContentLoaded', function(){
     $$('[data-i18n-ph]').forEach(function(el){ el.placeholder = t(el.getAttribute('data-i18n-ph')); });
     $$('[data-i18n-aria]').forEach(function(el){ el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'))); });
     $('#langBtn').textContent = t('langBtn');
+    var al = $('#articlesLink'); if(al) al.setAttribute('href', (lang === 'ar' ? '/ar' : '') + '/articles');
     $('#langBtn').setAttribute('lang', lang === 'ar' ? 'en' : 'ar');
     var pd = document.getElementById('pdp'); if(pd && pd.open) pd.close();
     DEPTS.forEach(renderDept);

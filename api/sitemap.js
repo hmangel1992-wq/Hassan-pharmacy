@@ -31,13 +31,30 @@ module.exports = async function handler(req, res) {
     else console.error('sitemap: supabase', r.status);
   } catch (e) { console.error('sitemap failed', e); }
 
-  const pages = [['/', '/ar/'], ['/beauty', '/ar/beauty'], ['/athlete', '/ar/athlete']].map(([en, ar]) => entry(en, ar)).join('') +
+  // Published articles (English and Arabic pages only when that language has been written).
+  let articles = [];
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/articles?is_published=eq.true&select=slug,title_en,body_en,title_ar,body_ar&order=published_at.desc&limit=1000`, {
+      headers: { apikey: ANON, Authorization: `Bearer ${ANON}` },
+    });
+    if (r.ok) articles = await r.json();
+    else console.error('sitemap: articles', r.status);
+  } catch (e) { console.error('sitemap articles failed', e); }
+  const arts = articles.map((a) => {
+    const en = a.title_en && a.body_en, ar = a.title_ar && a.body_ar;
+    if (en && ar) return entry('/articles/' + a.slug, '/ar/articles/' + a.slug);
+    if (en) return `<url><loc>${esc(SITE + '/articles/' + a.slug)}</loc></url>`;
+    if (ar) return `<url><loc>${esc(SITE + '/ar/articles/' + a.slug)}</loc></url>`;
+    return '';
+  }).join('');
+
+  const pages = [['/', '/ar/'], ['/beauty', '/ar/beauty'], ['/athlete', '/ar/athlete'], ['/articles', '/ar/articles']].map(([en, ar]) => entry(en, ar)).join('') +
     `<url><loc>${esc(SITE + '/policies')}</loc></url>`;
   const prods = products.map((p) => { const s = slugify(p.name_en) + '-' + p.id; return entry('/p/' + s, '/ar/p/' + s); }).join('');
 
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
   res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
   return res.status(200).send(
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${pages}${prods}</urlset>`
+    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${pages}${prods}${arts}</urlset>`
   );
 };
