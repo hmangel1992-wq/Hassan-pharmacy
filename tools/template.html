@@ -535,36 +535,52 @@
   .drawer__foot[hidden]{ display: none; }
 
   .drawer__foot{ max-height: 70vh; overflow-y: auto; }
-  /* ---------- Promotions banner ---------- */
-  .promo{ background: var(--mint); border-bottom: 1px solid var(--mint-2); }
+  /* ---------- Promotions banner (sits under the hero) ---------- */
+  .promo{ background: var(--ivory); padding: 34px 0 6px; }
   .promo[hidden]{ display: none; }
-  .promo__in{ width: var(--wrap); margin-inline: auto; position: relative; padding: 18px 0 26px; }
-  .promo__slide{ display: none; grid-template-columns: auto 1fr auto; gap: 14px 28px; align-items: center; }
-  .promo__slide.is-active{ display: grid; animation: promoIn .45s ease; }
-  @keyframes promoIn{ from{ opacity: 0; transform: translateY(4px); } to{ opacity: 1; transform: none; } }
-  .promo__imgs{ display: flex; align-items: center; }
-  .promo__img{ width: 88px; height: 88px; border-radius: 50%; overflow: hidden; background: #fff; border: 3px solid var(--mint); display: grid; place-items: center; margin-inline-start: -20px; box-shadow: 0 1px 6px rgba(31,95,107,.18); }
+  .promo__in{ width: var(--wrap); margin-inline: auto; background: linear-gradient(135deg, #FFFFFF 0%, var(--mint) 100%); border: 1px solid var(--mint-2); position: relative; }
+  .promo__stage{ display: grid; }
+  .promo__slide{ grid-area: 1 / 1; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr) auto; align-items: center; gap: 12px 36px;
+    padding: 30px clamp(20px, 4vw, 48px) 22px; opacity: 0; visibility: hidden; transition: opacity .5s ease, visibility .5s; }
+  .promo__slide.is-active{ opacity: 1; visibility: visible; }
+  .promo__imgs{ display: flex; align-items: center; justify-content: center; }
+  .promo__img{ width: clamp(96px, 13vw, 150px); aspect-ratio: 1; background: #fff; border: 1px solid var(--mint-2); display: grid; place-items: center; overflow: hidden;
+    margin-inline-start: -26px; box-shadow: 0 6px 18px rgba(31,95,107,.14); }
   .promo__img:first-child{ margin-inline-start: 0; }
+  .promo__img:nth-child(2){ transform: translateY(10px); }
   .promo__img .photo{ width: 100%; height: 100%; object-fit: cover; }
-  .promo__tag{ font-size: .76rem; letter-spacing: .14em; text-transform: uppercase; color: var(--teal-deep); font-weight: 600; }
+  .promo__tag{ display: inline-block; font-size: .74rem; letter-spacing: .18em; text-transform: uppercase; color: var(--teal-deep); font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid var(--teal-deep); }
   [lang="ar"] .promo__tag{ letter-spacing: 0; }
-  .promo__title{ font-size: clamp(1.15rem, 2.2vw, 1.5rem); font-weight: 500; line-height: 1.25; margin: 2px 0 4px; }
+  .promo__title{ font-size: clamp(1.4rem, 2.8vw, 2.1rem); font-weight: 400; line-height: 1.2; margin: 14px 0 8px; }
   .promo__title button{ font: inherit; color: inherit; background: none; border: 0; padding: 0; text-align: start; cursor: pointer; }
-  .promo__text{ font-size: .94rem; color: var(--ink-soft); max-width: 58ch; }
-  .promo__note{ font-size: .82rem; color: var(--teal-deep); margin-top: 4px; }
-  .promo__buy{ display: grid; gap: 8px; justify-items: end; text-align: end; }
-  .promo__price{ font-size: 1.3rem; font-weight: 600; }
-  .promo__price del{ font-size: .95rem; font-weight: 400; color: var(--ink-soft); margin-inline-end: 8px; }
-  .promo__btns{ display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-  .promo__dots{ position: absolute; inset-inline: 0; bottom: 8px; display: flex; justify-content: center; gap: 8px; }
-  .promo__dots button{ width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 1px solid var(--teal-deep); background: transparent; cursor: pointer; }
-  .promo__dots button.is-active{ background: var(--teal-deep); }
-  @media (max-width: 760px){
-    .promo__slide{ grid-template-columns: 1fr; text-align: center; justify-items: center; }
-    .promo__imgs{ justify-content: center; }
+  .promo__text{ font-size: .98rem; color: var(--ink-soft); max-width: 52ch; }
+  .promo__note{ font-size: .82rem; color: var(--teal-deep); margin-top: 8px; }
+  .promo__buy{ display: grid; gap: 12px; justify-items: end; text-align: end; }
+  .promo__price{ font-size: 1.6rem; font-weight: 500; }
+  .promo__price del{ font-size: 1rem; font-weight: 400; color: var(--ink-soft); margin-inline-end: 10px; }
+  .promo__btns{ display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+  .promo__ctrl{ display: flex; align-items: center; justify-content: center; gap: 14px; padding: 0 20px 18px; }
+  .promo__arrow{ width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--teal-deep); background: #fff; color: var(--teal-deep); display: grid; place-items: center; cursor: pointer; padding: 0; transition: background .2s, color .2s; }
+  .promo__arrow:hover{ background: var(--teal-deep); color: #fff; }
+  .promo__arrow svg{ width: 16px; height: 16px; }
+  [dir="rtl"] .promo__arrow svg{ transform: scaleX(-1); }
+  .promo__dots{ display: flex; gap: 8px; align-items: center; }
+  .promo__dots button{ width: 34px; height: 14px; padding: 0; border: 0; background: none; cursor: pointer; position: relative; }
+  .promo__dots button::before{ content: ""; position: absolute; inset-inline: 0; top: 6px; height: 2px; background: rgba(31,95,107,.25); }
+  .promo__dots button::after{ content: ""; position: absolute; inset-inline-start: 0; top: 6px; height: 2px; width: 0; background: var(--teal-deep); }
+  .promo__dots button.is-active::after{ width: 100%; animation: promoFill 7s linear; }
+  .promo__count{ font-size: .8rem; color: var(--ink-soft); letter-spacing: .1em; min-width: 3.2em; text-align: center; }
+  .promo__in:hover .promo__dots button.is-active::after, .promo__in:focus-within .promo__dots button.is-active::after{ animation-play-state: paused; }
+  @keyframes promoFill{ from{ width: 0; } to{ width: 100%; } }
+  @media (prefers-reduced-motion: reduce){ .promo__dots button.is-active::after{ animation: none; } .promo__slide{ transition: none; } }
+  @media (max-width: 860px){
+    .promo__slide{ grid-template-columns: 1fr; text-align: center; justify-items: center; padding-top: 26px; }
+    .promo__img{ margin-inline-start: -18px; }
+    .promo__title button{ text-align: center; }
+    .promo__tag{ border-bottom: 0; padding-bottom: 0; }
+    .promo__text{ margin-inline: auto; }
     .promo__buy{ justify-items: center; text-align: center; }
     .promo__btns{ justify-content: center; }
-    .promo__img{ width: 72px; height: 72px; }
   }
   .order-form{ display: grid; gap: 10px; }
   .order-form label.optin{ display: flex; align-items: flex-start; gap: 10px; font-size: .86rem; line-height: 1.45; color: var(--ink); cursor: pointer; }
@@ -1050,7 +1066,7 @@ document.addEventListener('DOMContentLoaded', function(){
       track_order:'Track your order', f_articles:'Health & care advice',
       wa_optin:'Send me offers and news on WhatsApp. I can stop anytime by replying STOP.',
       promo_offer:'Special offer', promo_bundle:'Bundle', promo_add_all:'Add bundle to cart', promo_view:'View', promo_total:'{n} items',
-      promo_code_note:'Code {code} is applied in your cart.', promo_prev:'Previous offer', promo_go:'Show offer {n}',
+      promo_code_note:'Code {code} is applied in your cart.', promo_prev:'Previous offer', promo_next:'Next offer', promo_go:'Show offer {n}',
       langBtn:'العربية'
     },
     ar: {
@@ -1129,7 +1145,7 @@ document.addEventListener('DOMContentLoaded', function(){
       track_order:'تتبّع طلبك', f_articles:'نصائح الصحة والعناية',
       wa_optin:'أرسلوا لي العروض والأخبار عبر واتساب. يمكنني الإيقاف في أي وقت بالرد بكلمة STOP.',
       promo_offer:'عرض خاص', promo_bundle:'باقة', promo_add_all:'أضف الباقة إلى السلة', promo_view:'عرض', promo_total:'{n} منتجات',
-      promo_code_note:'يتم تطبيق الرمز {code} في سلّتك.', promo_prev:'العرض السابق', promo_go:'عرض {n}',
+      promo_code_note:'يتم تطبيق الرمز {code} في سلّتك.', promo_prev:'العرض السابق', promo_next:'العرض التالي', promo_go:'عرض {n}',
       langBtn:'English'
     }
   };
@@ -1409,7 +1425,7 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   /* ---------- Promotions banner (chosen in admin > Promotions) ---------- */
-  var PROMOS = [], promoIdx = 0, promoTimer = null;
+  var PROMOS = [], promoIdx = 0;
   function loadPromos(){
     if(!sb) return Promise.resolve();
     return sb.from('promotions').select('*').eq('is_active', true).order('sort_order', {ascending:true}).order('created_at', {ascending:true})
@@ -1422,13 +1438,23 @@ document.addEventListener('DOMContentLoaded', function(){
       return items.length ? {pr:pr, items:items} : null;
     }).filter(Boolean);
   }
+  function placePromoBanner(){
+    // The banner lives right under the hero image of the department being shown.
+    var box = $('#promoBanner'); if(!box || box.getAttribute('data-placed')) return;
+    var hero = document.querySelector('.panel[data-panel="' + activePanel + '"] .hero') || document.querySelector('.panel .hero') || document.querySelector('main .hero');
+    if(hero && hero.parentNode){ hero.parentNode.insertBefore(box, hero.nextSibling); box.setAttribute('data-placed', '1'); }
+  }
+  var ARROW_L = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>';
+  var ARROW_R = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg>';
+  function pad2(n){ return (n < 10 ? '0' : '') + n; }
   function renderPromos(){
     var box = $('#promoBanner'); if(!box) return;
     var slides = promoSlides();
-    clearInterval(promoTimer);
     if(!slides.length){ box.hidden = true; box.innerHTML = ''; return; }
+    placePromoBanner();
     if(promoIdx >= slides.length) promoIdx = 0;
-    box.innerHTML = '<div class="promo__in">' + slides.map(function(sl, i){
+    var many = slides.length > 1;
+    box.innerHTML = '<div class="promo__in"><div class="promo__stage">' + slides.map(function(sl, i){
       var pr = sl.pr, items = sl.items, multi = items.length > 1;
       var title = (lang === 'ar' ? (pr.title_ar || pr.title_en) : (pr.title_en || pr.title_ar)) || (multi ? t('promo_bundle') : name(items[0]));
       var text = lang === 'ar' ? (pr.text_ar || pr.text_en) : (pr.text_en || pr.text_ar);
@@ -1446,19 +1472,27 @@ document.addEventListener('DOMContentLoaded', function(){
             (multi ? '' : '<button class="btn btn--line" type="button" data-open="' + esc(items[0].id) + '">' + t('promo_view') + '</button>') +
             '<button class="btn btn--solid" type="button" data-promo-add="' + i + '">' + (multi ? t('promo_add_all') : t('add')) + '</button></div></div>' +
       '</div>';
-    }).join('') + (slides.length > 1 ? '<div class="promo__dots">' + slides.map(function(_, i){
-      return '<button type="button" data-promo-go="' + i + '" aria-label="' + esc(t('promo_go').replace('{n}', i + 1)) + '"' + (i === promoIdx ? ' class="is-active"' : '') + '></button>';
-    }).join('') + '</div>' : '') + '</div>';
+    }).join('') + '</div>' + (many ? '<div class="promo__ctrl">' +
+      '<button class="promo__arrow" type="button" data-promo-step="-1" aria-label="' + esc(t('promo_prev')) + '">' + ARROW_L + '</button>' +
+      '<div class="promo__dots">' + slides.map(function(_, i){
+        return '<button type="button" data-promo-go="' + i + '" aria-label="' + esc(t('promo_go').replace('{n}', i + 1)) + '"' + (i === promoIdx ? ' class="is-active"' : '') + '></button>';
+      }).join('') + '</div>' +
+      '<span class="promo__count" dir="ltr">' + pad2(promoIdx + 1) + ' / ' + pad2(slides.length) + '</span>' +
+      '<button class="promo__arrow" type="button" data-promo-step="1" aria-label="' + esc(t('promo_next')) + '">' + ARROW_R + '</button>' +
+    '</div>' : '') + '</div>';
     box.hidden = false;
-    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if(slides.length > 1 && !reduce) promoTimer = setInterval(function(){ if(!box.matches(':hover')) showPromo(promoIdx + 1); }, 7000);
   }
   function showPromo(i){
     var box = $('#promoBanner'), sl = $$('.promo__slide', box); if(!sl.length) return;
     promoIdx = (i + sl.length) % sl.length;
     sl.forEach(function(el, k){ el.classList.toggle('is-active', k === promoIdx); });
-    $$('.promo__dots button', box).forEach(function(b, k){ b.classList.toggle('is-active', k === promoIdx); });
+    $$('.promo__dots button', box).forEach(function(b, k){ b.classList.remove('is-active'); if(k === promoIdx){ void b.offsetWidth; b.classList.add('is-active'); } });   // restarts the progress line
+    var c = $('.promo__count', box); if(c) c.textContent = pad2(promoIdx + 1) + ' / ' + pad2(sl.length);
   }
+  // Auto-advance when the progress line of the active dot has finished (it pauses while the banner is hovered or focused).
+  document.addEventListener('animationend', function(e){
+    if(e.animationName === 'promoFill' && e.target.closest && e.target.closest('#promoBanner')) showPromo(promoIdx + 1);
+  });
   function addPromo(i){
     var sl = promoSlides()[i]; if(!sl) return;
     var added = 0;
@@ -1893,6 +1927,7 @@ document.addEventListener('DOMContentLoaded', function(){
       return;
     }
     if((el = e.target.closest('[data-promo-add]'))){ addPromo(parseInt(el.getAttribute('data-promo-add'), 10)); return; }
+    if((el = e.target.closest('[data-promo-step]'))){ showPromo(promoIdx + parseInt(el.getAttribute('data-promo-step'), 10)); return; }
     if((el = e.target.closest('[data-promo-go]'))){ showPromo(parseInt(el.getAttribute('data-promo-go'), 10)); return; }
     if((el = e.target.closest('[data-notify-open]'))){
       var nf = el.parentNode.querySelector('form'); el.hidden = true; nf.hidden = false;
