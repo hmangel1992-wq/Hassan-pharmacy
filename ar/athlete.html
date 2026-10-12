@@ -534,6 +534,8 @@
 
   .drawer__foot{ max-height: 70vh; overflow-y: auto; }
   .order-form{ display: grid; gap: 10px; }
+  .order-form label.optin{ display: flex; align-items: flex-start; gap: 10px; font-size: .86rem; line-height: 1.45; color: var(--ink); cursor: pointer; }
+  .order-form label.optin input{ width: 18px; height: 18px; min-width: 18px; margin-top: 2px; padding: 0; accent-color: var(--teal-deep); }
   .order-form label{ display: grid; gap: 4px; font-size: .88rem; color: var(--ink-soft); }
   .order-form input,.order-form textarea{
     width: 100%; padding: 10px 12px; font-size: 1rem; color: var(--ink);
@@ -907,6 +909,7 @@
         <input name="address" type="text" maxlength="300" autocomplete="street-address"></label>
       <label><span data-i18n="notes_label">ملاحظات (اختياري)</span>
         <textarea name="notes" rows="2" maxlength="500"></textarea></label>
+      <label class="optin"><input type="checkbox" name="wa_optin"><span data-i18n="wa_optin">أرسلوا لي العروض والأخبار عبر واتساب. يمكنني الإيقاف في أي وقت بالرد بكلمة STOP.</span></label>
       <p class="form-error" id="orderError" role="alert" hidden=""></p>
       <button class="btn btn--solid btn--block" id="placeBtn" type="submit" data-i18n="place_order">إرسال الطلب</button>
       <p class="drawer__note consent"><span data-i18n="consent_pre">بإرسال الطلب فإنك توافق على </span><a href="/policies" target="_blank" rel="noopener" data-i18n="policies">الخصوصية والسياسات</a></p>
@@ -1010,6 +1013,7 @@ document.addEventListener('DOMContentLoaded', function(){
       order_ok_title:'Thank you, your order is in', order_ok_text:'Your order number is {no}. We will contact you soon to confirm delivery and payment.',
       order_wa_confirm:'Message us on WhatsApp', continue:'Continue shopping', wa_order:'Hello AVARA, my order number is #{no}.',
       track_order:'Track your order', f_articles:'Health & care advice',
+      wa_optin:'Send me offers and news on WhatsApp. I can stop anytime by replying STOP.',
       langBtn:'العربية'
     },
     ar: {
@@ -1086,6 +1090,7 @@ document.addEventListener('DOMContentLoaded', function(){
       order_ok_title:'شكراً لك، وصلنا طلبك', order_ok_text:'رقم طلبك هو {no}. سنتواصل معك قريباً لتأكيد التوصيل والدفع.',
       order_wa_confirm:'راسلنا عبر واتساب', continue:'متابعة التسوق', wa_order:'مرحباً AVARA، رقم طلبي #{no}.',
       track_order:'تتبّع طلبك', f_articles:'نصائح الصحة والعناية',
+      wa_optin:'أرسلوا لي العروض والأخبار عبر واتساب. يمكنني الإيقاف في أي وقت بالرد بكلمة STOP.',
       langBtn:'English'
     }
   };
@@ -1510,6 +1515,7 @@ document.addEventListener('DOMContentLoaded', function(){
     btn.disabled = true; btn.textContent = t('placing');
     var codeUsed = appliedCode ? appliedCode.code : '';
     var sumNow = cartTotals().sum - (appliedCode ? Math.min(appliedCode.discount || 0, cartTotals().sum) : 0), countNow = items.length;
+    var optin = !!f.wa_optin.checked;
     var args = {p_name:nm, p_phone:ph, p_address:f.address.value.trim(), p_notes:f.notes.value.trim(), p_items:items};
     if(codeUsed) args.p_code = codeUsed;
     sb.rpc('place_order', args)
@@ -1530,6 +1536,11 @@ document.addEventListener('DOMContentLoaded', function(){
           } else showOrderError(noStock ? 'order_stock' : unavailable ? 'order_unavail' : 'order_err');
           if(noStock || unavailable) loadProducts();
           return;
+        }
+        // Opt-in for WhatsApp offers: only when the customer ticked the box. A failure here never affects the order.
+        if(optin){
+          sb.rpc('wa_subscribe', {p_order_no: Number(res.data), p_phone: ph, p_name: nm, p_lang: lang, p_consent: t('wa_optin')})
+            .then(function(r){ if(r && r.data && r.data.ok) track('WhatsApp Optin', {}); }).catch(function(){});
         }
         lastOrder = res.data; cart = {}; saveCart(); e.target.reset();
         appliedCode = null; $('#codeInput').value = ''; codeMsg('', ''); setCodeUi(); renderCart();

@@ -193,6 +193,7 @@
         <button class="tab" role="tab" id="tabDiscounts" aria-selected="false">Discounts</button>
         <button class="tab" role="tab" id="tabWaiting" aria-selected="false">Waiting list <span class="pill" id="waitPill" hidden>0</span></button>
         <button class="tab" role="tab" id="tabArticles" aria-selected="false">Articles</button>
+        <button class="tab" role="tab" id="tabWaList" aria-selected="false">WhatsApp list</button>
         <button class="tab" role="tab" id="tabSettings" aria-selected="false">Settings</button>
       </div>
       <span class="spacer"></span>
@@ -240,6 +241,36 @@
       </div>
       <div class="orders" id="orderList"></div>
       <p class="empty" id="ordersEmpty" hidden>No orders yet.</p>
+    </section>
+
+    <!-- WhatsApp opt-in list -->
+    <section id="panelWaList" hidden>
+      <div class="bar">
+        <h2>WhatsApp list</h2>
+        <select id="waListFilter" aria-label="Filter">
+          <option value="active">Subscribed</option>
+          <option value="off">Unsubscribed</option>
+          <option value="all">All</option>
+        </select>
+        <button class="btn" id="waCopy" type="button">Copy numbers</button>
+        <button class="btn" id="waCsv" type="button">Download CSV</button>
+      </div>
+      <p class="hint" style="margin:0 0 12px">Customers who ticked "Send me offers and news on WhatsApp" at checkout. Only message people who are Subscribed. If someone replies STOP, tap Unsubscribe next to their name and do not message them again.</p>
+      <form class="settings" id="waMsgForm" onsubmit="return false">
+        <h3>Your offer message</h3>
+        <label class="field">English<textarea id="waMsgEn" rows="3" maxlength="800" placeholder="Hello {name}, this week at AVARA: 10% off all skin-care. Reply STOP to unsubscribe."></textarea></label>
+        <label class="field">العربية<textarea id="waMsgAr" rows="3" maxlength="800" dir="rtl" placeholder="مرحباً {name}، هذا الأسبوع في AVARA: خصم 10% على منتجات العناية بالبشرة. للإيقاف أرسل STOP."></textarea></label>
+        <p class="hint" style="margin:0">{name} is replaced with the customer's name. Each customer gets the language they used at checkout. Tap WhatsApp in a row to open the message ready to send.</p>
+      </form>
+      <p class="msg msg--err" id="waListErr" role="alert" hidden></p>
+      <p class="msg msg--ok" id="waListOk" hidden></p>
+      <div class="table-wrap" style="margin-top:20px">
+        <table class="tbl">
+          <thead><tr><th>Name</th><th>Phone</th><th>Language</th><th>Opted in</th><th>Status</th><th></th></tr></thead>
+          <tbody id="waListRows"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="waListEmpty" hidden>No one here yet. Customers appear after they tick the WhatsApp box when ordering.</p>
     </section>
 
     <!-- Articles -->
@@ -659,6 +690,8 @@
     $('#panelWaiting').hidden = name !== 'waiting';
     $('#tabArticles').setAttribute('aria-selected', name === 'articles');
     $('#panelArticles').hidden = name !== 'articles';
+    $('#tabWaList').setAttribute('aria-selected', name === 'walist');
+    $('#panelWaList').hidden = name !== 'walist';
     $('#panelDiscounts').hidden = name !== 'discounts';
     $('#panelProducts').hidden = name !== 'products';
     $('#panelOrders').hidden = name !== 'orders';
@@ -669,6 +702,7 @@
   $('#tabDiscounts').addEventListener('click', function(){ tab('discounts'); loadCodes(); });
   $('#tabWaiting').addEventListener('click', function(){ tab('waiting'); loadWaiting(); });
   $('#tabArticles').addEventListener('click', function(){ tab('articles'); loadArticles(); });
+  $('#tabWaList').addEventListener('click', function(){ tab('walist'); loadWaList(); });
   $('#tabOrders').addEventListener('click', function(){ tab('orders'); loadOrders(); });
 
   /* ---------- Products list ---------- */
@@ -1054,6 +1088,75 @@
       if(!confirm('Remove this request?')) return;
       sb.from('stock_requests').delete().eq('id', b.getAttribute('data-wait-del')).then(function(r){
         if(r.error) alert('Could not delete: ' + r.error.message); else loadWaiting();
+      });
+    }
+  });
+
+  /* ---------- WhatsApp opt-in list ---------- */
+  var waSubs = [];
+  try{ $('#waMsgEn').value = localStorage.getItem('avara-wamsg-en') || ''; $('#waMsgAr').value = localStorage.getItem('avara-wamsg-ar') || ''; }catch(e){}
+  ['En','Ar'].forEach(function(k){
+    $('#waMsg' + k).addEventListener('input', function(){
+      try{ localStorage.setItem('avara-wamsg-' + k.toLowerCase(), this.value); }catch(e){}
+      renderWaList();
+    });
+  });
+  function waMsgFor(r){
+    var tpl = (r.lang === 'ar' ? $('#waMsgAr').value : $('#waMsgEn').value).trim();
+    if(!tpl) tpl = r.lang === 'ar' ? 'مرحباً {name}، من AVARA.' : 'Hello {name}, this is AVARA.';
+    return tpl.replace(/\{name\}/g, r.name || (r.lang === 'ar' ? '' : 'there')).replace(/\s+([,،])/g, '$1');
+  }
+  function waListFiltered(){
+    var f = $('#waListFilter').value;
+    return waSubs.filter(function(r){ return f === 'all' ? true : f === 'off' ? !!r.unsubscribed_at : !r.unsubscribed_at; });
+  }
+  function renderWaList(){
+    var list = waListFiltered();
+    $('#waListEmpty').hidden = list.length > 0;
+    $('#waListRows').innerHTML = list.map(function(r){
+      var date = new Date(r.created_at).toLocaleDateString('en', {dateStyle:'medium'});
+      var link = 'https://wa.me/' + waDigits(r.phone) + '?text=' + encodeURIComponent(waMsgFor(r));
+      return '<tr><td>' + esc(r.name || '-') + '</td><td dir="ltr">' + esc(r.phone) + '</td><td>' + (r.lang === 'ar' ? 'Arabic' : 'English') + '</td>' +
+        '<td>' + esc(date) + '</td><td>' + (r.unsubscribed_at ? 'Unsubscribed' : '<strong style="color:#1F5F6B">Subscribed</strong>') + '</td>' +
+        '<td><div class="actions">' + (r.unsubscribed_at ? '' : '<a class="btn btn--sm" target="_blank" rel="noopener" href="' + esc(link) + '">WhatsApp</a><button class="btn btn--sm" data-wal-off="' + esc(r.id) + '">Unsubscribe</button>') +
+        '<button class="btn btn--sm btn--danger" data-wal-del="' + esc(r.id) + '">Delete</button></div></td></tr>';
+    }).join('');
+  }
+  function loadWaList(){
+    return sb.from('wa_subscribers').select('*').order('created_at', {ascending:false}).limit(5000).then(function(r){
+      var err = $('#waListErr');
+      if(r.error){ err.textContent = 'The WhatsApp list is not available yet. Run phase4-whatsapp-optin.sql in the Supabase SQL Editor. (' + r.error.message + ')'; err.hidden = false; return; }
+      err.hidden = true; waSubs = r.data || []; renderWaList();
+    });
+  }
+  function waNote(msg){ var ok = $('#waListOk'); ok.textContent = msg; ok.hidden = false; setTimeout(function(){ ok.hidden = true; }, 2500); }
+  $('#waListFilter').addEventListener('change', renderWaList);
+  $('#waCopy').addEventListener('click', function(){
+    var nums = waListFiltered().filter(function(r){ return !r.unsubscribed_at; }).map(function(r){ return '+' + waDigits(r.phone); }).join('\n');
+    if(!nums){ waNote('Nothing to copy.'); return; }
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(nums).then(function(){ waNote('Numbers copied.'); }, function(){ waNote('Could not copy. Use Download CSV.'); });
+    else waNote('Could not copy. Use Download CSV.');
+  });
+  $('#waCsv').addEventListener('click', function(){
+    var q = function(v){ return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
+    var rows = [['Name','Phone','Language','Opted in','Status']].concat(waListFiltered().map(function(r){
+      return [r.name || '', '+' + waDigits(r.phone), r.lang, r.created_at.slice(0, 10), r.unsubscribed_at ? 'unsubscribed' : 'subscribed'];
+    }));
+    var csv = '\ufeff' + rows.map(function(r){ return r.map(q).join(','); }).join('\r\n');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
+    a.download = 'avara-whatsapp-list.csv'; document.body.appendChild(a); a.click(); a.remove();
+  });
+  $('#waListRows').addEventListener('click', function(e){
+    var b;
+    if((b = e.target.closest('[data-wal-off]'))){
+      sb.from('wa_subscribers').update({unsubscribed_at: new Date().toISOString()}).eq('id', b.getAttribute('data-wal-off')).then(function(r){
+        if(r.error) alert('Could not update: ' + r.error.message); else loadWaList();
+      });
+    } else if((b = e.target.closest('[data-wal-del]'))){
+      if(!confirm('Remove this person from the list completely?')) return;
+      sb.from('wa_subscribers').delete().eq('id', b.getAttribute('data-wal-del')).then(function(r){
+        if(r.error) alert('Could not delete: ' + r.error.message); else loadWaList();
       });
     }
   });
