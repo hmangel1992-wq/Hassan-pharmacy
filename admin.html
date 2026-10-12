@@ -189,6 +189,7 @@
       <img src="/assets/logo.png" alt="AVARA">
       <div class="tabs" role="tablist">
         <button class="tab" role="tab" id="tabProducts" aria-selected="true">Products</button>
+        <button class="tab" role="tab" id="tabPromos" aria-selected="false">Promotions</button>
         <button class="tab" role="tab" id="tabOrders" aria-selected="false">Orders <span class="pill" id="newPill" hidden>0</span></button>
         <button class="tab" role="tab" id="tabDiscounts" aria-selected="false">Discounts</button>
         <button class="tab" role="tab" id="tabWaiting" aria-selected="false">Waiting list <span class="pill" id="waitPill" hidden>0</span></button>
@@ -241,6 +242,54 @@
       </div>
       <div class="orders" id="orderList"></div>
       <p class="empty" id="ordersEmpty" hidden>No orders yet.</p>
+    </section>
+
+    <!-- Promotions banner -->
+    <section id="panelPromos" hidden>
+      <div class="bar">
+        <h2>Promotions banner</h2>
+        <button class="btn btn--solid" id="newPromo" type="button">New promotion</button>
+      </div>
+      <p class="hint" style="margin:0 0 12px">The banner at the top of the store. Each promotion shows one product, or a bundle of several products picked from your product list. Customers see the products' current prices (set a sale price on a product to make it cheaper). A promotion only shows the products that are in stock, and disappears when none are. An optional discount code is applied in the cart automatically when the customer adds the promotion.</p>
+      <p class="msg msg--err" id="promoListErr" role="alert" hidden></p>
+      <form class="settings" id="promoForm" novalidate hidden>
+        <h3 id="promoFormTitle">New promotion</h3>
+        <div class="row3">
+          <label class="field">Title (English)<input name="title_en" maxlength="80" placeholder="Glow bundle"></label>
+          <label class="field">العنوان (العربية)<input name="title_ar" maxlength="80" dir="rtl"></label>
+          <label class="field">Order in banner (1 = first)<input name="sort_order" type="number" step="1" value="1"></label>
+        </div>
+        <div class="row3">
+          <label class="field">Short text (English, optional)<input name="text_en" maxlength="160" placeholder="Cleanser + toner for glowing skin"></label>
+          <label class="field">نص قصير (اختياري)<input name="text_ar" maxlength="160" dir="rtl"></label>
+          <label class="field">Discount code (optional)<input name="code" maxlength="30" list="promoCodes" autocomplete="off" style="text-transform:uppercase"></label>
+        </div>
+        <datalist id="promoCodes"></datalist>
+        <div class="row3">
+          <label class="field">Starts on (optional)<input name="starts" type="date"></label>
+          <label class="field">Ends on (optional)<input name="ends" type="date"></label>
+          <span></span>
+        </div>
+        <div class="field">
+          <span>Products in this promotion (<strong id="promoPickCount">0</strong> selected, up to 8)</span>
+          <input id="promoSearch" type="search" placeholder="Search products" autocomplete="off" style="margin:6px 0">
+          <div id="promoPick" style="max-height:260px;overflow:auto;border:1px solid var(--sage-deep);background:var(--white)"></div>
+        </div>
+        <label class="check"><input type="checkbox" name="is_active" checked> Turned on</label>
+        <p class="msg msg--err" id="promoErr" role="alert" hidden></p>
+        <div class="settings__foot">
+          <button class="btn btn--solid" type="submit" id="promoSave">Save promotion</button>
+          <button class="btn" type="button" id="promoCancel">Cancel</button>
+          <span class="msg msg--ok" id="promoOk" hidden style="margin:0">Saved.</span>
+        </div>
+      </form>
+      <div class="table-wrap" style="margin-top:20px">
+        <table class="tbl">
+          <thead><tr><th>Promotion</th><th>Products</th><th>Code</th><th>Dates</th><th>Status</th><th></th></tr></thead>
+          <tbody id="promoRows"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="promoEmpty" hidden>No promotions yet. Tap New promotion and pick products from your list.</p>
     </section>
 
     <!-- WhatsApp opt-in list -->
@@ -692,6 +741,8 @@
     $('#panelArticles').hidden = name !== 'articles';
     $('#tabWaList').setAttribute('aria-selected', name === 'walist');
     $('#panelWaList').hidden = name !== 'walist';
+    $('#tabPromos').setAttribute('aria-selected', name === 'promos');
+    $('#panelPromos').hidden = name !== 'promos';
     $('#panelDiscounts').hidden = name !== 'discounts';
     $('#panelProducts').hidden = name !== 'products';
     $('#panelOrders').hidden = name !== 'orders';
@@ -703,6 +754,7 @@
   $('#tabWaiting').addEventListener('click', function(){ tab('waiting'); loadWaiting(); });
   $('#tabArticles').addEventListener('click', function(){ tab('articles'); loadArticles(); });
   $('#tabWaList').addEventListener('click', function(){ tab('walist'); loadWaList(); });
+  $('#tabPromos').addEventListener('click', function(){ tab('promos'); loadPromos(); });
   $('#tabOrders').addEventListener('click', function(){ tab('orders'); loadOrders(); });
 
   /* ---------- Products list ---------- */
@@ -1089,6 +1141,110 @@
       sb.from('stock_requests').delete().eq('id', b.getAttribute('data-wait-del')).then(function(r){
         if(r.error) alert('Could not delete: ' + r.error.message); else loadWaiting();
       });
+    }
+  });
+
+  /* ---------- Promotions banner ---------- */
+  var promos = [], editingPromo = null, promoSel = [];
+  function promoStatus(p){
+    var now = Date.now();
+    if(!p.is_active) return 'Off';
+    if(p.starts_at && new Date(p.starts_at) > now) return 'Scheduled';
+    if(p.ends_at && new Date(p.ends_at) <= now) return 'Ended';
+    var live = (p.product_ids || []).some(function(id){ var x = products.filter(function(q){ return String(q.id) === String(id); })[0]; return x && x.is_active !== false && Number(x.stock) > 0; });
+    return live ? '<strong style="color:#1F5F6B">Showing</strong>' : 'On, but no product in stock';
+  }
+  function renderPromos(){
+    $('#promoEmpty').hidden = promos.length > 0;
+    $('#promoRows').innerHTML = promos.map(function(p){
+      var names = (p.product_ids || []).map(function(id){ var x = products.filter(function(q){ return String(q.id) === String(id); })[0]; return x ? x.name_en : '(deleted product)'; });
+      var dates = (p.starts_at ? new Date(p.starts_at).toLocaleDateString('en', {dateStyle:'medium'}) : 'now') + ' to ' + (p.ends_at ? new Date(p.ends_at).toLocaleDateString('en', {dateStyle:'medium'}) : 'no end');
+      return '<tr><td><strong>' + esc(p.title_en || p.title_ar || (names.length > 1 ? 'Bundle' : names[0])) + '</strong><br><small>Order ' + esc(p.sort_order) + '</small></td>' +
+        '<td>' + names.map(esc).join('<br>') + '</td><td>' + esc(p.code || '-') + '</td><td>' + esc(dates) + '</td><td>' + promoStatus(p) + '</td>' +
+        '<td><div class="actions"><button class="btn btn--sm" data-promo-edit="' + esc(p.id) + '">Edit</button>' +
+        '<button class="btn btn--sm" data-promo-toggle="' + esc(p.id) + '">' + (p.is_active ? 'Turn off' : 'Turn on') + '</button>' +
+        '<button class="btn btn--sm btn--danger" data-promo-del="' + esc(p.id) + '">Delete</button></div></td></tr>';
+    }).join('');
+  }
+  function loadPromos(){
+    var pr = products.length ? Promise.resolve() : loadProducts();
+    return pr.then(function(){ return sb.from('promotions').select('*').order('sort_order').order('created_at'); }).then(function(r){
+      var err = $('#promoListErr');
+      if(r.error){ err.textContent = 'Promotions are not available yet. Run phase4-promotions.sql in the Supabase SQL Editor. (' + r.error.message + ')'; err.hidden = false; return; }
+      err.hidden = true; promos = r.data || []; renderPromos();
+    });
+  }
+  function renderPick(){
+    var q = ($('#promoSearch').value || '').trim().toLowerCase();
+    var list = products.filter(function(p){ return !q || (String(p.name_en || '') + ' ' + String(p.name_ar || '') + ' ' + String(p.brand || '')).toLowerCase().indexOf(q) >= 0; });
+    $('#promoPick').innerHTML = list.map(function(p){
+      var on = promoSel.indexOf(String(p.id)) >= 0, out = Number(p.stock) <= 0;
+      return '<label class="check" style="margin:0;padding:8px 12px;border-bottom:1px solid var(--mist-2)"><input type="checkbox" data-pick="' + esc(p.id) + '"' + (on ? ' checked' : '') + '> ' +
+        '<span style="flex:1">' + esc(p.name_en) + (p.is_active === false ? ' <small>(hidden)</small>' : '') + (out ? ' <small style="color:#8A2E20">(out of stock)</small>' : '') + '</span>' +
+        '<span dir="ltr">' + money(p.sale_price != null ? p.sale_price : p.price) + '</span></label>';
+    }).join('') || '<p class="empty" style="margin:12px">No products match.</p>';
+    $('#promoPickCount').textContent = promoSel.length;
+  }
+  function openPromoForm(p){
+    var el = $('#promoForm').elements; editingPromo = p || null;
+    $('#promoFormTitle').textContent = p ? 'Edit promotion' : 'New promotion';
+    ['title_en','title_ar','text_en','text_ar','code'].forEach(function(k){ el[k].value = p && p[k] ? p[k] : ''; });
+    el.sort_order.value = p ? p.sort_order : (promos.length + 1);
+    el.starts.value = p && p.starts_at ? p.starts_at.slice(0, 10) : ''; el.ends.value = p && p.ends_at ? p.ends_at.slice(0, 10) : '';
+    el.is_active.checked = p ? !!p.is_active : true;
+    promoSel = p ? (p.product_ids || []).map(String) : []; $('#promoSearch').value = '';
+    var dl = $('#promoCodes'); dl.innerHTML = '';
+    (typeof loadCodes === 'function' ? loadCodes() : Promise.resolve()).then(function(){ dl.innerHTML = (codes || []).map(function(c){ return '<option value="' + esc(c.code) + '">'; }).join(''); }).catch(function(){});
+    renderPick(); $('#promoErr').hidden = true; $('#promoForm').hidden = false; $('#promoForm').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  $('#newPromo').addEventListener('click', function(){ (products.length ? Promise.resolve() : loadProducts()).then(function(){ openPromoForm(null); }); });
+  $('#promoCancel').addEventListener('click', function(){ $('#promoForm').hidden = true; editingPromo = null; });
+  $('#promoSearch').addEventListener('input', renderPick);
+  $('#promoPick').addEventListener('change', function(e){
+    var cb = e.target.closest('[data-pick]'); if(!cb) return;
+    var id = cb.getAttribute('data-pick'), i = promoSel.indexOf(id);
+    if(cb.checked){
+      if(promoSel.length >= 8){ cb.checked = false; alert('A promotion can hold up to 8 products.'); return; }
+      if(i < 0) promoSel.push(id);
+    } else if(i >= 0) promoSel.splice(i, 1);
+    $('#promoPickCount').textContent = promoSel.length;
+  });
+  $('#promoForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var el = e.target.elements, err = $('#promoErr'), btn = $('#promoSave');
+    var fail = function(m){ err.textContent = m; err.hidden = false; };
+    err.hidden = true;
+    var code = el.code.value.trim().toUpperCase();
+    if(!promoSel.length){ fail('Pick at least one product from the list.'); return; }
+    if(!el.title_en.value.trim() && !el.title_ar.value.trim() && promoSel.length > 1){ fail('Give the bundle a title (English or Arabic).'); return; }
+    if(code && !/^[A-Z0-9_-]{3,30}$/.test(code)){ fail('The code needs 3 to 30 letters or numbers.'); return; }
+    var starts = el.starts.value ? new Date(el.starts.value + 'T00:00:00') : null, ends = el.ends.value ? new Date(el.ends.value + 'T23:59:59') : null;
+    if(starts && ends && ends < starts){ fail('The end date is before the start date.'); return; }
+    var row = {
+      title_en: el.title_en.value.trim() || null, title_ar: el.title_ar.value.trim() || null,
+      text_en: el.text_en.value.trim() || null, text_ar: el.text_ar.value.trim() || null,
+      product_ids: promoSel.slice(), code: code || null, sort_order: parseInt(el.sort_order.value, 10) || 0,
+      is_active: el.is_active.checked, starts_at: starts ? starts.toISOString() : null, ends_at: ends ? ends.toISOString() : null
+    };
+    btn.disabled = true; btn.textContent = 'Saving…';
+    var q = editingPromo ? sb.from('promotions').update(row).eq('id', editingPromo.id) : sb.from('promotions').insert(row);
+    q.then(function(r){
+      btn.disabled = false; btn.textContent = 'Save promotion';
+      if(r.error){ fail('Could not save: ' + r.error.message); return; }
+      $('#promoForm').hidden = true; editingPromo = null;
+      var ok = $('#promoOk'); ok.hidden = false; setTimeout(function(){ ok.hidden = true; }, 2500); loadPromos();
+    });
+  });
+  $('#promoRows').addEventListener('click', function(e){
+    var b, p;
+    function byId(id){ return promos.filter(function(x){ return String(x.id) === String(id); })[0]; }
+    if((b = e.target.closest('[data-promo-edit]'))){ openPromoForm(byId(b.getAttribute('data-promo-edit'))); }
+    else if((b = e.target.closest('[data-promo-toggle]'))){
+      p = byId(b.getAttribute('data-promo-toggle'));
+      sb.from('promotions').update({is_active: !p.is_active}).eq('id', p.id).then(function(r){ if(r.error) alert('Could not update: ' + r.error.message); else loadPromos(); });
+    } else if((b = e.target.closest('[data-promo-del]'))){
+      if(!confirm('Delete this promotion? The products are not affected.')) return;
+      sb.from('promotions').delete().eq('id', b.getAttribute('data-promo-del')).then(function(r){ if(r.error) alert('Could not delete: ' + r.error.message); else loadPromos(); });
     }
   });
 
