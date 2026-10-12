@@ -113,7 +113,7 @@
       busy:'Too many attempts. Please wait a few minutes or message us on WhatsApp.',
       fail:'Something went wrong. Please try again, or message us on WhatsApp.',
       order:'Order', placed:'Placed on', noteLabel:'Message from AVARA', items:'Items', delivery:'Delivery', discount:'Discount', total:'Total',
-      wa:'Message us on WhatsApp', again:'Track another order', waText:'Hello AVARA, I have a question about order #{no}.',
+      wa:'Message us on WhatsApp', again:'Track another order', reorder:'Order again', waText:'Hello AVARA, I have a question about order #{no}.',
       steps:['Order received','Confirmed','Out for delivery','Delivered'],
       status:{
         new:'We received your order and will contact you soon to confirm it.',
@@ -133,7 +133,7 @@
       busy:'محاولات كثيرة. يرجى الانتظار بضع دقائق أو مراسلتنا عبر واتساب.',
       fail:'حدث خطأ ما. يرجى المحاولة مجدداً أو مراسلتنا عبر واتساب.',
       order:'الطلب', placed:'تاريخ الطلب', noteLabel:'رسالة من AVARA', items:'المنتجات', delivery:'التوصيل', discount:'الخصم', total:'المجموع الكلي',
-      wa:'راسلنا عبر واتساب', again:'تتبّع طلباً آخر', waText:'مرحباً AVARA، لدي سؤال عن الطلب رقم #{no}.',
+      wa:'راسلنا عبر واتساب', again:'تتبّع طلباً آخر', reorder:'اطلب مرة أخرى', waText:'مرحباً AVARA، لدي سؤال عن الطلب رقم #{no}.',
       steps:['تم استلام الطلب','تم التأكيد','في الطريق إليك','تم التسليم'],
       status:{
         new:'وصلنا طلبك وسنتواصل معك قريباً لتأكيده.',
@@ -187,9 +187,20 @@
       (d.status_note ? '<div class="note"><small>' + esc(L.noteLabel) + '</small>' + esc(d.status_note) + '</div>' : '') +
       '<ul class="items">' + items + '</ul>' +
       '<div class="total"><span>' + esc(L.total) + '</span><span dir="ltr">' + money(d.total) + '</span></div>' +
-      '<div class="actions"><a class="btn" href="' + wa + '" target="_blank" rel="noopener">' + esc(L.wa) + '</a>' +
+      '<div class="actions"><button class="btn btn--solid" type="button" id="reorderBtn">' + esc(L.reorder) + '</button><a class="btn btn--line" href="' + wa + '" target="_blank" rel="noopener">' + esc(L.wa) + '</a>' +
       '<button class="btn btn--line" type="button" id="againBtn">' + esc(L.again) + '</button></div>';
     res.hidden = false;
+    $('#reorderBtn').addEventListener('click', function(){
+      // Put the same products back in the cart (merged with what is already there) and open the store's cart.
+      var cart = {};
+      try{ cart = JSON.parse(localStorage.getItem('avara-cart') || '{}') || {}; }catch(e){ cart = {}; }
+      (d.items || []).forEach(function(i){
+        var q = parseInt(i.qty, 10); if(!i.id || !(q > 0)) return;
+        cart[i.id] = Math.min((cart[i.id] || 0) + q, 99);
+      });
+      try{ localStorage.setItem('avara-cart', JSON.stringify(cart)); }catch(e){}
+      location.href = (lang === 'ar' ? '/ar/' : '/') + '?cart=1';
+    });
     $('#againBtn').addEventListener('click', function(){
       res.hidden = true; lastData = null; $('#trackForm').hidden = false; $('#trackForm').elements.no.focus();
     });

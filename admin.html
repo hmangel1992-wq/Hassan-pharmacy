@@ -191,6 +191,7 @@
         <button class="tab" role="tab" id="tabProducts" aria-selected="true">Products</button>
         <button class="tab" role="tab" id="tabOrders" aria-selected="false">Orders <span class="pill" id="newPill" hidden>0</span></button>
         <button class="tab" role="tab" id="tabDiscounts" aria-selected="false">Discounts</button>
+        <button class="tab" role="tab" id="tabWaiting" aria-selected="false">Waiting list <span class="pill" id="waitPill" hidden>0</span></button>
         <button class="tab" role="tab" id="tabSettings" aria-selected="false">Settings</button>
       </div>
       <span class="spacer"></span>
@@ -238,6 +239,29 @@
       </div>
       <div class="orders" id="orderList"></div>
       <p class="empty" id="ordersEmpty" hidden>No orders yet.</p>
+    </section>
+
+    <!-- Waiting list (back-in-stock requests) -->
+    <section id="panelWaiting" hidden>
+      <div class="bar">
+        <h2>Waiting list</h2>
+        <select id="waitFilter" aria-label="Filter">
+          <option value="waiting">Waiting for a message</option>
+          <option value="ready">Back in stock (message now)</option>
+          <option value="notified">Already messaged</option>
+          <option value="all">All</option>
+        </select>
+        <button class="btn" id="refreshWait" type="button">Refresh</button>
+      </div>
+      <p class="hint" style="margin:0 0 12px">Customers who asked to be told when a sold-out product is back. When you restock a product, tap WhatsApp to message each person, then Mark messaged.</p>
+      <p class="msg msg--err" id="waitErr" role="alert" hidden></p>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>Product</th><th>Customer</th><th>Phone</th><th>Asked on</th><th>Status</th><th></th></tr></thead>
+          <tbody id="waitRows"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="waitEmpty" hidden>No requests here.</p>
     </section>
 
     <!-- Discounts -->
@@ -473,7 +497,7 @@
       return ensureMfa().then(function(passed){
         if(!passed) return;
         $('#who').textContent = user.email; show('viewApp');
-        loadProducts(); loadOrders(); loadSettings(); refreshMfaStatus();
+        loadProducts().then(loadWaiting); loadOrders(); loadSettings(); refreshMfaStatus();
         clearInterval(timer); timer = setInterval(loadOrders, 60000);
       });
     });
@@ -588,6 +612,8 @@
     $('#tabOrders').setAttribute('aria-selected', name === 'orders');
     $('#tabSettings').setAttribute('aria-selected', name === 'settings');
     $('#tabDiscounts').setAttribute('aria-selected', name === 'discounts');
+    $('#tabWaiting').setAttribute('aria-selected', name === 'waiting');
+    $('#panelWaiting').hidden = name !== 'waiting';
     $('#panelDiscounts').hidden = name !== 'discounts';
     $('#panelProducts').hidden = name !== 'products';
     $('#panelOrders').hidden = name !== 'orders';
@@ -596,6 +622,7 @@
   $('#tabSettings').addEventListener('click', function(){ tab('settings'); if(!/is ON/.test($('#mfaStatus').textContent)) refreshMfaStatus(); });
   $('#tabProducts').addEventListener('click', function(){ tab('products'); });
   $('#tabDiscounts').addEventListener('click', function(){ tab('discounts'); loadCodes(); });
+  $('#tabWaiting').addEventListener('click', function(){ tab('waiting'); loadWaiting(); });
   $('#tabOrders').addEventListener('click', function(){ tab('orders'); loadOrders(); });
 
   /* ---------- Products list ---------- */
@@ -912,6 +939,75 @@
       if(!confirm('Delete the code ' + code + '? Past orders keep their discount.')) return;
       sb.from('discount_codes').delete().eq('code', code).then(function(r){
         if(r.error) alert('Could not delete: ' + r.error.message); else loadCodes();
+      });
+    }
+  });
+
+  /* ---------- Waiting list (back-in-stock requests) ---------- */
+  var waiting = [];
+  function waDigits(phone){
+    var d = String(phone || '').replace(/\D/g, '');
+    if(d.indexOf('00') === 0) d = d.slice(2);
+    else if(d.indexOf('961') === 0) { /* already international */ }
+    else if(d.charAt(0) === '0') d = '961' + d.slice(1);
+    else if(d.length <= 8) d = '961' + d;
+    return d;
+  }
+  function waLink(r){
+    var txt = r.lang === 'ar'
+      ? 'مرحباً' + (r.name ? ' ' + r.name : '') + '، المنتج ' + r.product_name + ' متوفر الآن في AVARA. هل ترغب بطلبه؟'
+      : 'Hello' + (r.name ? ' ' + r.name : '') + ', ' + r.product_name + ' is back in stock at AVARA. Would you like to order it?';
+    return 'https://wa.me/' + waDigits(r.phone) + '?text=' + encodeURIComponent(txt);
+  }
+  function inStock(r){
+    var p = products.filter(function(x){ return String(x.id) === String(r.product_id); })[0];
+    return !!p && p.is_active !== false && Number(p.stock) > 0;
+  }
+  function renderWaiting(){
+    var f = $('#waitFilter').value;
+    var pending = waiting.filter(function(r){ return !r.notified_at; });
+    var ready = pending.filter(inStock).length;
+    var pill = $('#waitPill'); pill.textContent = ready; pill.hidden = ready === 0;
+    var list = waiting.filter(function(r){
+      if(f === 'waiting') return !r.notified_at;
+      if(f === 'ready') return !r.notified_at && inStock(r);
+      if(f === 'notified') return !!r.notified_at;
+      return true;
+    });
+    // Products that are back in stock first, then by product name.
+    list.sort(function(a, b){ return (inStock(b) - inStock(a)) || String(a.product_name).localeCompare(String(b.product_name)) || (new Date(a.created_at) - new Date(b.created_at)); });
+    $('#waitEmpty').hidden = list.length > 0;
+    $('#waitRows').innerHTML = list.map(function(r){
+      var date = new Date(r.created_at).toLocaleDateString('en', {dateStyle:'medium'});
+      var status = r.notified_at ? 'Messaged' : (inStock(r) ? '<strong style="color:#1F5F6B">Back in stock</strong>' : 'Still sold out');
+      return '<tr><td>' + esc(r.product_name) + '</td>' +
+        '<td>' + esc(r.name || '-') + (r.lang === 'ar' ? ' <small>(Arabic)</small>' : '') + '</td>' +
+        '<td dir="ltr">' + esc(r.phone) + '</td><td>' + esc(date) + '</td><td>' + status + '</td>' +
+        '<td><div class="actions"><a class="btn btn--sm" target="_blank" rel="noopener" href="' + esc(waLink(r)) + '">WhatsApp</a>' +
+        (r.notified_at ? '<button class="btn btn--sm" data-wait-undo="' + esc(r.id) + '">Undo</button>' : '<button class="btn btn--sm" data-wait-done="' + esc(r.id) + '">Mark messaged</button>') +
+        '<button class="btn btn--sm btn--danger" data-wait-del="' + esc(r.id) + '">Delete</button></div></td></tr>';
+    }).join('');
+  }
+  function loadWaiting(){
+    return sb.from('stock_requests').select('*').order('created_at', {ascending:false}).limit(1000).then(function(r){
+      var err = $('#waitErr');
+      if(r.error){ err.textContent = 'The waiting list is not available yet. Run phase4-back-in-stock.sql in the Supabase SQL Editor. (' + r.error.message + ')'; err.hidden = false; return; }
+      err.hidden = true; waiting = r.data || []; renderWaiting();
+    });
+  }
+  $('#waitFilter').addEventListener('change', renderWaiting);
+  $('#refreshWait').addEventListener('click', function(){ loadProducts().then(loadWaiting); });
+  $('#waitRows').addEventListener('click', function(e){
+    var b, id;
+    if((b = e.target.closest('[data-wait-done]')) || (b = e.target.closest('[data-wait-undo]'))){
+      var done = b.hasAttribute('data-wait-done'); id = b.getAttribute(done ? 'data-wait-done' : 'data-wait-undo');
+      sb.from('stock_requests').update({notified_at: done ? new Date().toISOString() : null}).eq('id', id).then(function(r){
+        if(r.error) alert('Could not update: ' + r.error.message); else loadWaiting();
+      });
+    } else if((b = e.target.closest('[data-wait-del]'))){
+      if(!confirm('Remove this request?')) return;
+      sb.from('stock_requests').delete().eq('id', b.getAttribute('data-wait-del')).then(function(r){
+        if(r.error) alert('Could not delete: ' + r.error.message); else loadWaiting();
       });
     }
   });
