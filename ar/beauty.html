@@ -349,6 +349,15 @@
   .card__stock{ font-size: .84rem; font-weight: 500; color: #9A5B00; margin-bottom: 6px; }
   .card.is-soldout .card__media .photo, .card.is-soldout .card__media .pack, .card.is-soldout .card__media .gallery{ opacity: .5; }
   .btn.is-soldout[disabled]{ cursor: not-allowed; }
+  .notify{ margin-top: 10px; }
+  .notify__open{ display:block; width:100%; text-align:center; font:inherit; font-size:.86rem; color:var(--teal-deep); background:none; border:0; border-bottom:1px solid transparent; padding:4px 0; cursor:pointer; }
+  .notify__open:hover{ border-bottom-color:var(--teal-deep); }
+  .notify__form{ display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+  .notify__form[hidden]{ display:none; }
+  .notify__form p{ font-size:.82rem; color:var(--ink); opacity:.8; }
+  .notify__form input{ font:inherit; font-size:.9rem; padding:.55rem .7rem; border:1px solid rgba(0,0,0,.2); background:#fff; color:var(--ink); width:100%; }
+  .notify__msg{ font-size:.82rem; color:var(--teal-deep); }
+  .notify__msg--err{ color:#9B2C2C; }
 
   .gallery{ position: absolute; inset: 0; }
   .gallery__track{
@@ -981,6 +990,10 @@ document.addEventListener('DOMContentLoaded', function(){
       chat_greet:'Hello, welcome to AVARA. Ask me about medical advice, athlete recovery or beauty care — I\'m here to help.',
       chat_err:'Sorry, something went wrong. Please try again, or message us on WhatsApp.',
       chat_suggest:'Suggested for you',
+      nt_open:'Notify me when it is back', nt_lead:'Leave your phone number and we will message you when it is available again.',
+      nt_phone:'Phone number', nt_name:'Your name (optional)', nt_send:'Notify me', nt_sending:'Sending…',
+      nt_ok:'Done. We will message you as soon as it is back.', nt_bad:'Please enter a valid phone number.',
+      nt_instock:'Good news, this product is available now.', nt_err:'Something went wrong. Please try again, or message us on WhatsApp.',
       install_app:'Install app', install_added:'AVARA is installed on your device',
       install_help_title:'Install the AVARA app', install_help_close:'Got it',
       install_help_ios:'Tap the Share icon in Safari, then choose "Add to Home Screen".',
@@ -1053,6 +1066,10 @@ document.addEventListener('DOMContentLoaded', function(){
       chat_greet:'مرحباً بك في AVARA. اسألني عن النصائح الطبية أو استشفاء الرياضيين أو العناية بالجمال، أنا هنا للمساعدة.',
       chat_err:'عذراً، حدث خطأ ما. يرجى المحاولة مجدداً أو مراسلتنا عبر واتساب.',
       chat_suggest:'مقترحات لك',
+      nt_open:'أعلمني عند توفره', nt_lead:'اترك رقم هاتفك وسنراسلك عندما يتوفر المنتج من جديد.',
+      nt_phone:'رقم الهاتف', nt_name:'اسمك (اختياري)', nt_send:'أعلمني', nt_sending:'جارٍ الإرسال…',
+      nt_ok:'تم. سنراسلك فور توفره.', nt_bad:'يرجى إدخال رقم هاتف صحيح.',
+      nt_instock:'خبر سار، المنتج متوفر الآن.', nt_err:'حدث خطأ ما. يرجى المحاولة مجدداً أو مراسلتنا عبر واتساب.',
       install_app:'تثبيت التطبيق', install_added:'تم تثبيت AVARA على جهازك',
       install_help_title:'ثبّت تطبيق AVARA', install_help_close:'حسناً',
       install_help_ios:'اضغط على أيقونة المشاركة في Safari، ثم اختر "إضافة إلى الشاشة الرئيسية".',
@@ -1216,6 +1233,7 @@ document.addEventListener('DOMContentLoaded', function(){
         DEPTS.forEach(renderDept); renderCart(); runSearch();
         updateItemList();
         if(!hashHandled){ hashHandled = true; openFromHash(); }
+        if(!cartOpened){ cartOpened = true; if(/[?&]cart=1\b/.test(location.search)){ Object.keys(cart).forEach(function(id){ var pr = byId[id]; if(!pr) return; var av = avail(pr); if(av <= 0) delete cart[id]; else if(cart[id] > av) cart[id] = av; }); saveCart(); renderCart(); openCart(); try{ history.replaceState(null, '', location.pathname + location.hash); }catch(e){} } }
       })
       .catch(function(){ loadState = 'error'; DEPTS.forEach(renderGrid); });
   }
@@ -1323,13 +1341,26 @@ document.addEventListener('DOMContentLoaded', function(){
           '<p class="card__desc">' + esc(lang === 'ar' ? p.da : p.de) + '</p>' +
           (low ? '<p class="card__stock">' + t('only_left').replace('{n}', p.stock) + '</p>' : '') +
           '<div class="card__foot"><span class="card__size">' + esc(pick({en:p.size[0], ar:p.size[1]})) + '</span>' + priceHtml + '</div>' +
-          (out ? '<button class="btn btn--line is-soldout" type="button" disabled>' + t('out_of_stock') + '</button>'
+          (out ? '<button class="btn btn--line is-soldout" type="button" disabled>' + t('out_of_stock') + '</button>' + notifyHtml(p)
                : '<button class="btn btn--line" type="button" data-add="' + esc(p.id) + '">' + t('add') + '</button>') +
           '<a class="card__ask" data-ask="' + esc(p.id) + '" href="' + esc(waProductUrl(p)) + '" target="_blank" rel="noopener">' + t('pdp_ask') + '</a>' +
         '</div></article>';
     }).join('') : '<p class="state-msg">' + t('no_products') + '</p>';
     countEl.textContent = t('count').replace('{n}', list.length);
     wireGalleries(grid);
+  }
+
+  // "Notify me when it is back" box for sold-out products (card and product dialog).
+  function notifyHtml(p){
+    return '<div class="notify" data-notify-box="' + esc(p.id) + '">' +
+      '<button class="notify__open" type="button" data-notify-open>' + t('nt_open') + '</button>' +
+      '<form class="notify__form" data-notify="' + esc(p.id) + '" hidden novalidate>' +
+        '<p>' + t('nt_lead') + '</p>' +
+        '<input name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="' + esc(t('nt_phone')) + '" aria-label="' + esc(t('nt_phone')) + '" dir="ltr">' +
+        '<input name="name" type="text" autocomplete="name" maxlength="80" placeholder="' + esc(t('nt_name')) + '" aria-label="' + esc(t('nt_name')) + '">' +
+        '<button class="btn btn--solid" type="submit">' + t('nt_send') + '</button>' +
+        '<p class="notify__msg" role="status" hidden></p>' +
+      '</form></div>';
   }
 
   function renderDept(d){ renderTools(d); renderGrid(d); }
@@ -1506,6 +1537,28 @@ document.addEventListener('DOMContentLoaded', function(){
       .catch(function(){ btn.disabled = false; btn.textContent = t('place_order'); showOrderError('order_err'); });
   }
 
+  document.addEventListener('submit', function(e){
+    var f = e.target.closest ? e.target.closest('form[data-notify]') : null; if(!f) return;
+    e.preventDefault();
+    var msg = f.querySelector('.notify__msg'), btn = f.querySelector('button[type="submit"]');
+    var say = function(key, bad){ msg.textContent = t(key); msg.className = 'notify__msg' + (bad ? ' notify__msg--err' : ''); msg.hidden = false; };
+    var phone = f.elements.phone.value.trim();
+    if(phone.replace(/\D/g, '').length < 6){ say('nt_bad', true); return; }
+    if(!sb){ say('nt_err', true); return; }
+    var pid = f.getAttribute('data-notify'), prod = byId[pid];
+    btn.disabled = true; btn.textContent = t('nt_sending');
+    sb.rpc('request_restock', {p_product_id: String(pid), p_phone: phone, p_name: f.elements.name.value.trim() || null, p_lang: lang}).then(function(r){
+      btn.disabled = false; btn.textContent = t('nt_send');
+      if(r.error || !r.data){ say('nt_err', true); return; }
+      if(r.data.ok){
+        say('nt_ok'); f.elements.phone.hidden = true; f.elements.name.hidden = true; btn.hidden = true;
+        track('Notify Request', {product: prod ? prod.en : 'unknown'});
+      } else if(r.data.reason === 'phone'){ say('nt_bad', true); }
+      else if(r.data.reason === 'in_stock'){ say('nt_instock'); loadProducts(); }
+      else say('nt_err', true);
+    }).catch(function(){ btn.disabled = false; btn.textContent = t('nt_send'); say('nt_err', true); });
+  });
+
   var toastTimer;
   function toast(msg){
     var el = $('#toast'); el.textContent = msg; el.classList.add('show');
@@ -1612,6 +1665,7 @@ document.addEventListener('DOMContentLoaded', function(){
             '<a class="btn btn--line" data-ask="' + esc(p.id) + '" href="' + wa + '" target="_blank" rel="noopener">' + t('pdp_ask') + '</a>' +
             '<button class="btn btn--line" type="button" data-share>' + t('pdp_share') + '</button>' +
           '</div>' +
+          (out ? notifyHtml(p) : '') +
           (rel.length ? '<div class="pdp__rel"><h3>' + t('pdp_related') + '</h3><ul style="list-style:none">' + rel.map(function(x){
             return '<li><button type="button" data-open="' + esc(x.id) + '"><span>' + esc(name(x)) + '</span><span dir="ltr">' + money(effPrice(x)) + '</span></button></li>';
           }).join('') + '</ul></div>' : '') +
@@ -1633,7 +1687,7 @@ document.addEventListener('DOMContentLoaded', function(){
       }).catch(function(){});
     }
   }
-  var hashHandled = false;
+  var hashHandled = false, cartOpened = false;
   function openFromHash(){
     var h = location.hash.slice(1);
     if(h.indexOf('p-') !== 0) return;
@@ -1671,6 +1725,11 @@ document.addEventListener('DOMContentLoaded', function(){
       if((cart[id] || 0) + 1 > avail(prod)){ say(avail(prod) <= 0 ? t('out_of_stock') : t('stock_max').replace('{n}', avail(prod))); return; }
       lastOrder = null; cart[id] = (cart[id] || 0) + 1; saveCart(); renderCart(); say(t('added'));
       track('Add to Cart', {product: prod.en || id, source: el.closest('#chatLog') ? 'chat' : 'store'});
+      return;
+    }
+    if((el = e.target.closest('[data-notify-open]'))){
+      var nf = el.parentNode.querySelector('form'); el.hidden = true; nf.hidden = false;
+      var ni = nf.querySelector('input'); if(ni) ni.focus();
       return;
     }
     if((el = e.target.closest('[data-ask]'))){
