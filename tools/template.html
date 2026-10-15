@@ -242,6 +242,32 @@
   /* =========================================================
      Section scaffolding
      ========================================================= */
+  /* Hero call-to-action: easy to spot, with a gentle pulse and a downward arrow */
+  .hero__cta{
+    display: inline-flex; align-items: center; gap: .7em;
+    padding: .95em 2.3em; font-weight: 600; letter-spacing: .03em;
+    font-size: clamp(.9rem, 1.3vw, 1.2rem);
+    animation: ctaPulse 2.4s ease-out infinite;
+    transition: background .25s ease, transform .25s ease, border-color .25s ease;
+  }
+  .hero__cta:hover{ transform: translateY(-2px); animation-play-state: paused; }
+  .hero__cta::after{
+    content: ""; width: .5em; height: .5em; flex: none;
+    border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+    transform: rotate(45deg) translateY(-2px); animation: ctaBob 1.6s ease-in-out infinite;
+  }
+  @keyframes ctaPulse{
+    0%   { box-shadow: 0 8px 22px rgba(31,95,107,.35), 0 0 0 0 rgba(47,143,157,.55); }
+    70%  { box-shadow: 0 8px 22px rgba(31,95,107,.35), 0 0 0 18px rgba(47,143,157,0); }
+    100% { box-shadow: 0 8px 22px rgba(31,95,107,.35), 0 0 0 0 rgba(47,143,157,0); }
+  }
+  @keyframes ctaBob{
+    0%, 100% { transform: rotate(45deg) translate(-2px, -2px); }
+    50%      { transform: rotate(45deg) translate(2px, 2px); }
+  }
+  @media (max-width: 760px){
+    .hero__cta{ display: flex; width: 100%; max-width: 340px; margin: 18px auto 8px; padding: 1.05em 1.6em; font-size: 1.05rem; }
+  }
   .panel[hidden]{ display: none; }
   .section{ padding: 104px 0; }
   .section--mist{ background: var(--mint); }
@@ -770,7 +796,7 @@
     <div class="hero__copy" style="--x:36.2%;--y:23%;--w:36%">
       <p class="hero__h" data-i18n="hero_h_medical"></p>
       <p class="hero__s" data-i18n="hero_s_medical"></p>
-      <a class="btn btn--solid hero__cta" href="#medical" data-i18n="hero_cta_medical"></a>
+      <a class="btn btn--solid hero__cta" href="#tools-medical" data-i18n="hero_cta_medical"></a>
     </div>
   </section>
 
@@ -902,7 +928,7 @@
     <div class="hero__copy" style="--x:42.6%;--y:10%;--w:36%">
       <p class="hero__h" data-i18n="hero_h_beauty"></p>
       <p class="hero__s" data-i18n="hero_s_beauty"></p>
-      <a class="btn btn--solid hero__cta" href="#beauty" data-i18n="hero_cta_beauty"></a>
+      <a class="btn btn--solid hero__cta" href="#collTabs-beauty" data-i18n="hero_cta_beauty"></a>
     </div>
   </section>
 
@@ -926,7 +952,7 @@
     <div class="hero__copy" style="--x:45.3%;--y:14%;--w:40%">
       <p class="hero__h" data-i18n="hero_h_athlete"></p>
       <p class="hero__s" data-i18n="hero_s_athlete"></p>
-      <a class="btn btn--solid hero__cta" href="#athlete" data-i18n="hero_cta_athlete"></a>
+      <a class="btn btn--solid hero__cta" href="#tools-athlete" data-i18n="hero_cta_athlete"></a>
     </div>
   </section>
 
