@@ -199,6 +199,7 @@
         <button class="tab" role="tab" id="tabWaiting" aria-selected="false">Waiting list <span class="pill" id="waitPill" hidden>0</span></button>
         <button class="tab" role="tab" id="tabArticles" aria-selected="false">Articles</button>
         <button class="tab" role="tab" id="tabWaList" aria-selected="false">WhatsApp list</button>
+        <button class="tab" role="tab" id="tabReviews" aria-selected="false">Reviews <span class="pill" id="revPill" hidden>0</span></button>
         <button class="tab" role="tab" id="tabSettings" aria-selected="false">Settings</button>
       </div>
       <span class="spacer"></span>
@@ -432,6 +433,28 @@
       <p class="empty" id="codesEmpty" hidden>No codes yet. Create your first one above, for example WELCOME10 with 10 percent, first orders only.</p>
     </section>
 
+    <!-- Reviews -->
+    <section id="panelReviews" hidden>
+      <div class="bar">
+        <h2>Customer reviews</h2>
+        <select id="revFilter" aria-label="Filter">
+          <option value="waiting">Waiting for approval</option>
+          <option value="approved">Published</option>
+          <option value="all">All</option>
+        </select>
+        <button class="btn" id="refreshReviews" type="button">Refresh</button>
+      </div>
+      <p class="hint" style="margin:0 0 12px">Customers can only review an order that is marked Delivered, using the order number and their phone. Nothing appears on the website until you tap Publish. To ask for a review, open Orders and tap Request review on a delivered order.</p>
+      <p class="msg msg--err" id="revErr" role="alert" hidden></p>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>Customer</th><th>Rating</th><th>Review</th><th>Order</th><th>Date</th><th>Status</th><th></th></tr></thead>
+          <tbody id="revRows"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="revEmpty" hidden>No reviews here yet.</p>
+    </section>
+
     <!-- Settings -->
     <section id="panelSettings" hidden>
       <div class="bar"><h2>Store settings</h2></div>
@@ -632,7 +655,7 @@
       return ensureMfa().then(function(passed){
         if(!passed) return;
         $('#who').textContent = user.email; show('viewApp');
-        loadProducts().then(loadWaiting); loadOrders(); loadSettings(); refreshMfaStatus();
+        loadProducts().then(loadWaiting); loadOrders(); loadSettings(); refreshMfaStatus(); loadReviews();
         clearInterval(timer); timer = setInterval(loadOrders, 60000);
       });
     });
@@ -759,6 +782,8 @@
     $('#panelProducts').hidden = name !== 'products';
     $('#panelOrders').hidden = name !== 'orders';
     $('#panelSettings').hidden = name !== 'settings';
+    $('#tabReviews').setAttribute('aria-selected', name === 'reviews');
+    $('#panelReviews').hidden = name !== 'reviews';
   }
   $('#tabSettings').addEventListener('click', function(){ tab('settings'); if(!/is ON/.test($('#mfaStatus').textContent)) refreshMfaStatus(); });
   $('#tabProducts').addEventListener('click', function(){ tab('products'); });
@@ -768,6 +793,7 @@
   $('#tabWaList').addEventListener('click', function(){ tab('walist'); loadWaList(); });
   $('#tabPromos').addEventListener('click', function(){ tab('promos'); loadPromos(); });
   $('#tabOrders').addEventListener('click', function(){ tab('orders'); loadOrders(); });
+  $('#tabReviews').addEventListener('click', function(){ tab('reviews'); loadReviews(); });
 
   /* ---------- Products list ---------- */
   // Supabase returns at most 1000 rows per request, so a big catalogue is fetched page by page.
@@ -1480,6 +1506,63 @@
     }
   });
 
+  /* ---------- Reviews ---------- */
+  var reviews = [];
+  function reviewStars(n){ var s = ''; for(var i = 1; i <= 5; i++) s += (i <= n ? '★' : '☆'); return s; }
+  function renderReviews(){
+    var f = $('#revFilter').value;
+    var waiting = reviews.filter(function(r){ return !r.is_approved; }).length;
+    var pill = $('#revPill'); pill.textContent = waiting; pill.hidden = waiting === 0;
+    var list = reviews.filter(function(r){ return f === 'all' ? true : f === 'approved' ? r.is_approved : !r.is_approved; });
+    $('#revEmpty').hidden = list.length > 0;
+    $('#revRows').innerHTML = list.map(function(r){
+      var date = new Date(r.created_at).toLocaleDateString('en', {dateStyle:'medium'});
+      return '<tr><td>' + esc(r.name) + (r.lang === 'ar' ? ' <small>(Arabic)</small>' : '') + '</td>' +
+        '<td style="white-space:nowrap;color:#C9962B" title="' + esc(r.rating) + ' / 5">' + reviewStars(Number(r.rating)) + '</td>' +
+        '<td dir="auto" style="max-width:380px">' + (r.comment ? esc(r.comment) : '<span class="hint">(rating only)</span>') + '</td>' +
+        '<td>#' + esc(r.order_no) + '</td><td>' + esc(date) + '</td>' +
+        '<td>' + (r.is_approved ? '<strong style="color:#1F5F6B">Published</strong>' : 'Waiting') + '</td>' +
+        '<td><div class="actions">' +
+          '<button class="btn btn--sm" data-rev-toggle="' + esc(r.id) + '">' + (r.is_approved ? 'Hide' : 'Publish') + '</button>' +
+          '<button class="btn btn--sm btn--danger" data-rev-del="' + esc(r.id) + '">Delete</button></div></td></tr>';
+    }).join('');
+  }
+  function loadReviews(){
+    return sb.from('reviews').select('*').order('created_at', {ascending:false}).limit(1000).then(function(r){
+      var err = $('#revErr');
+      if(r.error){ err.textContent = 'Reviews are not available yet. Run phase5-reviews.sql in the Supabase SQL Editor. (' + r.error.message + ')'; err.hidden = false; return; }
+      err.hidden = true; reviews = r.data || []; renderReviews();
+      if(orders.length) renderOrders();   // so delivered orders show "Reviewed"
+    });
+  }
+  // WhatsApp message (English + Arabic) that asks a customer of a delivered order for a review.
+  function reviewReqLink(o){
+    if(o.status !== 'delivered') return '';
+    if(reviews.some(function(r){ return String(r.order_no) === String(o.order_no); })) return ' · <span class="hint">Reviewed</span>';
+    var first = String(o.customer_name || '').trim().split(/\s+/)[0] || '';
+    var url = location.origin + '/review?no=' + o.order_no;
+    var txt = 'Hello' + (first ? ' ' + first : '') + ', thank you for ordering from AVARA. We would love to hear how it went: ' + url +
+      '\n\nمرحباً' + (first ? ' ' + first : '') + '، شكراً لطلبك من AVARA. يسعدنا سماع رأيك: ' + url;
+    return ' · <a href="https://wa.me/' + esc(waNumber(o.phone)) + '?text=' + encodeURIComponent(txt) + '" target="_blank" rel="noopener">Request review</a>';
+  }
+  $('#revFilter').addEventListener('change', renderReviews);
+  $('#refreshReviews').addEventListener('click', loadReviews);
+  $('#revRows').addEventListener('click', function(e){
+    var b;
+    function byId(id){ return reviews.filter(function(x){ return String(x.id) === String(id); })[0]; }
+    if((b = e.target.closest('[data-rev-toggle]'))){
+      var r = byId(b.getAttribute('data-rev-toggle'));
+      sb.from('reviews').update({is_approved: !r.is_approved}).eq('id', r.id).then(function(x){
+        if(x.error) alert('Could not update: ' + x.error.message); else loadReviews();
+      });
+    } else if((b = e.target.closest('[data-rev-del]'))){
+      if(!confirm('Delete this review? This cannot be undone.')) return;
+      sb.from('reviews').delete().eq('id', b.getAttribute('data-rev-del')).then(function(x){
+        if(x.error) alert('Could not delete: ' + x.error.message); else loadReviews();
+      });
+    }
+  });
+
   /* ---------- Orders ---------- */
   var STATUSES = ['new','confirmed','out_for_delivery','delivered','cancelled'];
   function loadOrders(){
@@ -1507,7 +1590,7 @@
         '<span class="order__date">' + esc(d.toLocaleString([], {dateStyle:'medium', timeStyle:'short'})) + '</span></div>' +
         '<div class="order__grid">' +
           '<div><h4>Customer</h4><div>' + esc(o.customer_name) + '</div><div><a href="tel:' + esc(o.phone) + '">' + esc(o.phone) + '</a> · ' +
-            '<a href="https://wa.me/' + esc(waNumber(o.phone)) + '" target="_blank" rel="noopener">WhatsApp</a></div>' +
+            '<a href="https://wa.me/' + esc(waNumber(o.phone)) + '" target="_blank" rel="noopener">WhatsApp</a>' + reviewReqLink(o) + '</div>' +
             (o.address ? '<div>' + esc(o.address) + '</div>' : '') +
             (o.notes ? '<div class="hint" style="margin-top:6px">Note: ' + esc(o.notes) + '</div>' : '') + '</div>' +
           '<div><h4>Items</h4><ul>' + items + '</ul></div>' +

@@ -55,6 +55,10 @@
     {
       "source": "/track",
       "destination": "/track.html"
+    },
+    {
+      "source": "/review",
+      "destination": "/review.html"
     }
   ],
   "headers": [
