@@ -337,7 +337,13 @@
   .card__body{ display: flex; flex-direction: column; gap: 4px; padding-top: 16px; flex: 1; }
   .card__cat{ font-size: .8rem; color: var(--ink-soft); font-weight: 500; letter-spacing: .06em; }
   .card__name{ font-size: 1.1rem; font-weight: 500; line-height: 1.3; }
-  .card__desc{ font-size: .92rem; color: var(--ink-soft); line-height: 1.5; flex: 1; margin-bottom: 8px; }
+  .card__desc{ font-size: .92rem; color: var(--ink-soft); line-height: 1.5; flex: 1; margin-bottom: 8px;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+  .card__desc.has-more{ flex: none; margin-bottom: 2px; }
+  .card__desc.is-open{ display: block; -webkit-line-clamp: unset; line-clamp: unset; overflow: visible; }
+  .card__more{ align-self: flex-start; margin-bottom: auto; padding: 2px 0 10px; font-size: .86rem; font-weight: 500; color: var(--teal-deep);
+    border-bottom: 1px solid transparent; }
+  .card__more:hover{ text-decoration: underline; text-underline-offset: 3px; }
   .card__foot{ display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
   .card__size{ font-size: .88rem; color: var(--ink-soft); }
   .card__price{ font-size: 1.15rem; font-weight: 500; }
@@ -1114,6 +1120,7 @@ document.addEventListener('DOMContentLoaded', function(){
       fx_brands_h:'{n} brands', fx_brands_p:'In our catalogue today.',
       rv_title:'What customers say', rv_one:'1 review', rv_many:'{n} reviews', rv_stars:'{n} out of 5 stars',
       rv_note:'Reviews come from customers whose order was delivered, and are published after we approve them.', rv_cta:'Bought from us? Leave a review',
+      show_more:'Show more', show_less:'Show less',
       langBtn:'العربية'
     },
     ar: {
@@ -1201,6 +1208,7 @@ document.addEventListener('DOMContentLoaded', function(){
       fx_brands_h:'{n} علامة تجارية', fx_brands_p:'في كتالوجنا اليوم.',
       rv_title:'آراء العملاء', rv_one:'تقييم واحد', rv_many:'{n} تقييمات', rv_stars:'{n} من 5 نجوم',
       rv_note:'التقييمات من عملاء تم تسليم طلباتهم، وتُنشر بعد موافقتنا عليها.', rv_cta:'اشتريت منا؟ اترك تقييمك',
+      show_more:'عرض المزيد', show_less:'عرض أقل',
       langBtn:'English'
     }
   };
@@ -1381,6 +1389,24 @@ document.addEventListener('DOMContentLoaded', function(){
       '<div class="gallery__dots">' + dots + '</div>' +
     '</div>';
   }
+  // Descriptions are clamped to 2 lines by CSS; a "Show more" link is added only where the text is really cut off.
+  function wireDescs(root){
+    (root || document).querySelectorAll('.card__desc').forEach(function(d){
+      var nx = d.nextElementSibling, more = (nx && nx.hasAttribute('data-more')) ? nx : null;
+      var over = d.classList.contains('is-open') || d.scrollHeight > d.clientHeight + 1;
+      if(over && !more){
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'card__more'; b.setAttribute('data-more', '');
+        b.setAttribute('aria-expanded', 'false'); b.textContent = t('show_more');
+        d.parentNode.insertBefore(b, d.nextSibling); d.classList.add('has-more');
+      } else if(!over && more){
+        more.parentNode.removeChild(more); d.classList.remove('has-more');
+      }
+    });
+  }
+  var descTimer;
+  window.addEventListener('resize', function(){ clearTimeout(descTimer); descTimer = setTimeout(function(){ wireDescs(document); }, 150); });
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ wireDescs(document); });
   function wireGalleries(container){
     container.querySelectorAll('[data-gallery]').forEach(function(g){
       var track = g.querySelector('.gallery__track');
@@ -1463,7 +1489,7 @@ document.addEventListener('DOMContentLoaded', function(){
         '</div></article>';
     }).join('') : '<p class="state-msg">' + t('no_products') + '</p>';
     countEl.textContent = t('count').replace('{n}', list.length);
-    wireGalleries(grid);
+    wireGalleries(grid); wireDescs(grid);
   }
 
   // "Notify me when it is back" box for sold-out products (card and product dialog).
@@ -2028,6 +2054,11 @@ document.addEventListener('DOMContentLoaded', function(){
       if((cart[id] || 0) + 1 > avail(prod)){ say(avail(prod) <= 0 ? t('out_of_stock') : t('stock_max').replace('{n}', avail(prod))); return; }
       lastOrder = null; cart[id] = (cart[id] || 0) + 1; saveCart(); renderCart(); say(t('added'));
       track('Add to Cart', {product: prod.en || id, source: el.closest('#chatLog') ? 'chat' : 'store'});
+      return;
+    }
+    if((el = e.target.closest('[data-more]'))){
+      var dd = el.previousElementSibling, isOpen = dd.classList.toggle('is-open');
+      el.textContent = t(isOpen ? 'show_less' : 'show_more'); el.setAttribute('aria-expanded', String(isOpen));
       return;
     }
     if((el = e.target.closest('[data-promo-add]'))){ addPromo(parseInt(el.getAttribute('data-promo-add'), 10)); return; }
