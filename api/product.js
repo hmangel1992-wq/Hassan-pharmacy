@@ -122,6 +122,7 @@ ${ld ? `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\
 ${body}
 <footer><a href="/policies">${esc(T.policies)}</a><br>${esc(T.rights)}</footer>
 <script>document.addEventListener('click',function(e){var a=e.target.closest('a[data-ask]');if(a&&window.plausible)window.plausible('WhatsApp Product',{props:{product:a.getAttribute('data-ask')}})});</script>
+<script src="/assets/float-contact.js" defer></script>
 </body>
 </html>`;
 }
