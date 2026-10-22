@@ -32,10 +32,12 @@ if (!m) throw new Error('Could not find the I18N block in tools/template.html');
 const I18N = new Function('return ' + m[1])();
 
 const PAGES = [
-  { lang: 'en', panel: 'medical', file: 'index.html',      url: '/' },
+  { lang: 'en', panel: 'home',    file: 'index.html',      url: '/' },
+  { lang: 'en', panel: 'medical', file: 'medical.html',    url: '/medical' },
   { lang: 'en', panel: 'beauty',  file: 'beauty.html',     url: '/beauty' },
   { lang: 'en', panel: 'athlete', file: 'athlete.html',    url: '/athlete' },
-  { lang: 'ar', panel: 'medical', file: 'ar/index.html',   url: '/ar/' },
+  { lang: 'ar', panel: 'home',    file: 'ar/index.html',   url: '/ar/' },
+  { lang: 'ar', panel: 'medical', file: 'ar/medical.html', url: '/ar/medical' },
   { lang: 'ar', panel: 'beauty',  file: 'ar/beauty.html',  url: '/ar/beauty' },
   { lang: 'ar', panel: 'athlete', file: 'ar/athlete.html', url: '/ar/athlete' },
 ];
@@ -83,6 +85,20 @@ const META = {
     },
   },
 };
+
+// Home page: takes over the old Medical title and description; the Medical page gets its own.
+META.en.home = Object.assign({}, META.en.medical, { h1: 'AVARA — Health care and cosmetics', hero: null });
+META.ar.home = Object.assign({}, META.ar.medical, { h1: 'AVARA — رعاية صحية ومستحضرات تجميل', hero: null });
+Object.assign(META.en.medical, {
+  title: 'Medical care | AVARA: medical advice, vitamins and everyday essentials',
+  desc: 'Medical advice, vitamins, first aid and health devices from AVARA. Straight answers on symptoms and medication questions. Prescription-only medicines are not sold online.',
+  h1: 'AVARA — Medical care',
+});
+Object.assign(META.ar.medical, {
+  title: 'الرعاية الطبية | AVARA: نصائح طبية وفيتامينات وأساسيات يومية',
+  desc: 'نصائح طبية وفيتامينات وإسعافات أولية وأجهزة صحية من AVARA. إجابات واضحة عن الأعراض وأسئلة الأدوية. لا تُباع الأدوية التي تُصرف بوصفة طبية عبر الإنترنت.',
+  h1: 'AVARA — الرعاية الطبية',
+});
 
 const abs = (u) => SITE + u;
 
@@ -190,11 +206,11 @@ PAGES.forEach((page) => {
   addMeta(doc, { property: 'og:locale', content: ar ? 'ar_AR' : 'en_US' });
   addMeta(doc, { property: 'og:locale:alternate', content: ar ? 'en_US' : 'ar_AR' });
   addMeta(doc, { name: 'twitter:card', content: 'summary_large_image' });
-  const heroBase = '/assets/' + meta.hero.replace(/\.jpg$/, '');
-  addLink(doc, { rel: 'preload', as: 'image', href: heroBase + '-1536.webp', imagesrcset: heroBase + '-800.webp 800w, ' + heroBase + '-1536.webp 1536w', imagesizes: '100vw', fetchpriority: 'high' });
+  const heroBase = meta.hero ? '/assets/' + meta.hero.replace(/\.jpg$/, '') : null;
+  if (heroBase) addLink(doc, { rel: 'preload', as: 'image', href: heroBase + '-1536.webp', imagesrcset: heroBase + '-800.webp 800w, ' + heroBase + '-1536.webp 1536w', imagesizes: '100vw', fetchpriority: 'high' });
 
   // ---- Structured data ----
-  if (page.panel === 'medical') {
+  if (page.panel === 'home') {
     addLd(doc, 'ld-business', {
       '@context': 'https://schema.org',
       '@graph': [
@@ -211,8 +227,8 @@ PAGES.forEach((page) => {
     addLd(doc, null, {
       '@context': 'https://schema.org', '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'AVARA', item: abs(urlOf(page.lang, 'medical')) },
-        { '@type': 'ListItem', position: 2, name: ar ? I18N.ar['nav_' + page.panel + '_full'] : I18N.en['nav_' + page.panel + '_full'], item: pageUrl },
+        { '@type': 'ListItem', position: 1, name: 'AVARA', item: abs(urlOf(page.lang, 'home')) },
+        { '@type': 'ListItem', position: 2, name: (ar ? I18N.ar : I18N.en)['nav_' + page.panel + '_full'] || (ar ? I18N.ar : I18N.en)['nav_' + page.panel], item: pageUrl },
       ],
     });
   }
