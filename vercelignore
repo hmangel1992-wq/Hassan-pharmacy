@@ -1,0 +1,26 @@
+# AVARA: files that stay in your project but are NOT published on the website.
+# (Vercel reads this file when you deploy. It does not delete anything.)
+
+# Database scripts (you run these in Supabase, visitors never need them)
+*.sql
+
+# Setup notes and documentation
+*.md
+
+# One-time patch scripts and the page builder
+apply-*.js
+tools/
+claude/
+
+# Backups made by the patch scripts
+*.bak
+
+# Tooling files
+skills-lock.json
+package-lock.json
+
+# Secrets and local folders (never publish)
+.env
+.env.*
+node_modules/
+.vercel/
