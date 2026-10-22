@@ -27,10 +27,13 @@
 
 <script src="/config.js" defer></script>
 <script src="/vendor/supabase-2.45.4.js" defer></script>
-<!-- Privacy-friendly analytics (Plausible): no cookies, no personal data.
-     data-domain must match the site name you create in Plausible. -->
-<script defer data-domain="avara-nu-beige.vercel.app" src="https://plausible.io/js/script.js"></script>
-<script>window.plausible = window.plausible || function(){ (window.plausible.q = window.plausible.q || []).push(arguments); };</script>
+<!-- Privacy-friendly analytics by Plausible -->
+<script async src="https://plausible.io/js/pa-hl02LMOrQ1w2cM0awG3nn.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
