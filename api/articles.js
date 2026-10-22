@@ -16,7 +16,7 @@ const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 const DEPT = {
-  medical: { en: 'Medical care', ar: 'الرعاية الطبية', path: '' },
+  medical: { en: 'Medical care', ar: 'الرعاية الطبية', path: 'medical' },
   athlete: { en: 'Athlete care', ar: 'الرعاية الرياضية', path: 'athlete' },
   beauty: { en: 'Beauty care', ar: 'العناية بالجمال', path: 'beauty' },
 };

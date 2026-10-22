@@ -149,6 +149,7 @@ ${ld ? `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\
 </div></header>
 ${body}
 <footer><a href="/policies">${esc(T.policies)}</a><br>${esc(T.rights)}</footer>
+<script src="/assets/float-contact.js" defer></script>
 </body>
 </html>`;
 }

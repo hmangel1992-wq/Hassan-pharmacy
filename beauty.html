@@ -662,6 +662,53 @@
   [dir="rtl"] .toast{ transform: translate(50%, 20px); }
   .toast.show{ opacity: 1; transform: translate(-50%, 0); }
   [dir="rtl"] .toast.show{ transform: translate(50%, 0); }
+
+  /* =========================================================
+     Home page
+     ========================================================= */
+  .hero.hero--home{
+    display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); align-items: center;
+    gap: clamp(24px, 5vw, 72px); min-height: clamp(420px, 44vw, 580px);
+    padding: clamp(40px, 6vw, 84px) max(24px, calc((100% - 1240px) / 2));
+    background: linear-gradient(135deg, var(--mint) 0%, #F3FBF9 58%, var(--ivory) 100%);
+  }
+  .home-hero__eyebrow{ font-size: .86rem; letter-spacing: .16em; text-transform: uppercase; color: var(--teal-deep); font-weight: 500; }
+  [lang="ar"] .home-hero__eyebrow{ letter-spacing: 0; text-transform: none; }
+  .home-hero__h{ margin-top: 14px; font-weight: 300; line-height: 1.08; font-size: clamp(2.4rem, 5.4vw, 4.6rem); color: var(--ink); }
+  [lang="ar"] .home-hero__h{ font-weight: 400; line-height: 1.3; }
+  .home-hero__s{ margin-top: 18px; max-width: 40ch; font-size: clamp(1.02rem, 1.4vw, 1.25rem); color: var(--ink-soft); }
+  .home-hero__cta{ margin-top: 30px; display: flex; flex-wrap: wrap; gap: 12px; }
+  .home-hero__art{ position: relative; display: flex; align-items: flex-end; justify-content: center; padding: 24px 0 8px; }
+  .home-hero__art::before{
+    content: ""; position: absolute; inset: 4% 8% 0; border-radius: 50%;
+    background: radial-gradient(circle at 50% 45%, #FFFFFF 0%, rgba(255,255,255,.55) 45%, rgba(255,255,255,0) 72%);
+  }
+  .home-hero__art .pack{ position: relative; width: clamp(110px, 17vw, 220px); height: auto; filter: drop-shadow(0 18px 22px rgba(31,95,107,.16)); }
+  .home-hero__art .pack:nth-child(1){ margin-inline-end: -4%; transform: translateY(6px) rotate(-4deg); }
+  .home-hero__art .pack:nth-child(2){ width: clamp(130px, 21vw, 270px); z-index: 1; }
+  .home-hero__art .pack:nth-child(3){ margin-inline-start: -4%; transform: translateY(6px) rotate(4deg); }
+  @media (max-width: 860px){
+    .hero.hero--home{ grid-template-columns: 1fr; min-height: 0; text-align: center; padding: 44px 24px 28px; }
+    .home-hero__s{ margin-inline: auto; }
+    .home-hero__cta{ justify-content: center; }
+    .home-hero__art .pack{ width: 26vw; }
+    .home-hero__art .pack:nth-child(2){ width: 32vw; }
+  }
+  @media (max-width: 460px){ .home-hero__cta .btn{ width: 100%; } }
+
+  .dtiles{ margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .dtile{ display: flex; flex-direction: column; background: var(--white); border: 1px solid var(--mint-2); text-decoration: none; overflow: hidden; transition: border-color .3s ease, box-shadow .3s ease; }
+  .dtile:hover{ border-color: var(--teal-deep); box-shadow: 0 12px 30px rgba(31,95,107,.12); }
+  .dtile__img{ display: block; aspect-ratio: 16 / 9; overflow: hidden; background: var(--wall); }
+  .dtile__img img{ width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+  .dtile:hover .dtile__img img{ transform: scale(1.04); }
+  .dtile__body{ display: flex; flex-direction: column; gap: 10px; padding: 24px 26px 26px; flex: 1; }
+  .dtile__name{ font-size: 1.45rem; font-weight: 400; line-height: 1.2; }
+  .dtile__desc{ color: var(--ink-soft); flex: 1; }
+  @media (max-width: 860px){ .dtiles{ grid-template-columns: 1fr; } }
+  #featured .grid{ margin-top: 36px; }
+  #grid-featured .card__foot{ margin-top: auto; }
+  #featured[hidden]{ display: none; }
 </style>
 <title>Beauty care | AVARA: skin care, hair care and cosmetics</title><meta name="description" content="Shop skin care, hair care and cosmetics at AVARA: Avara Care, Avara Hair and Avara Cosmetics, with brands such as La Roche-Posay, CeraVe and Kérastase."><link rel="canonical" href="https://avara-nu-beige.vercel.app/beauty"><link rel="alternate" hreflang="en" href="https://avara-nu-beige.vercel.app/beauty"><link rel="alternate" hreflang="ar" href="https://avara-nu-beige.vercel.app/ar/beauty"><link rel="alternate" hreflang="x-default" href="https://avara-nu-beige.vercel.app/beauty"><meta property="og:site_name" content="AVARA"><meta property="og:type" content="website"><meta property="og:title" content="Beauty care | AVARA: skin care, hair care and cosmetics"><meta property="og:description" content="Shop skin care, hair care and cosmetics at AVARA: Avara Care, Avara Hair and Avara Cosmetics, with brands such as La Roche-Posay, CeraVe and Kérastase."><meta property="og:url" content="https://avara-nu-beige.vercel.app/beauty"><meta property="og:image" content="https://avara-nu-beige.vercel.app/assets/hero-beauty.jpg"><meta property="og:locale" content="en_US"><meta property="og:locale:alternate" content="ar_AR"><meta name="twitter:card" content="summary_large_image"><link rel="preload" as="image" href="/assets/hero-beauty-1536.webp" imagesrcset="/assets/hero-beauty-800.webp 800w, /assets/hero-beauty-1536.webp 1536w" imagesizes="100vw" fetchpriority="high"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AVARA","item":"https://avara-nu-beige.vercel.app/"},{"@type":"ListItem","position":2,"name":"Beauty care","item":"https://avara-nu-beige.vercel.app/beauty"}]}</script></head>
 <body id="top">
@@ -747,7 +794,7 @@
     <a class="brand" href="/" aria-label="AVARA"><img src="/assets/logo.png" alt="AVARA" width="132" height="26"></a>
 
     <ul class="nav" id="nav">
-      <li><a href="/" data-nav-panel="medical" data-i18n="nav_medical">Medical care</a></li>
+      <li><a href="/medical" data-nav-panel="medical" data-i18n="nav_medical">Medical care</a></li>
       <li><a href="/beauty" data-nav-panel="beauty" data-i18n="nav_beauty_full" aria-current="page">Beauty care</a></li>
       <li><a href="/athlete" data-nav-panel="athlete" data-i18n="nav_athlete_full">Athlete care</a></li>
       <li><a href="/#about" data-i18n="nav_about">About</a></li>
@@ -786,59 +833,63 @@
 
 <main>
 
-<!-- ============ PANEL: MEDICAL (home) ============ -->
-<div class="panel" data-panel="medical" id="panel-medical" hidden="">
+<!-- ============ PANEL: HOME ============ -->
+<div class="panel" data-panel="home" id="panel-home" hidden="">
 
-  <section class="hero" aria-label="AVARA Medical care">
-    <img class="hero__img" src="/assets/hero-medical-1536.webp" srcset="/assets/hero-medical-800.webp 800w, /assets/hero-medical-1536.webp 1536w" sizes="100vw" width="1536" height="900" alt="A smiling woman beside vitamin D3, omega-3 fish oil, a digital thermometer and La Roche-Posay Cicaplast balm." loading="lazy">
-    <div class="hero__copy" style="--x:36.2%;--y:23%;--w:36%">
-      <p class="hero__h" data-i18n="hero_h_medical">Better health for a more beautiful life.</p>
-      <p class="hero__s" data-i18n="hero_s_medical">Medical advice, vitamins and everyday essentials.</p>
-      <a class="btn btn--solid hero__cta" href="/#tools-medical" data-i18n="hero_cta_medical">Shop Medical care</a>
+  <section class="hero hero--home" aria-label="AVARA">
+    <div class="home-hero__copy">
+      <p class="home-hero__eyebrow" data-i18n="hero_tag">Inspired by Nature. Perfected by Science.</p>
+      <p class="home-hero__h" data-i18n="hero_h_home">Your Health Matters</p>
+      <p class="home-hero__s" data-i18n="hero_s_home">Medical advice, athlete care and beauty, in one trusted place.</p>
+      <div class="home-hero__cta">
+        <a class="btn btn--solid" href="/#departments" data-i18n="cta_depts">Shop by department</a>
+        <a class="btn btn--line" href="/#chat" data-i18n="chat_cta">Chat with us</a>
+      </div>
+    </div>
+    <div class="home-hero__art" aria-hidden="true">
+      <svg class="pack" viewBox="0 0 120 140"><use href="#pk-tube"></use></svg>
+      <svg class="pack" viewBox="0 0 120 140"><use href="#pk-dropper"></use></svg>
+      <svg class="pack" viewBox="0 0 120 140"><use href="#pk-pump"></use></svg>
     </div>
   </section>
 
-  <section class="section" id="departments" style="padding-bottom:40px">
+  <section class="section" id="departments" aria-labelledby="deptTitle" style="padding-bottom:40px">
     <div class="wrap">
-      <h2 class="h2" data-i18n="dept_title">Shop by department</h2>
-      <div class="tiles tiles--2">
-        <a class="tile" href="#beauty">
-          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 40C8 20 20 8 40 8c0 20-12 32-32 32z"></path><path d="M8 40L28 20"></path></svg>
-          <span class="tile__name" data-i18n="nav_beauty_full">Beauty care</span>
-          <span class="tile__desc" data-i18n="tile_beauty">Skin care inspired by nature and perfected by science.</span>
-          <span class="tile__go"><span data-i18n="shop">Shop</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+      <h2 class="h2" id="deptTitle" data-i18n="dept_title">Shop by department</h2>
+      <div class="dtiles">
+        <a class="dtile" href="/medical">
+          <span class="dtile__img"><img src="/assets/hero-medical-800.webp" alt="" width="800" height="469" loading="lazy"></span>
+          <span class="dtile__body">
+            <span class="dtile__name" data-i18n="nav_medical">Medical care</span>
+            <span class="dtile__desc" data-i18n="tile_medical">Health care essentials, with answers you can trust.</span>
+            <span class="tile__go"><span data-i18n="shop">Shop</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          </span>
         </a>
-        <a class="tile" href="/athlete">
-          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M3 25h9l5-12 7 22 6-16 3 6h12"></path></svg>
-          <span class="tile__name" data-i18n="nav_athlete_full">Athlete care</span>
-          <span class="tile__desc" data-i18n="tile_athlete">Recovery, hydration and everyday support for active bodies.</span>
-          <span class="tile__go"><span data-i18n="shop">Shop</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+        <a class="dtile" href="/beauty">
+          <span class="dtile__img"><img src="/assets/hero-beauty-800.webp" alt="" width="800" height="469" loading="lazy"></span>
+          <span class="dtile__body">
+            <span class="dtile__name" data-i18n="nav_beauty_full">Beauty care</span>
+            <span class="dtile__desc" data-i18n="tile_beauty">Skin care inspired by nature and perfected by science.</span>
+            <span class="tile__go"><span data-i18n="shop">Shop</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          </span>
+        </a>
+        <a class="dtile" href="/athlete">
+          <span class="dtile__img"><img src="/assets/hero-athlete-800.webp" alt="" width="800" height="469" loading="lazy"></span>
+          <span class="dtile__body">
+            <span class="dtile__name" data-i18n="nav_athlete_full">Athlete care</span>
+            <span class="dtile__desc" data-i18n="tile_athlete">Recovery, hydration and everyday support for active bodies.</span>
+            <span class="tile__go"><span data-i18n="shop">Shop</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          </span>
         </a>
       </div>
     </div>
   </section>
 
-  <section class="section" id="medical" aria-labelledby="medicalTitle">
+  <section class="section section--mist" id="featured" aria-labelledby="featuredTitle" hidden="">
     <div class="wrap">
-      <div class="dept-head dept-head--split">
-        <div>
-          <h2 class="h2" id="medicalTitle" data-i18n="nav_medical">Medical care</h2>
-          <p class="lead" data-i18n="lead_medical">Straight answers on symptoms, medication questions and everyday health care.</p>
-          <p class="rx-note" data-i18n="rx_note">Prescription-only medicines are not sold online. For prescriptions, please contact the pharmacy.</p>
-        </div>
-        <aside class="advice">
-          <h3 class="advice__title" data-i18n="advice_title">Ask before you decide</h3>
-          <ul class="advice__list">
-            <li><a href="/#chat" data-i18n="advice_1">Symptoms, and when to see a doctor</a></li>
-            <li><a href="/#chat" data-i18n="advice_2">Medication questions and interactions</a></li>
-            <li><a href="/#chat" data-i18n="advice_3">Vitamins and supplements that suit you</a></li>
-          </ul>
-          <a class="btn btn--solid" href="/#chat" data-i18n="chat_cta">Chat with us</a>
-          <p class="advice__note" data-i18n="advice_note">General guidance only. It does not replace your doctor.</p>
-        </aside>
-      </div>
-      <div class="toolbar" id="tools-medical"></div>
-      <div class="grid" id="grid-medical"></div>
+      <h2 class="h2" id="featuredTitle" data-i18n="featured_title">Featured picks</h2>
+      <p class="lead" data-i18n="featured_sub">A few products from across our three departments.</p>
+      <div class="grid" id="grid-featured"></div>
     </div>
   </section>
 
@@ -918,6 +969,44 @@
 
 </div>
 
+<!-- ============ PANEL: MEDICAL ============ -->
+<div class="panel" data-panel="medical" id="panel-medical" hidden="">
+
+  <section class="hero" aria-label="AVARA Medical care">
+    <img class="hero__img" src="/assets/hero-medical-1536.webp" srcset="/assets/hero-medical-800.webp 800w, /assets/hero-medical-1536.webp 1536w" sizes="100vw" width="1536" height="900" alt="A smiling woman beside vitamin D3, omega-3 fish oil, a digital thermometer and La Roche-Posay Cicaplast balm." loading="lazy">
+    <div class="hero__copy" style="--x:36.2%;--y:23%;--w:36%">
+      <p class="hero__h" data-i18n="hero_h_medical">Better health for a more beautiful life.</p>
+      <p class="hero__s" data-i18n="hero_s_medical">Medical advice, vitamins and everyday essentials.</p>
+      <a class="btn btn--solid hero__cta" href="/medical#tools-medical" data-i18n="hero_cta_medical">Shop Medical care</a>
+    </div>
+  </section>
+
+  <section class="section" id="medical" aria-labelledby="medicalTitle">
+    <div class="wrap">
+      <div class="dept-head dept-head--split">
+        <div>
+          <h2 class="h2" id="medicalTitle" data-i18n="nav_medical">Medical care</h2>
+          <p class="lead" data-i18n="lead_medical">Straight answers on symptoms, medication questions and everyday health care.</p>
+          <p class="rx-note" data-i18n="rx_note">Prescription-only medicines are not sold online. For prescriptions, please contact the pharmacy.</p>
+        </div>
+        <aside class="advice">
+          <h3 class="advice__title" data-i18n="advice_title">Ask before you decide</h3>
+          <ul class="advice__list">
+            <li><a href="/#chat" data-i18n="advice_1">Symptoms, and when to see a doctor</a></li>
+            <li><a href="/#chat" data-i18n="advice_2">Medication questions and interactions</a></li>
+            <li><a href="/#chat" data-i18n="advice_3">Vitamins and supplements that suit you</a></li>
+          </ul>
+          <a class="btn btn--solid" href="/#chat" data-i18n="chat_cta">Chat with us</a>
+          <p class="advice__note" data-i18n="advice_note">General guidance only. It does not replace your doctor.</p>
+        </aside>
+      </div>
+      <div class="toolbar" id="tools-medical"></div>
+      <div class="grid" id="grid-medical"></div>
+    </div>
+  </section>
+
+</div>
+
 <!-- ============ PANEL: BEAUTY ============ -->
 <div class="panel" data-panel="beauty" id="panel-beauty"><h1 class="sr-only">AVARA — Beauty care</h1>
 
@@ -977,7 +1066,7 @@
     <nav aria-label="Shop">
       <h3 data-i18n="f_shop">Shop</h3>
       <ul>
-        <li><a href="/" data-i18n="nav_medical">Medical advice</a></li>
+        <li><a href="/medical" data-i18n="nav_medical">Medical advice</a></li>
         <li><a href="/athlete" data-i18n="nav_athlete_full">Athlete section</a></li>
         <li><a href="#beauty" data-i18n="nav_beauty_full">Beauty section</a></li>
       </ul>
@@ -1147,6 +1236,8 @@ document.addEventListener('DOMContentLoaded', function(){
       rv_title:'What customers say', rv_one:'1 review', rv_many:'{n} reviews', rv_stars:'{n} out of 5 stars',
       rv_note:'Reviews come from customers whose order was delivered, and are published after we approve them.', rv_cta:'Bought from us? Leave a review',
       show_more:'Show more', show_less:'Show less',
+      hero_h_home:'Your Health Matters', hero_s_home:'Medical advice, athlete care and beauty, in one trusted place.',
+      cta_depts:'Shop by department', featured_title:'Featured picks', featured_sub:'A few products from across our three departments.',
       langBtn:'العربية'
     },
     ar: {
@@ -1235,6 +1326,8 @@ document.addEventListener('DOMContentLoaded', function(){
       rv_title:'آراء العملاء', rv_one:'تقييم واحد', rv_many:'{n} تقييمات', rv_stars:'{n} من 5 نجوم',
       rv_note:'التقييمات من عملاء تم تسليم طلباتهم، وتُنشر بعد موافقتنا عليها.', rv_cta:'اشتريت منا؟ اترك تقييمك',
       show_more:'عرض المزيد', show_less:'عرض أقل',
+      hero_h_home:'صحتك تهمّنا', hero_s_home:'نصائح طبية ورعاية رياضية وعناية بالجمال، في مكان واحد تثق به.',
+      cta_depts:'تسوّق حسب القسم', featured_title:'مختارات لك', featured_sub:'مجموعة منتجات من أقسامنا الثلاثة.',
       langBtn:'English'
     }
   };
@@ -1380,7 +1473,7 @@ document.addEventListener('DOMContentLoaded', function(){
       .then(function(res){
         if(res.error){ throw res.error; }
         PRODUCTS = (res.data || []).map(mapRow); loadState = 'ok'; indexProducts();
-        DEPTS.forEach(renderDept); renderCart(); runSearch();
+        DEPTS.forEach(renderDept); renderFeatured(); renderCart(); runSearch();
         updateItemList(); loadPromos(); renderTrust();
         if(!hashHandled){ hashHandled = true; openFromHash(); }
         if(!cartOpened){ cartOpened = true; if(/[?&]cart=1\b/.test(location.search)){ Object.keys(cart).forEach(function(id){ var pr = byId[id]; if(!pr) return; var av = avail(pr); if(av <= 0) delete cart[id]; else if(cart[id] > av) cart[id] = av; }); saveCart(); renderCart(); openCart(); try{ history.replaceState(null, '', location.pathname + location.hash); }catch(e){} } }
@@ -1901,9 +1994,44 @@ document.addEventListener('DOMContentLoaded', function(){
       return '<li><button type="button" data-goto="' + esc(p.id) + '"><span>' + esc(name(p)) + '<br><small>' + esc(pick(DEPT_LABEL[p.dept])) + '</small></span><span dir="ltr">' + money(effPrice(p)) + '</span></button></li>';
     }).join('') : '<li class="search-empty">' + t('search_none') + '</li>';
   }
+
+  /* ---------- Home: featured picks (real products only) ---------- */
+  // In stock; products with a photo, on sale or new come first, then your own order from admin.
+  // Spread across the three departments, at most 8. The section stays hidden until there is something to show.
+  function renderFeatured(){
+    var sec = $('#featured'), grid = $('#grid-featured'); if(!sec || !grid) return;
+    if(loadState !== 'ok'){ sec.hidden = true; return; }
+    var by = {medical: [], beauty: [], athlete: []};
+    PRODUCTS.forEach(function(p, i){
+      if(avail(p) <= 0 || !by[p.dept]) return;
+      by[p.dept].push({p: p, k: (p.img ? 0 : 4) + (p.salePrice != null ? 0 : 2) + (p.isNew ? 0 : 1), i: i});
+    });
+    var lists = ['medical', 'beauty', 'athlete'].map(function(d){
+      return by[d].sort(function(a, b){ return a.k - b.k || a.i - b.i; });
+    });
+    var picks = [];
+    for(var n = 0; picks.length < 8 && n < 8; n++){
+      lists.forEach(function(l){ if(picks.length < 8 && l[n]) picks.push(l[n].p); });
+    }
+    sec.hidden = !picks.length;
+    grid.innerHTML = picks.map(function(p){
+      var priceHtml = p.salePrice != null
+        ? '<span class="card__price card__price--sale" dir="ltr"><span class="card__price-was">' + money(p.price) + '</span><span class="card__price-now">' + money(p.salePrice) + '</span></span>'
+        : '<span class="card__price" dir="ltr">' + money(p.price) + '</span>';
+      return '<article class="card">' +
+        '<div class="card__media" data-open="' + esc(p.id) + '">' + media(p) + (p.isNew ? '<span class="badge">' + t('badge_new') + '</span>' : '') + '</div>' +
+        '<div class="card__body">' +
+          '<p class="card__cat">' + (p.brand ? esc(p.brand) + ' · ' : '') + esc(catLabel(p)) + '</p>' +
+          '<h3 class="card__name"><button class="card__name-btn" type="button" data-open="' + esc(p.id) + '">' + esc(name(p)) + '</button></h3>' +
+          '<div class="card__foot"><span class="card__size">' + esc(pick({en: p.size[0], ar: p.size[1]})) + '</span>' + priceHtml + '</div>' +
+          '<button class="btn btn--line" type="button" data-add="' + esc(p.id) + '">' + t('add') + '</button>' +
+        '</div></article>';
+    }).join('');
+  }
+
   /* ---------- Panels (Medical / Beauty / Athlete are separate screens, not scroll anchors) ---------- */
-  var activePanel = document.documentElement.getAttribute('data-panel') || 'medical';
-  function deptUrl(d){ var b = lang === 'ar' ? '/ar' : ''; return d === 'medical' ? b + '/' : b + '/' + d; }
+  var activePanel = document.documentElement.getAttribute('data-panel') || 'home';
+  function deptUrl(d){ var b = lang === 'ar' ? '/ar' : ''; return d === 'home' ? b + '/' : b + '/' + d; }
   function routeTo(panel, hash){ location.href = deptUrl(panel) + (hash ? '#' + hash : ''); }
   function showPanel(name){
     if(!name || name === activePanel){ return; }
@@ -2062,7 +2190,7 @@ document.addEventListener('DOMContentLoaded', function(){
     var al = $('#articlesLink'); if(al) al.setAttribute('href', (lang === 'ar' ? '/ar' : '') + '/articles');
     $('#langBtn').setAttribute('lang', lang === 'ar' ? 'en' : 'ar');
     var pd = document.getElementById('pdp'); if(pd && pd.open) pd.close();
-    DEPTS.forEach(renderDept);
+    DEPTS.forEach(renderDept); renderFeatured();
     applyStore();
     renderCart();
     runSearch(); renderPromos(); renderTrust(); renderReviews();
