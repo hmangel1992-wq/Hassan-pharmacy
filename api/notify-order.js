@@ -6,11 +6,11 @@
 // Required env:  NOTIFY_SECRET            (same value as the webhook header)
 // Telegram:      TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 // Email (Resend):RESEND_API_KEY, NOTIFY_EMAIL_TO, optional NOTIFY_EMAIL_FROM
-// Optional:      SITE_URL  (default https://avara-nu-beige.vercel.app)
+// Optional:      SITE_URL  (default https://avaracare.online)
 
 const crypto = require('crypto');
 
-const SITE = (process.env.SITE_URL || 'https://avara-nu-beige.vercel.app').replace(/\/$/, '');
+const SITE = (process.env.SITE_URL || 'https://avaracare.online').replace(/\/$/, '');
 
 function safeEqual(a, b) {
   const A = Buffer.from(String(a || ''));

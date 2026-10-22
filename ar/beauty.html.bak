@@ -1,0 +1,2458 @@
+<!DOCTYPE html><html lang="ar" dir="rtl" data-lang="ar" data-panel="beauty" data-alt-url="/beauty"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<meta name="theme-color" content="#2F8F9D">
+
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="AVARA">
+
+
+
+
+
+
+
+
+
+<script src="/config.js" defer=""></script>
+<script src="/vendor/supabase-2.45.4.js" defer=""></script>
+<!-- Privacy-friendly analytics (Plausible): no cookies, no personal data.
+     data-domain must match the site name you create in Plausible. -->
+<script defer="" data-domain="avara-nu-beige.vercel.app" src="https://plausible.io/js/script.js"></script>
+<script>window.plausible = window.plausible || function(){ (window.plausible.q = window.plausible.q || []).push(arguments); };</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&amp;family=Tajawal:wght@300;400;500;700&amp;display=swap" rel="stylesheet">
+
+<style>
+  /* =========================================================
+     AVARA — tokens
+     ========================================================= */
+  :root{
+    --teal:      #2F8F9D;   /* Avara Teal — main brand colour: logo, icons, borders */
+    --teal-deep: #1F5F6B;   /* Deep Teal — buttons, hover states, premium accents */
+    --mint:      #DFF4F1;   /* Soft Mint — section backgrounds */
+    --mint-2:    #C6E5E0;   /* hairlines on mint (one step deeper) */
+    --ivory:     #FAF9F6;   /* Ivory White — main website background */
+    --ink:       #2C2C2C;   /* Charcoal — typography and navigation */
+    --ink-soft:  #5B5F5F;   /* secondary text */
+    --white:     #FFFFFF;
+    --wall:      #E1DFDA;   /* hero photo wall colour, letterbox */
+
+    --font: 'Jost','Tajawal',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --wrap: min(1240px, 100% - 48px);
+    --header-h: 76px;
+  }
+  [lang="ar"]{ --font: 'Tajawal','Jost',system-ui,-apple-system,'Segoe UI',sans-serif; }
+  [lang="ar"] *{ letter-spacing: 0 !important; }
+
+  *,*::before,*::after{ box-sizing: border-box; margin: 0; padding: 0; }
+  html{ scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h) + 16px); }
+  body{
+    font-family: var(--font);
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--ink);
+    background: var(--ivory);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  img,svg{ display: block; max-width: 100%; }
+  a{ color: inherit; }
+  button,select,input{ font: inherit; color: inherit; }
+  button{ cursor: pointer; background: none; border: 0; }
+  :focus-visible{ outline: 2px solid var(--teal-deep); outline-offset: 3px; }
+  .sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ animation: none !important; transition: none !important; }
+  }
+
+  .wrap{ width: var(--wrap); margin-inline: auto; }
+
+  /* =========================================================
+     Buttons
+     ========================================================= */
+  .btn{
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    padding: .85rem 1.7rem;
+    font-weight: 500; font-size: .92rem; letter-spacing: .04em;
+    text-decoration: none;
+    border: 1px solid var(--teal-deep);
+    border-radius: 2px;
+    transition: background .25s ease, color .25s ease, border-color .25s ease;
+    white-space: nowrap;
+  }
+  .btn--solid{ background: var(--teal-deep); color: var(--white); }
+  .btn--solid:hover{ background: var(--ink); border-color: var(--ink); }
+  .btn--line{ background: transparent; color: var(--ink); }
+  .btn--line:hover{ background: var(--mint); border-color: var(--teal-deep); }
+  .btn--block{ width: 100%; }
+
+  /* =========================================================
+     Announcement bar + header
+     ========================================================= */
+  .announce{
+    background: var(--teal-deep);
+    color: var(--white);
+    text-align: center;
+    font-size: .84rem;
+    letter-spacing: .12em;
+    padding: 9px 16px;
+  }
+
+  .site-header{
+    position: sticky; top: 0; z-index: 60;
+    height: var(--header-h);
+    background: rgba(250,249,246,.96);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--mint-2);
+  }
+  .site-header__in{
+    width: var(--wrap); height: 100%; margin-inline: auto;
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 32px;
+  }
+  .brand{ display: block; line-height: 0; }
+  .brand img{ height: 26px; width: auto; }
+
+  .nav{ display: flex; justify-content: center; gap: clamp(18px, 2.6vw, 38px); list-style: none; }
+  .nav a{
+    text-decoration: none; font-size: .95rem; font-weight: 400; color: var(--ink);
+    padding: 6px 0; border-bottom: 1px solid transparent;
+    transition: border-color .25s ease, color .25s ease;
+  }
+  .nav a:hover{ border-color: var(--teal); color: var(--teal-deep); }
+  .nav a[aria-current="page"]{ color: var(--teal-deep); border-color: var(--teal-deep); font-weight: 500; }
+
+  .tools{ display: flex; align-items: center; gap: 4px; }
+  .tool{
+    position: relative; display: inline-flex; align-items: center; justify-content: center;
+    min-width: 42px; height: 42px; padding: 0 10px; border-radius: 2px;
+    transition: background .2s ease;
+  }
+  .tool:hover{ background: var(--mint); }
+  .tool svg{ width: 21px; height: 21px; stroke: var(--ink); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .tool--lang{ font-size: .9rem; font-weight: 500; }
+  .tool--install{
+    gap: 8px; padding: 0 14px; border: 1px solid var(--teal); border-radius: 999px; font-size: .88rem; font-weight: 500;
+  }
+  .tool--install svg{ width: 17px; height: 17px; stroke: var(--teal-deep); }
+  .tool--install:hover{ background: var(--mint); }
+  .tool--install[hidden]{ display: none; }
+  @media (max-width: 640px){ .tool--install span{ display: none; } .tool--install{ padding: 0 10px; } }
+
+  .install-help{
+    position: fixed; z-index: 100; inset-inline: 0; bottom: 0; background: var(--white);
+    border-top: 1px solid var(--mint-2); padding: 20px 24px calc(20px + env(safe-area-inset-bottom, 0px));
+    transform: translateY(100%); transition: transform .3s ease; box-shadow: 0 -8px 24px rgba(44,44,44,.12);
+  }
+  .install-help.show{ transform: none; }
+  .install-help__in{ width: min(520px, 100%); margin-inline: auto; }
+  .install-help h3{ font-size: 1.1rem; font-weight: 500; margin-bottom: 8px; }
+  .install-help p{ color: var(--ink-soft); font-size: .92rem; line-height: 1.6; }
+  .install-help button{ margin-top: 14px; }
+  .tool__count{
+    position: absolute; top: 3px; inset-inline-end: 1px;
+    min-width: 18px; height: 18px; padding: 0 5px;
+    background: var(--teal-deep); color: var(--white);
+    font-size: .7rem; font-weight: 600; line-height: 18px; text-align: center; border-radius: 9px;
+  }
+  .tool__count[hidden]{ display: none; }
+  .menu-btn{ display: none; }
+
+  .search-panel{
+    position: absolute; inset-inline: 0; top: 100%;
+    background: var(--ivory); border-bottom: 1px solid var(--mint-2);
+    padding: 18px 0 22px;
+  }
+  .search-panel[hidden]{ display: none; }
+  .search-panel__in{ width: min(720px, 100% - 48px); margin-inline: auto; }
+  .search-input{
+    width: 100%; padding: 14px 16px; font-size: 1.05rem;
+    border: 1px solid var(--teal); border-radius: 2px; background: var(--mint);
+  }
+  .search-results{ list-style: none; margin-top: 8px; }
+  .search-results button{
+    width: 100%; display: flex; justify-content: space-between; gap: 16px; align-items: baseline;
+    padding: 12px 8px; text-align: start; border-bottom: 1px solid var(--mint-2);
+  }
+  .search-results button:hover{ background: var(--mint); }
+  .search-results small{ color: var(--ink-soft); font-size: .84rem; }
+  .search-empty{ padding: 14px 8px; color: var(--ink-soft); }
+
+  @media (max-width: 980px){
+    .site-header__in{ grid-template-columns: auto 1fr; gap: 12px; }
+    .menu-btn{ display: inline-flex; order: -1; }
+    .site-header__in{ grid-template-columns: auto auto 1fr; }
+    .tools{ justify-self: end; }
+    .brand{ justify-self: start; }
+    .nav{
+      position: absolute; inset-inline: 0; top: 100%;
+      flex-direction: column; gap: 0; justify-content: flex-start;
+      background: var(--ivory); border-bottom: 1px solid var(--mint-2);
+      padding: 8px 24px 20px;
+      display: none;
+    }
+    .nav-open .nav{ display: flex; }
+    .nav a{ display: block; padding: 14px 0; border-bottom: 1px solid var(--mint-2); }
+  }
+
+  /* =========================================================
+     Hero — the banner IS the layout; copy sits in the wall space
+     ========================================================= */
+  .hero{ position: relative; background: var(--wall); overflow: hidden; animation: heroIn .7s ease-out both; }
+  .hero__img{ display: block; width: 100%; height: auto; }
+  @keyframes heroIn{ from{ opacity: 0; } to{ opacity: 1; } }
+  /* Text sits in the empty wall space of each photo. Positions are percentages of the photo,
+     and sizes use vw, so the layout scales with the picture. Physical left/top (not logical)
+     keeps it clear of the model in Arabic (right-to-left) too. */
+  .hero__copy{
+    position: absolute; left: var(--x); top: var(--y); width: var(--w); text-align: center;
+    text-shadow: 0 0 22px rgba(255,255,255,.7);
+  }
+  .hero__h{ font-weight: 300; line-height: 1.14; font-size: clamp(1.3rem, 2.9vw, 2.9rem); color: var(--ink); }
+  [lang="ar"] .hero__h{ line-height: 1.35; font-weight: 400; }
+  .hero__s{ margin-top: .7em; font-size: clamp(.85rem, 1.15vw, 1.1rem); color: var(--ink); opacity: .82; }
+  .hero__cta{
+    margin-top: 1.1em; padding: .8em 1.9em; border-radius: 999px; text-shadow: none;
+    font-size: clamp(.78rem, 1.1vw, 1.02rem); box-shadow: 0 6px 20px rgba(31,95,107,.28);
+  }
+  .hero__cta:focus-visible{ box-shadow: 0 0 0 3px rgba(255,255,255,.95), 0 6px 18px rgba(44,44,44,.3); outline: none; }
+  @media (max-width: 1000px){ .hero__s{ display: none; } }
+  @media (max-width: 760px){
+    .hero{ display: flex; flex-direction: column; background: var(--mint); }
+    .hero__copy{ position: static; order: 2; width: auto; padding: 26px 24px 30px; text-shadow: none; }
+    .hero__h{ font-size: 1.7rem; }
+    .hero__s{ display: block; font-size: .98rem; }
+    .hero__cta{ margin: 18px 0 8px; padding: .95rem 1.8rem; font-size: .95rem; box-shadow: none; }
+  }
+
+  /* =========================================================
+     Section scaffolding
+     ========================================================= */
+  /* Hero call-to-action: easy to spot, with a gentle pulse and a downward arrow */
+  .hero__cta{
+    display: inline-flex; align-items: center; gap: .7em;
+    padding: .95em 2.3em; font-weight: 600; letter-spacing: .03em;
+    font-size: clamp(.9rem, 1.3vw, 1.2rem);
+    animation: ctaPulse 2.4s ease-out infinite;
+    transition: background .25s ease, transform .25s ease, border-color .25s ease;
+  }
+  .hero__cta:hover{ transform: translateY(-2px); animation-play-state: paused; }
+  .hero__cta::after{
+    content: ""; width: .5em; height: .5em; flex: none;
+    border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+    transform: rotate(45deg) translateY(-2px); animation: ctaBob 1.6s ease-in-out infinite;
+  }
+  @keyframes ctaPulse{
+    0%   { box-shadow: 0 8px 22px rgba(31,95,107,.35), 0 0 0 0 rgba(47,143,157,.55); }
+    70%  { box-shadow: 0 8px 22px rgba(31,95,107,.35), 0 0 0 18px rgba(47,143,157,0); }
+    100% { box-shadow: 0 8px 22px rgba(31,95,107,.35), 0 0 0 0 rgba(47,143,157,0); }
+  }
+  @keyframes ctaBob{
+    0%, 100% { transform: rotate(45deg) translate(-2px, -2px); }
+    50%      { transform: rotate(45deg) translate(2px, 2px); }
+  }
+  @media (max-width: 760px){
+    .hero__cta{ display: flex; width: 100%; max-width: 340px; margin: 18px auto 8px; padding: 1.05em 1.6em; font-size: 1.05rem; }
+  }
+  .panel[hidden]{ display: none; }
+  .section{ padding: 104px 0; }
+  .section--mist{ background: var(--mint); }
+  .h2{
+    font-weight: 300; line-height: 1.12; letter-spacing: .005em;
+    font-size: clamp(2rem, 3.6vw, 3rem);
+  }
+  .lead{ margin-top: 16px; color: var(--ink-soft); font-size: 1.1rem; max-width: 46ch; }
+  @media (max-width: 640px){ .section{ padding: 72px 0; } }
+
+  /* Departments (shop by) */
+  .tiles{ margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .tiles--2{ grid-template-columns: repeat(2, 1fr); max-width: 760px; }
+  .tile{
+    display: flex; flex-direction: column; gap: 14px; padding: 32px 30px 28px;
+    background: var(--mint); border: 1px solid var(--mint-2);
+    text-decoration: none; transition: background .3s ease, border-color .3s ease;
+  }
+  .tile:hover{ background: var(--teal-deep); border-color: var(--teal-deep); color: var(--white); }
+  .tile svg{ width: 40px; height: 40px; stroke: var(--teal-deep); fill: none; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
+  .tile:hover svg{ stroke: var(--white); }
+  .tile__name{ font-size: 1.5rem; font-weight: 400; line-height: 1.2; }
+  .tile__desc{ color: var(--ink-soft); flex: 1; }
+  .tile:hover .tile__desc{ color: var(--mint); }
+  .tile__go{ display: inline-flex; align-items: center; gap: 8px; font-weight: 500; color: var(--teal-deep); }
+  .tile:hover .tile__go{ color: var(--white); }
+  .tile__go svg{ width: 16px; height: 16px; stroke-width: 2; }
+  [dir="rtl"] .tile__go svg{ transform: scaleX(-1); }
+  @media (max-width: 860px){ .tiles, .tiles--2{ grid-template-columns: 1fr; } }
+
+  /* Department heads */
+  .dept-head{ display: grid; gap: 48px; align-items: center; margin-bottom: 48px; }
+  .dept-head--split{ grid-template-columns: 1.05fr .95fr; }
+  @media (max-width: 860px){
+    .dept-head--split{ grid-template-columns: 1fr; gap: 28px; }
+  }
+
+  .advice{ background: var(--mint); padding: 30px 32px 28px; }
+  .advice__title{ font-size: 1.3rem; font-weight: 500; }
+  .advice__list{ list-style: none; margin: 14px 0 22px; }
+  .advice__list a{
+    display: block; padding: 12px 0; text-decoration: none;
+    border-bottom: 1px solid rgba(44,44,44,.15);
+  }
+  .advice__list a:hover{ text-decoration: underline; text-underline-offset: 4px; }
+  .advice__note{ margin-top: 14px; font-size: .88rem; color: var(--ink-soft); }
+  .advice .btn--solid{ width: 100%; }
+
+  /* Toolbar */
+  .toolbar{
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 14px 0; border-block: 1px solid var(--mint-2);
+    margin-bottom: 32px;
+  }
+  .section--mist .toolbar{ border-color: rgba(31,95,107,.25); }
+  .chips{ display: flex; flex-wrap: wrap; gap: 8px; }
+  .subtabs{ display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+  .subtab{
+    padding: 11px 24px; font-size: .98rem; font-weight: 500; background: var(--white);
+    border: 1px solid var(--teal); border-radius: 2px; transition: background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .subtab:hover{ background: var(--mint); }
+  .subtab[aria-pressed="true"]{ background: var(--teal-deep); border-color: var(--teal-deep); color: var(--white); }
+  .chip{
+    padding: 7px 16px; font-size: .9rem; border: 1px solid var(--teal); border-radius: 999px;
+    transition: background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .chip:hover{ background: var(--mint-2); }
+  .chip[aria-pressed="true"]{ background: var(--teal-deep); border-color: var(--teal-deep); color: var(--white); }
+  .toolbar__right{ display: flex; align-items: center; gap: 18px; }
+  .count{ color: var(--ink-soft); font-size: .9rem; }
+  .sort{ display: flex; align-items: center; gap: 8px; font-size: .9rem; }
+  .sort select{
+    padding: 7px 10px; background: var(--ivory); border: 1px solid var(--teal); border-radius: 2px;
+  }
+
+  /* Product grid + cards */
+  .grid{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px 20px; }
+  @media (max-width: 1040px){ .grid{ grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 760px){ .grid{ grid-template-columns: repeat(2, 1fr); gap: 28px 12px; } }
+
+  .card{ display: flex; flex-direction: column; scroll-margin-top: 120px; }
+  .card__media{
+    position: relative; aspect-ratio: 4/5; display: grid; place-items: center;
+    background: radial-gradient(ellipse at 50% 35%, #FFFFFF 0%, var(--mint) 62%, var(--mint-2) 100%);
+    transition: background .3s ease;
+  }
+  .section--mist .card__media{ background: radial-gradient(ellipse at 50% 35%, #FFFFFF 0%, #F4FBFA 60%, #E4F3F0 100%); }
+  .pack{ width: 68%; height: auto; }
+  .badge{
+    position: absolute; top: 12px; inset-inline-start: 12px;
+    background: var(--teal-deep); color: var(--white);
+    font-size: .74rem; font-weight: 500; letter-spacing: .06em; padding: 3px 10px; border-radius: 2px;
+  }
+  .card__body{ display: flex; flex-direction: column; gap: 4px; padding-top: 16px; flex: 1; }
+  .card__cat{ font-size: .8rem; color: var(--ink-soft); font-weight: 500; letter-spacing: .06em; }
+  .card__name{ font-size: 1.1rem; font-weight: 500; line-height: 1.3; }
+  .card__desc{ font-size: .92rem; color: var(--ink-soft); line-height: 1.5; flex: 1; margin-bottom: 8px;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+  .card__desc.has-more{ flex: none; margin-bottom: 2px; }
+  .card__desc.is-open{ display: block; -webkit-line-clamp: unset; line-clamp: unset; overflow: visible; }
+  .card__more{ align-self: flex-start; margin-bottom: auto; padding: 2px 0 10px; font-size: .86rem; font-weight: 500; color: var(--teal-deep);
+    border-bottom: 1px solid transparent; }
+  .card__more:hover{ text-decoration: underline; text-underline-offset: 3px; }
+  .card__foot{ display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+  .card__size{ font-size: .88rem; color: var(--ink-soft); }
+  .card__price{ font-size: 1.15rem; font-weight: 500; }
+  .card.is-found .card__media{ outline: 2px solid var(--teal-deep); outline-offset: 4px; }
+  .card .btn{ padding: .7rem 1rem; font-size: .88rem; }
+  .card__ask{ display: block; margin-top: 10px; text-align: center; font-size: .86rem; color: var(--teal-deep); text-decoration: none; padding: 4px 0; border-bottom: 1px solid transparent; align-self: center; }
+  .card__ask:hover{ border-bottom-color: var(--teal-deep); }
+  .badge--out{ background: var(--ink); }
+  .card__stock{ font-size: .84rem; font-weight: 500; color: #9A5B00; margin-bottom: 6px; }
+  .card.is-soldout .card__media .photo, .card.is-soldout .card__media .pack, .card.is-soldout .card__media .gallery{ opacity: .5; }
+  .btn.is-soldout[disabled]{ cursor: not-allowed; }
+  .notify{ margin-top: 10px; }
+  .notify__open{ display:block; width:100%; text-align:center; font:inherit; font-size:.86rem; color:var(--teal-deep); background:none; border:0; border-bottom:1px solid transparent; padding:4px 0; cursor:pointer; }
+  .notify__open:hover{ border-bottom-color:var(--teal-deep); }
+  .notify__form{ display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+  .notify__form[hidden]{ display:none; }
+  .notify__form p{ font-size:.82rem; color:var(--ink); opacity:.8; }
+  .notify__form input{ font:inherit; font-size:.9rem; padding:.55rem .7rem; border:1px solid rgba(0,0,0,.2); background:#fff; color:var(--ink); width:100%; }
+  .notify__msg{ font-size:.82rem; color:var(--teal-deep); }
+  .notify__msg--err{ color:#9B2C2C; }
+
+  .gallery{ position: absolute; inset: 0; }
+  .gallery__track{
+    display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  }
+  .gallery__track::-webkit-scrollbar{ display: none; }
+  .gallery__track .g-img{ flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; scroll-snap-align: start; }
+  .gallery__nav{
+    position: absolute; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border-radius: 999px;
+    background: rgba(255,255,255,.85); display: grid; place-items: center; font-size: 1.1rem; line-height: 1; color: var(--ink);
+  }
+  @media (hover: hover){ .gallery__nav{ opacity: 0; transition: opacity .2s ease; } .card__media:hover .gallery__nav{ opacity: 1; } }
+  .gallery__nav--prev{ inset-inline-start: 8px; }
+  .gallery__nav--next{ inset-inline-end: 8px; }
+  .gallery__dots{ position: absolute; bottom: 8px; inset-inline: 0; display: flex; justify-content: center; gap: 5px; }
+  .gallery__dot{ width: 6px; height: 6px; border-radius: 999px; background: rgba(44,44,44,.3); }
+  .gallery__dot.is-active{ background: var(--teal-deep); }
+
+  .card__price--sale{ display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+  .card__price-was{ font-size: .82rem; color: var(--ink-soft); font-weight: 400; text-decoration: line-through; }
+  .card__price-now{ font-size: 1.15rem; font-weight: 600; color: var(--teal-deep); }
+  .line__price--sale{ display: flex; align-items: baseline; gap: 6px; }
+  .line__price-was{ font-size: .85rem; color: var(--ink-soft); text-decoration: line-through; }
+
+  /* Phase 1: clickable cards, filters, cart summary, product dialog, contact extras */
+  .card__media[data-open]{ cursor: pointer; }
+  .card__name-btn{ font: inherit; color: inherit; text-align: start; cursor: pointer; line-height: 1.3; }
+  .card__name-btn:hover{ color: var(--teal-deep); text-decoration: underline; text-underline-offset: 3px; }
+  .toolbar__right{ flex-wrap: wrap; }
+  .search-results{ max-height: 60vh; overflow-y: auto; }
+
+  .cart-sum{ display: grid; gap: 6px; }
+  .cart-sum__row{ display: flex; justify-content: space-between; font-size: .98rem; color: var(--ink-soft); }
+  .cart-sum__row[hidden]{ display: none; }
+  .cart-sum__row--disc{ color: var(--teal-deep); font-weight: 500; }
+  .code-box{ display: grid; gap: 6px; margin: 12px 0 4px; }
+  .code-box__row{ display: flex; gap: 8px; }
+  .code-box input{ flex: 1; min-width: 0; padding: 9px 11px; font: inherit; font-size: .92rem; text-transform: uppercase; color: var(--ink); background: var(--white); border: 1px solid var(--teal); border-radius: 2px; }
+  .code-box .btn{ padding: .55rem 1rem; font-size: .88rem; }
+  .code-box__msg{ font-size: .86rem; color: var(--ink-soft); }
+  .code-box__msg--ok{ color: var(--teal-deep); }
+  .code-box__msg--err{ color: #8A2E20; }
+  .drawer__note[hidden]{ display: none; }
+
+  .cart-store{ margin-top: 20px; }
+  .cart-trust{ padding: 14px 16px; background: var(--mint); border-inline-start: 3px solid var(--teal-deep); font-size: .92rem; line-height: 1.55; margin-bottom: 8px; }
+  .cart-facts{ list-style: none; font-size: .9rem; color: var(--ink-soft); }
+  .cart-facts li{ display: grid; gap: 2px; padding: 9px 0; border-bottom: 1px solid var(--mint-2); }
+  .cart-facts strong{ color: var(--ink); font-weight: 500; }
+  .contact__text{ max-width: 34ch; text-align: end; line-height: 1.5; }
+  .contact__text a{ border-bottom: 1px solid var(--teal); text-decoration: none; }
+  .contact__list li[hidden]{ display: none; }
+  .trust-note{ margin-top: 20px; padding: 16px 18px; background: var(--mint); border-inline-start: 3px solid var(--teal-deep); max-width: 46ch; }
+  .trust-note[hidden]{ display: none; }
+  @media (max-width: 640px){ .contact__text{ text-align: start; max-width: none; } }
+
+  .pdp{ width: min(940px, calc(100% - 24px)); max-height: 92vh; margin: auto; border: 0; padding: 0; background: var(--ivory); color: var(--ink); overflow: auto; }
+  .pdp::backdrop{ background: rgba(44,44,44,.5); }
+  .pdp__close{ position: absolute; top: 10px; inset-inline-end: 10px; z-index: 5; background: rgba(255,255,255,.92); border-radius: 999px; }
+  .pdp__grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 36px; padding: 32px; align-items: start; }
+  .pdp__info{ display: flex; flex-direction: column; gap: 10px; }
+  .pdp__name{ font-size: 1.8rem; font-weight: 400; line-height: 1.2; }
+  .pdp__meta{ display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .pdp__desc{ color: var(--ink-soft); line-height: 1.6; }
+  .pdp__actions{ display: grid; gap: 10px; margin-top: 8px; }
+  .pdp__rel{ list-style: none; margin-top: 18px; border-top: 1px solid var(--mint-2); }
+  .pdp__rel h3{ font-size: 1rem; font-weight: 500; margin: 14px 0 6px; }
+  .pdp__rel button{ width: 100%; display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; text-align: start; border-bottom: 1px solid var(--mint-2); }
+  .pdp__rel button:hover{ color: var(--teal-deep); }
+  @media (max-width: 760px){ .pdp__grid{ grid-template-columns: 1fr; gap: 20px; padding: 20px; } .pdp__name{ font-size: 1.5rem; } }
+
+  .rx-note{ margin-top: 14px; font-size: .9rem; color: var(--ink-soft); max-width: 46ch; }
+  .chat-emergency{ max-width: 760px; margin: 0 auto 14px; padding: 12px 16px; background: #FFF4E5; border: 1px solid #E8C88A; font-size: .92rem; text-align: center; }
+  .consent a{ text-decoration: underline; text-underline-offset: 3px; }
+
+  /* Facts + customer reviews */
+  .facts{ padding-block: 64px; }
+  .facts__grid{ margin-top: 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; list-style: none; }
+  .fact{ padding: 24px 24px 22px; background: var(--white); border: 1px solid var(--mint-2); display: flex; flex-direction: column; gap: 8px; }
+  .fact h3{ font-size: 1.05rem; font-weight: 500; line-height: 1.3; color: var(--teal-deep); }
+  .fact p{ color: var(--ink-soft); font-size: .95rem; line-height: 1.55; flex: 1; }
+  .fact a{ font-size: .92rem; font-weight: 500; color: var(--teal-deep); text-decoration: none; border-bottom: 1px solid var(--teal); align-self: flex-start; }
+  .fact a:hover{ border-color: var(--teal-deep); }
+  .rv__head{ display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px 32px; margin-bottom: 36px; }
+  .rv__sum{ display: flex; align-items: center; gap: 14px; }
+  .rv__avg{ font-size: 2.6rem; font-weight: 300; line-height: 1; }
+  .rv__count{ color: var(--ink-soft); font-size: .92rem; }
+  .rv__stars{ display: inline-flex; gap: 2px; font-size: 1.1rem; line-height: 1; }
+  .rv__star{ color: var(--mint-2); }
+  .rv__star.on{ color: #C9962B; }
+  .rv__list{ list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+  .rv__item{ background: var(--white); border: 1px solid var(--mint-2); padding: 24px 24px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .rv__text{ line-height: 1.6; flex: 1; }
+  .rv__who{ display: flex; justify-content: space-between; gap: 12px; font-size: .88rem; color: var(--ink-soft); }
+  .rv__who strong{ color: var(--ink); font-weight: 500; }
+  .rv__foot{ margin-top: 24px; font-size: .88rem; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 8px 24px; }
+  .rv__foot a{ color: var(--teal-deep); }
+
+  /* About */
+  .about{ background: var(--teal-deep); color: var(--white); }
+  .about__grid{ display: grid; grid-template-columns: .55fr 1.45fr; gap: 64px; align-items: start; }
+  .about__text{
+    font-weight: 300; line-height: 1.5; font-size: clamp(1.5rem, 2.8vw, 2.25rem); max-width: 30ch;
+  }
+  .about__tag{ margin-top: 32px; font-size: 1.05rem; letter-spacing: .04em; color: var(--mint); }
+  @media (max-width: 760px){ .about__grid{ grid-template-columns: 1fr; gap: 24px; } }
+
+  /* Contact */
+  .contact__grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: start; }
+  .contact__list{ list-style: none; border-top: 1px solid var(--mint-2); }
+  .contact__list li{
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    padding: 24px 0; border-bottom: 1px solid var(--mint-2);
+  }
+  .contact__label{ color: var(--ink-soft); font-size: .92rem; }
+  .contact__value{ font-size: 1.3rem; font-weight: 400; text-decoration: none; border-bottom: 1px solid var(--teal); }
+  .contact__value:hover{ color: var(--teal-deep); border-color: var(--teal-deep); }
+  .contact__wa{ margin-top: 28px; }
+  @media (max-width: 860px){ .contact__grid{ grid-template-columns: 1fr; gap: 36px; } }
+
+  /* Chat */
+  .chat-head{ max-width: 640px; margin: 0 auto 32px; text-align: center; }
+  .chat-head .lead{ margin-inline: auto; }
+  .chat-panel{
+    max-width: 760px; margin: 0 auto; height: 560px; display: flex; flex-direction: column;
+    background: var(--white); border: 1px solid var(--teal);
+  }
+  .chat-log{ flex: 1; overflow-y: auto; padding: 22px 24px; display: flex; flex-direction: column; gap: 12px; }
+  .msg{ width: fit-content; max-width: 80%; padding: 10px 14px; border-radius: 4px; line-height: 1.5; font-size: .95rem; white-space: pre-wrap; }
+  .msg--bot{ background: var(--mint); color: var(--ink); margin-inline-end: auto; border-end-start-radius: 0; }
+  .msg--user{ background: var(--teal-deep); color: var(--white); margin-inline-start: auto; border-end-end-radius: 0; }
+  .msg--typing{ color: var(--ink-soft); font-style: italic; }
+  .chat-prods{ display: grid; gap: 8px; width: min(100%, 420px); margin-inline-end: auto; }
+  .chat-prod{ display: flex; align-items: center; gap: 12px; background: var(--white); border: 1px solid var(--mint-2); padding: 10px 12px; }
+  .chat-prod__info{ flex: 1; min-width: 0; }
+  .chat-prod__name{ display: block; font: inherit; font-size: .92rem; font-weight: 500; line-height: 1.3; text-align: start; background: none; border: 0; padding: 0; color: var(--ink); cursor: pointer; }
+  .chat-prod__name:hover{ color: var(--teal-deep); }
+  .chat-prod__price{ font-size: .88rem; color: var(--ink-soft); }
+  .chat-prod .btn{ padding: .5rem .9rem; font-size: .84rem; white-space: nowrap; }
+  .msg--error{ background: #F4DEDA; color: #8A2E20; margin-inline: auto; text-align: center; font-size: .88rem; }
+  .chat-form{ display: flex; align-items: flex-end; gap: 10px; padding: 14px 16px; border-top: 1px solid var(--mint-2); }
+  .chat-form textarea{
+    flex: 1; resize: none; max-height: 120px; padding: 10px 12px; font: inherit; color: var(--ink);
+    background: var(--ivory); border: 1px solid var(--teal); border-radius: 2px;
+  }
+  .chat-note{ max-width: 760px; margin: 14px auto 0; text-align: center; font-size: .84rem; color: var(--ink-soft); }
+  @media (max-width: 640px){ .chat-panel{ height: 68vh; } }
+
+  /* Footer */
+  .footer{ background: var(--teal-deep); color: var(--white); padding: 72px 0 0; }
+  .footer__grid{ display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 48px; padding-bottom: 56px; }
+  .footer__brand img{ height: 26px; width: auto; }
+  .footer__brand p{ margin-top: 18px; max-width: 30ch; }
+  .footer h3{ font-size: 1rem; font-weight: 600; margin-bottom: 14px; }
+  .footer ul{ list-style: none; }
+  .footer li{ padding: 4px 0; }
+  .footer a{ text-decoration: none; }
+  .footer a:hover{ text-decoration: underline; text-underline-offset: 4px; }
+  .footer__bar{ border-top: 1px solid rgba(255,255,255,.25); padding: 20px 0; font-size: .88rem; }
+  @media (max-width: 760px){ .footer__grid{ grid-template-columns: 1fr; gap: 32px; } }
+
+  /* Cart drawer */
+  .overlay{
+    position: fixed; inset: 0; z-index: 80; background: rgba(44,44,44,.4);
+    opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility .3s;
+  }
+  .drawer{
+    position: fixed; z-index: 90; top: 0; bottom: 0; inset-inline-end: 0;
+    width: min(440px, 100%); background: var(--ivory);
+    display: flex; flex-direction: column;
+    transform: translateX(100%); visibility: hidden;
+    transition: transform .35s ease, visibility .35s;
+  }
+  [dir="rtl"] .drawer{ transform: translateX(-100%); }
+  .cart-open .overlay{ opacity: 1; visibility: visible; }
+  .cart-open .drawer{ transform: none; visibility: visible; }
+  .drawer__head{ display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--mint-2); }
+  .drawer__title{ font-size: 1.3rem; font-weight: 400; }
+  .drawer__body{ flex: 1; overflow-y: auto; padding: 8px 24px; }
+  .drawer__empty{ padding: 40px 0; color: var(--ink-soft); }
+  .line{ display: grid; grid-template-columns: 64px 1fr auto; gap: 14px; padding: 18px 0; border-bottom: 1px solid var(--mint-2); align-items: center; }
+  .line__img{ background: var(--mint); aspect-ratio: 1; display: grid; place-items: center; }
+  .line__img svg{ width: 70%; height: auto; }
+  .line__name{ font-weight: 500; line-height: 1.3; }
+  .line__price{ color: var(--ink-soft); font-size: .92rem; }
+  .qty{ display: inline-flex; align-items: center; margin-top: 8px; border: 1px solid var(--teal); border-radius: 2px; }
+  .qty button{ width: 32px; height: 32px; font-size: 1.1rem; }
+  .qty button:hover{ background: var(--mint); }
+  .qty span{ min-width: 30px; text-align: center; font-size: .95rem; }
+  .line__total{ font-weight: 500; text-align: end; }
+  .line__rm{ display: block; margin-top: 8px; font-size: .84rem; color: var(--ink-soft); text-decoration: underline; text-underline-offset: 3px; margin-inline-start: auto; }
+  .drawer__foot{ padding: 20px 24px 24px; border-top: 1px solid var(--mint-2); display: grid; gap: 10px; }
+  .subtotal{ display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 500; margin-bottom: 4px; }
+  .drawer__note{ font-size: .86rem; color: var(--ink-soft); }
+  .drawer__foot[hidden]{ display: none; }
+
+  .drawer__foot{ max-height: 70vh; overflow-y: auto; }
+  /* ---------- Promotions banner (sits under the hero) ---------- */
+  .promo{ background: var(--ivory); padding: 34px 0 6px; }
+  .promo[hidden]{ display: none; }
+  .promo__in{ width: var(--wrap); margin-inline: auto; background: linear-gradient(135deg, #FFFFFF 0%, var(--mint) 100%); border: 1px solid var(--mint-2); position: relative; }
+  .promo__stage{ display: grid; }
+  .promo__slide{ grid-area: 1 / 1; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr) auto; align-items: center; gap: 12px 36px;
+    padding: 30px clamp(20px, 4vw, 48px) 22px; opacity: 0; visibility: hidden; transition: opacity .5s ease, visibility .5s; }
+  .promo__slide.is-active{ opacity: 1; visibility: visible; }
+  .promo__imgs{ display: flex; align-items: center; justify-content: center; }
+  .promo__img{ position: relative; width: clamp(96px, 13vw, 150px); aspect-ratio: 1; background: #fff; border: 1px solid var(--mint-2); display: grid; place-items: center; overflow: hidden;
+    margin-inline-start: -26px; box-shadow: 0 6px 18px rgba(31,95,107,.14); }
+  .promo__img:first-child{ margin-inline-start: 0; }
+  .promo__img:nth-child(2){ transform: translateY(10px); }
+  .promo__img .photo{ position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .promo__tag{ display: inline-block; font-size: .74rem; letter-spacing: .18em; text-transform: uppercase; color: var(--teal-deep); font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid var(--teal-deep); }
+  [lang="ar"] .promo__tag{ letter-spacing: 0; }
+  .promo__title{ font-size: clamp(1.4rem, 2.8vw, 2.1rem); font-weight: 400; line-height: 1.2; margin: 14px 0 8px; }
+  .promo__title button{ font: inherit; color: inherit; background: none; border: 0; padding: 0; text-align: start; cursor: pointer; }
+  .promo__text{ font-size: .98rem; color: var(--ink-soft); max-width: 52ch; }
+  .promo__note{ font-size: .82rem; color: var(--teal-deep); margin-top: 8px; }
+  .promo__buy{ display: grid; gap: 12px; justify-items: end; text-align: end; }
+  .promo__price{ font-size: 1.6rem; font-weight: 500; }
+  .promo__price del{ font-size: 1rem; font-weight: 400; color: var(--ink-soft); margin-inline-end: 10px; }
+  .promo__btns{ display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+  .promo__ctrl{ display: flex; align-items: center; justify-content: center; gap: 14px; padding: 0 20px 18px; }
+  .promo__arrow{ width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--teal-deep); background: #fff; color: var(--teal-deep); display: grid; place-items: center; cursor: pointer; padding: 0; transition: background .2s, color .2s; }
+  .promo__arrow:hover{ background: var(--teal-deep); color: #fff; }
+  .promo__arrow svg{ width: 16px; height: 16px; }
+  [dir="rtl"] .promo__arrow svg{ transform: scaleX(-1); }
+  .promo__dots{ display: flex; gap: 8px; align-items: center; }
+  .promo__dots button{ width: 34px; height: 14px; padding: 0; border: 0; background: none; cursor: pointer; position: relative; }
+  .promo__dots button::before{ content: ""; position: absolute; inset-inline: 0; top: 6px; height: 2px; background: rgba(31,95,107,.25); }
+  .promo__dots button::after{ content: ""; position: absolute; inset-inline-start: 0; top: 6px; height: 2px; width: 0; background: var(--teal-deep); }
+  .promo__dots button.is-active::after{ width: 100%; animation: promoFill 7s linear; }
+  .promo__count{ font-size: .8rem; color: var(--ink-soft); letter-spacing: .1em; min-width: 3.2em; text-align: center; }
+  .promo__in:hover .promo__dots button.is-active::after, .promo__in:focus-within .promo__dots button.is-active::after{ animation-play-state: paused; }
+  @keyframes promoFill{ from{ width: 0; } to{ width: 100%; } }
+  @media (prefers-reduced-motion: reduce){ .promo__dots button.is-active::after{ animation: none; } .promo__slide{ transition: none; } }
+  @media (max-width: 860px){
+    .promo__slide{ grid-template-columns: 1fr; text-align: center; justify-items: center; padding-top: 26px; }
+    .promo__img{ margin-inline-start: -18px; }
+    .promo__title button{ text-align: center; }
+    .promo__tag{ border-bottom: 0; padding-bottom: 0; }
+    .promo__text{ margin-inline: auto; }
+    .promo__buy{ justify-items: center; text-align: center; }
+    .promo__btns{ justify-content: center; }
+  }
+  .order-form{ display: grid; gap: 10px; }
+  .order-form label.optin{ display: flex; align-items: flex-start; gap: 10px; font-size: .86rem; line-height: 1.45; color: var(--ink); cursor: pointer; }
+  .order-form label.optin input{ width: 18px; height: 18px; min-width: 18px; margin-top: 2px; padding: 0; accent-color: var(--teal-deep); }
+  .order-form label{ display: grid; gap: 4px; font-size: .88rem; color: var(--ink-soft); }
+  .order-form input,.order-form textarea{
+    width: 100%; padding: 10px 12px; font-size: 1rem; color: var(--ink);
+    background: var(--ivory); border: 1px solid var(--teal); border-radius: 2px; resize: vertical;
+  }
+  .form-error{ color: #8A2E20; font-size: .9rem; }
+  .form-error[hidden]{ display: none; }
+  .btn[disabled]{ opacity: .6; cursor: progress; }
+  .done{ padding: 36px 0; display: grid; gap: 14px; }
+  .done h3{ font-size: 1.4rem; font-weight: 400; }
+  .done p{ color: var(--ink-soft); }
+  .state-msg{ grid-column: 1 / -1; padding: 48px 0; text-align: center; color: var(--ink-soft); }
+  .photo{ position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .line__img{ position: relative; overflow: hidden; }
+  .line__img .photo{ position: absolute; }
+
+  .toast{
+    position: fixed; z-index: 100; bottom: 24px; inset-inline-start: 50%; transform: translate(-50%, 20px);
+    background: var(--ink); color: var(--white); padding: 12px 22px; border-radius: 2px; font-size: .95rem;
+    opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease;
+  }
+  [dir="rtl"] .toast{ transform: translate(50%, 20px); }
+  .toast.show{ opacity: 1; transform: translate(-50%, 0); }
+  [dir="rtl"] .toast.show{ transform: translate(50%, 0); }
+
+  /* =========================================================
+     Home page
+     ========================================================= */
+  .hero.hero--home{
+    display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); align-items: center;
+    gap: clamp(24px, 5vw, 72px); min-height: clamp(420px, 44vw, 580px);
+    padding: clamp(40px, 6vw, 84px) max(24px, calc((100% - 1240px) / 2));
+    background: linear-gradient(135deg, var(--mint) 0%, #F3FBF9 58%, var(--ivory) 100%);
+  }
+  .home-hero__eyebrow{ font-size: .86rem; letter-spacing: .16em; text-transform: uppercase; color: var(--teal-deep); font-weight: 500; }
+  [lang="ar"] .home-hero__eyebrow{ letter-spacing: 0; text-transform: none; }
+  .home-hero__h{ margin-top: 14px; font-weight: 300; line-height: 1.08; font-size: clamp(2.4rem, 5.4vw, 4.6rem); color: var(--ink); }
+  [lang="ar"] .home-hero__h{ font-weight: 400; line-height: 1.3; }
+  .home-hero__s{ margin-top: 18px; max-width: 40ch; font-size: clamp(1.02rem, 1.4vw, 1.25rem); color: var(--ink-soft); }
+  .home-hero__cta{ margin-top: 30px; display: flex; flex-wrap: wrap; gap: 12px; }
+  .home-hero__art{ position: relative; display: flex; align-items: flex-end; justify-content: center; padding: 24px 0 8px; }
+  .home-hero__art::before{
+    content: ""; position: absolute; inset: 4% 8% 0; border-radius: 50%;
+    background: radial-gradient(circle at 50% 45%, #FFFFFF 0%, rgba(255,255,255,.55) 45%, rgba(255,255,255,0) 72%);
+  }
+  .home-hero__art .pack{ position: relative; width: clamp(110px, 17vw, 220px); height: auto; filter: drop-shadow(0 18px 22px rgba(31,95,107,.16)); }
+  .home-hero__art .pack:nth-child(1){ margin-inline-end: -4%; transform: translateY(6px) rotate(-4deg); }
+  .home-hero__art .pack:nth-child(2){ width: clamp(130px, 21vw, 270px); z-index: 1; }
+  .home-hero__art .pack:nth-child(3){ margin-inline-start: -4%; transform: translateY(6px) rotate(4deg); }
+  @media (max-width: 860px){
+    .hero.hero--home{ grid-template-columns: 1fr; min-height: 0; text-align: center; padding: 44px 24px 28px; }
+    .home-hero__s{ margin-inline: auto; }
+    .home-hero__cta{ justify-content: center; }
+    .home-hero__art .pack{ width: 26vw; }
+    .home-hero__art .pack:nth-child(2){ width: 32vw; }
+  }
+  @media (max-width: 460px){ .home-hero__cta .btn{ width: 100%; } }
+
+  .dtiles{ margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .dtile{ display: flex; flex-direction: column; background: var(--white); border: 1px solid var(--mint-2); text-decoration: none; overflow: hidden; transition: border-color .3s ease, box-shadow .3s ease; }
+  .dtile:hover{ border-color: var(--teal-deep); box-shadow: 0 12px 30px rgba(31,95,107,.12); }
+  .dtile__img{ display: block; aspect-ratio: 16 / 9; overflow: hidden; background: var(--wall); }
+  .dtile__img img{ width: 100%; height: 100%; object-fit: cover; transition: transform .5s ease; }
+  .dtile:hover .dtile__img img{ transform: scale(1.04); }
+  .dtile__body{ display: flex; flex-direction: column; gap: 10px; padding: 24px 26px 26px; flex: 1; }
+  .dtile__name{ font-size: 1.45rem; font-weight: 400; line-height: 1.2; }
+  .dtile__desc{ color: var(--ink-soft); flex: 1; }
+  @media (max-width: 860px){ .dtiles{ grid-template-columns: 1fr; } }
+  /* The doctor photo has a white background, so it is blended into the soft green of the headline area. */
+  .home-hero__doctor{ align-self: end; padding: 0; margin-bottom: calc(-1 * clamp(40px, 6vw, 84px)); }
+  .home-hero__doctor img{ position: relative; height: clamp(340px, 40vw, 540px); width: auto; max-width: 100%; mix-blend-mode: multiply; }
+  @media (max-width: 860px){
+    .home-hero__doctor{ margin-bottom: -28px; }
+    .home-hero__doctor img{ height: auto; width: min(72vw, 340px); }
+  }
+  #featured .grid{ margin-top: 36px; }
+  #grid-featured .card__foot{ margin-top: auto; }
+  #featured[hidden]{ display: none; }
+</style>
+<title>العناية بالجمال | AVARA: بشرة وشعر ومستحضرات تجميل</title><meta name="description" content="تسوّقي العناية بالبشرة والشعر ومستحضرات التجميل من AVARA: أفارا كير وأفارا هير وأفارا كوزمتكس، مع ماركات مثل لا روش بوزيه وسيرافي وكيراستاز."><link rel="canonical" href="https://avara-nu-beige.vercel.app/ar/beauty"><link rel="alternate" hreflang="en" href="https://avara-nu-beige.vercel.app/beauty"><link rel="alternate" hreflang="ar" href="https://avara-nu-beige.vercel.app/ar/beauty"><link rel="alternate" hreflang="x-default" href="https://avara-nu-beige.vercel.app/beauty"><meta property="og:site_name" content="AVARA"><meta property="og:type" content="website"><meta property="og:title" content="العناية بالجمال | AVARA: بشرة وشعر ومستحضرات تجميل"><meta property="og:description" content="تسوّقي العناية بالبشرة والشعر ومستحضرات التجميل من AVARA: أفارا كير وأفارا هير وأفارا كوزمتكس، مع ماركات مثل لا روش بوزيه وسيرافي وكيراستاز."><meta property="og:url" content="https://avara-nu-beige.vercel.app/ar/beauty"><meta property="og:image" content="https://avara-nu-beige.vercel.app/assets/hero-beauty.jpg"><meta property="og:locale" content="ar_AR"><meta property="og:locale:alternate" content="en_US"><meta name="twitter:card" content="summary_large_image"><link rel="preload" as="image" href="/assets/hero-beauty-1536.webp" imagesrcset="/assets/hero-beauty-800.webp 800w, /assets/hero-beauty-1536.webp 1536w" imagesizes="100vw" fetchpriority="high"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AVARA","item":"https://avara-nu-beige.vercel.app/ar/"},{"@type":"ListItem","position":2,"name":"العناية بالجمال","item":"https://avara-nu-beige.vercel.app/ar/beauty"}]}</script></head>
+<body id="top">
+
+<!-- ============ SVG PACKSHOT LIBRARY ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="gGlass" x1="0" x2="1"><stop offset="0" stop-color="#E9F6F4"></stop><stop offset="1" stop-color="#BFE0DC"></stop></linearGradient>
+    <linearGradient id="gSage" x1="0" x2="1"><stop offset="0" stop-color="#A8D8DB"></stop><stop offset="1" stop-color="#66B2BC"></stop></linearGradient>
+    <linearGradient id="gWhite" x1="0" x2="1"><stop offset="0" stop-color="#FFFFFF"></stop><stop offset="1" stop-color="#E6F1EF"></stop></linearGradient>
+
+    <symbol id="pk-dropper" viewBox="0 0 120 140">
+      <ellipse cx="60" cy="134" rx="34" ry="3.5" fill="#2C2C2C" opacity=".08"></ellipse>
+      <rect x="52" y="6" width="16" height="28" rx="8" fill="url(#gWhite)" stroke="#CFE1DE"></rect>
+      <rect x="44" y="30" width="32" height="14" rx="3" fill="url(#gWhite)" stroke="#CFE1DE"></rect>
+      <rect x="31" y="44" width="58" height="86" rx="10" fill="url(#gGlass)" stroke="#A9CFCB"></rect>
+      <rect x="35" y="49" width="6" height="76" rx="3" fill="#fff" opacity=".5"></rect>
+      <text x="60" y="86" text-anchor="middle" font-size="9" letter-spacing="2.4" fill="#1F5F6B" font-family="Jost,sans-serif">AVARA</text>
+      <rect x="47" y="95" width="26" height="1" fill="#2F8F9D"></rect>
+    </symbol>
+
+    <symbol id="pk-tube" viewBox="0 0 120 140">
+      <ellipse cx="60" cy="134" rx="30" ry="3.5" fill="#2C2C2C" opacity=".08"></ellipse>
+      <rect x="36" y="8" width="48" height="8" rx="2" fill="#DCEDEA"></rect>
+      <path d="M36 16h48l-3 96H39z" fill="url(#gWhite)" stroke="#CFE1DE"></path>
+      <rect x="40" y="110" width="40" height="20" rx="4" fill="url(#gWhite)" stroke="#CFE1DE"></rect>
+      <text x="60" y="56" text-anchor="middle" font-size="9" letter-spacing="2.4" fill="#1F5F6B" font-family="Jost,sans-serif">AVARA</text>
+      <rect x="47" y="64" width="26" height="1" fill="#2F8F9D"></rect>
+      <rect x="44" y="74" width="32" height="14" rx="2" fill="#8FCAD0" opacity=".55"></rect>
+    </symbol>
+
+    <symbol id="pk-pump" viewBox="0 0 120 140">
+      <ellipse cx="60" cy="134" rx="34" ry="3.5" fill="#2C2C2C" opacity=".08"></ellipse>
+      <path d="M40 8h34a4 4 0 0 1 4 4v8H36v-8a4 4 0 0 1 4-4z" fill="url(#gWhite)" stroke="#CFE1DE"></path>
+      <rect x="55" y="20" width="10" height="24" fill="#DCEDEA"></rect>
+      <rect x="46" y="42" width="28" height="16" rx="3" fill="url(#gWhite)" stroke="#CFE1DE"></rect>
+      <rect x="32" y="58" width="56" height="72" rx="9" fill="url(#gSage)"></rect>
+      <rect x="36" y="63" width="5" height="62" rx="2.5" fill="#fff" opacity=".35"></rect>
+      <text x="60" y="92" text-anchor="middle" font-size="9" letter-spacing="2.4" fill="#2C2C2C" font-family="Jost,sans-serif">AVARA</text>
+      <rect x="47" y="100" width="26" height="1" fill="#2C2C2C" opacity=".5"></rect>
+    </symbol>
+
+    <symbol id="pk-jar" viewBox="0 0 120 140">
+      <ellipse cx="60" cy="130" rx="42" ry="3.5" fill="#2C2C2C" opacity=".08"></ellipse>
+      <rect x="18" y="52" width="84" height="22" rx="6" fill="url(#gWhite)" stroke="#CFE1DE"></rect>
+      <rect x="22" y="72" width="76" height="56" rx="8" fill="url(#gSage)"></rect>
+      <rect x="27" y="77" width="5" height="46" rx="2.5" fill="#fff" opacity=".35"></rect>
+      <text x="60" y="103" text-anchor="middle" font-size="9" letter-spacing="2.4" fill="#2C2C2C" font-family="Jost,sans-serif">AVARA</text>
+      <rect x="47" y="110" width="26" height="1" fill="#2C2C2C" opacity=".5"></rect>
+    </symbol>
+
+    <symbol id="pk-tub" viewBox="0 0 120 140">
+      <ellipse cx="60" cy="134" rx="40" ry="3.5" fill="#2C2C2C" opacity=".08"></ellipse>
+      <rect x="24" y="24" width="72" height="22" rx="5" fill="url(#gWhite)" stroke="#CFE1DE"></rect>
+      <rect x="28" y="44" width="64" height="88" rx="8" fill="url(#gSage)"></rect>
+      <rect x="28" y="66" width="64" height="40" fill="#fff" opacity=".88"></rect>
+      <text x="60" y="90" text-anchor="middle" font-size="9" letter-spacing="2.4" fill="#1F5F6B" font-family="Jost,sans-serif">AVARA</text>
+    </symbol>
+
+    <symbol id="pk-box" viewBox="0 0 120 140">
+      <ellipse cx="60" cy="134" rx="42" ry="3.5" fill="#2C2C2C" opacity=".08"></ellipse>
+      <rect x="22" y="36" width="76" height="94" rx="4" fill="url(#gWhite)" stroke="#CFE1DE"></rect>
+      <rect x="22" y="36" width="76" height="14" fill="url(#gSage)"></rect>
+      <path d="M60 68v24M48 80h24" stroke="#2F8F9D" stroke-width="3.2" stroke-linecap="round"></path>
+      <text x="60" y="116" text-anchor="middle" font-size="9" letter-spacing="2.4" fill="#1F5F6B" font-family="Jost,sans-serif">AVARA</text>
+    </symbol>
+
+    <symbol id="pk-sachet" viewBox="0 0 120 140">
+      <ellipse cx="60" cy="134" rx="32" ry="3.5" fill="#2C2C2C" opacity=".08"></ellipse>
+      <rect x="32" y="22" width="56" height="106" rx="2" fill="url(#gSage)"></rect>
+      <path d="M32 32h56M32 118h56" stroke="#fff" stroke-width="1.4" stroke-dasharray="3 3" opacity=".8"></path>
+      <rect x="32" y="56" width="56" height="34" fill="#fff" opacity=".88"></rect>
+      <text x="60" y="78" text-anchor="middle" font-size="9" letter-spacing="2.4" fill="#1F5F6B" font-family="Jost,sans-serif">AVARA</text>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ============ ANNOUNCEMENT + HEADER ============ -->
+<div class="announce" data-i18n="announce">مستوحاة من الطبيعة، مصقولة بالعلم</div>
+
+<header class="site-header" id="siteHeader">
+  <div class="site-header__in">
+    <a class="brand" href="/ar/" aria-label="AVARA"><img src="/assets/logo.png" alt="AVARA" width="132" height="26"></a>
+
+    <ul class="nav" id="nav">
+      <li><a href="/ar/medical" data-nav-panel="medical" data-i18n="nav_medical">الرعاية الطبية</a></li>
+      <li><a href="/ar/beauty" data-nav-panel="beauty" data-i18n="nav_beauty_full" aria-current="page">العناية بالجمال</a></li>
+      <li><a href="/ar/athlete" data-nav-panel="athlete" data-i18n="nav_athlete_full">الرعاية الرياضية</a></li>
+      <li><a href="/ar/#about" data-i18n="nav_about">من نحن</a></li>
+      <li><a href="/ar/#contact" data-i18n="nav_contact">تواصل معنا</a></li>
+    </ul>
+
+    <div class="tools">
+      <button class="tool" id="searchBtn" type="button" aria-expanded="false" aria-controls="searchPanel" data-i18n-aria="search" aria-label="ابحث عن منتج">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+      </button>
+      <button class="tool tool--install" id="installBtn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14"></path></svg>
+        <span data-i18n="install_app">تثبيت التطبيق</span>
+      </button>
+      <button class="tool tool--lang" id="langBtn" type="button" lang="en">English</button>
+      <button class="tool" id="cartBtn" type="button" aria-haspopup="dialog" data-i18n-aria="cart_title" aria-label="سلّتك">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"></path><path d="M9 8V6a3 3 0 0 1 6 0v2"></path></svg>
+        <span class="tool__count" id="cartCount" hidden="">0</span>
+      </button>
+      <button class="tool menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="nav" data-i18n-aria="menu" aria-label="القائمة">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="search-panel" id="searchPanel" hidden="">
+    <div class="search-panel__in">
+      <label class="sr-only" for="searchInput" data-i18n="search">ابحث عن منتج</label>
+      <input class="search-input" id="searchInput" type="search" autocomplete="off" data-i18n-ph="search_ph" placeholder="ابحث عن منتج">
+      <ul class="search-results" id="searchResults"></ul>
+    </div>
+  </div>
+</header>
+
+<section class="promo" id="promoBanner" aria-label="Promotions" aria-roledescription="carousel" hidden=""></section>
+
+<main>
+
+<!-- ============ PANEL: HOME ============ -->
+<div class="panel" data-panel="home" id="panel-home" hidden="">
+
+  <section class="hero hero--home" aria-label="AVARA">
+    <div class="home-hero__copy">
+      <p class="home-hero__eyebrow" data-i18n="hero_tag">مستوحاة من الطبيعة، مصقولة بالعلم.</p>
+      <p class="home-hero__h" data-i18n="hero_h_home">صحتك تهمّنا</p>
+      <p class="home-hero__s" data-i18n="hero_s_home">نصائح طبية ورعاية رياضية وعناية بالجمال، في مكان واحد تثق به.</p>
+      <div class="home-hero__cta">
+        <a class="btn btn--solid" href="/ar/#departments" data-i18n="cta_depts">تسوّق حسب القسم</a>
+        <a class="btn btn--line" href="/ar/#chat" data-i18n="chat_cta">تحدّث معنا</a>
+      </div>
+    </div>
+    <div class="home-hero__art home-hero__doctor">
+      <img src="/assets/doctor-844.webp" srcset="/assets/doctor-600.webp 600w, /assets/doctor-844.webp 844w" sizes="(max-width: 860px) 70vw, 40vw" width="844" height="879" alt="طبيبة مبتسمة بالمعطف الأبيض وسماعة طبية تحمل لوحة ملاحظات." loading="lazy">
+    </div>
+  </section>
+
+  <section class="section" id="departments" aria-labelledby="deptTitle" style="padding-bottom:40px">
+    <div class="wrap">
+      <h2 class="h2" id="deptTitle" data-i18n="dept_title">تسوّق حسب القسم</h2>
+      <div class="dtiles">
+        <a class="dtile" href="/ar/medical">
+          <span class="dtile__img"><img src="/assets/hero-medical-800.webp" alt="" width="800" height="469" loading="lazy"></span>
+          <span class="dtile__body">
+            <span class="dtile__name" data-i18n="nav_medical">الرعاية الطبية</span>
+            <span class="dtile__desc" data-i18n="tile_medical">أساسيات الرعاية الصحية مع إجابات تثق بها.</span>
+            <span class="tile__go"><span data-i18n="shop">تسوّق</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          </span>
+        </a>
+        <a class="dtile" href="/ar/beauty">
+          <span class="dtile__img"><img src="/assets/hero-beauty-800.webp" alt="" width="800" height="469" loading="lazy"></span>
+          <span class="dtile__body">
+            <span class="dtile__name" data-i18n="nav_beauty_full">العناية بالجمال</span>
+            <span class="dtile__desc" data-i18n="tile_beauty">عناية بالبشرة مستوحاة من الطبيعة ومصقولة بالعلم.</span>
+            <span class="tile__go"><span data-i18n="shop">تسوّق</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          </span>
+        </a>
+        <a class="dtile" href="/ar/athlete">
+          <span class="dtile__img"><img src="/assets/hero-athlete-800.webp" alt="" width="800" height="469" loading="lazy"></span>
+          <span class="dtile__body">
+            <span class="dtile__name" data-i18n="nav_athlete_full">الرعاية الرياضية</span>
+            <span class="dtile__desc" data-i18n="tile_athlete">استشفاء وترطيب ودعم يومي للأجسام النشطة.</span>
+            <span class="tile__go"><span data-i18n="shop">تسوّق</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+          </span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--mist" id="featured" aria-labelledby="featuredTitle" hidden="">
+    <div class="wrap">
+      <h2 class="h2" id="featuredTitle" data-i18n="featured_title">مختارات لك</h2>
+      <p class="lead" data-i18n="featured_sub">مجموعة منتجات من أقسامنا الثلاثة.</p>
+      <div class="grid" id="grid-featured"></div>
+    </div>
+  </section>
+
+  <section class="section facts" id="facts" aria-labelledby="factsTitle">
+    <div class="wrap">
+      <h2 class="h2" id="factsTitle" data-i18n="trust_title">التسوّق مع AVARA</h2>
+      <ul class="facts__grid" id="factsGrid"></ul>
+    </div>
+  </section>
+
+  <section class="section section--mist" id="reviews" aria-labelledby="reviewsTitle" hidden="">
+    <div class="wrap">
+      <div class="rv__head">
+        <h2 class="h2" id="reviewsTitle" data-i18n="rv_title">آراء العملاء</h2>
+        <div class="rv__sum" id="rvSum"></div>
+      </div>
+      <ul class="rv__list" id="rvList"></ul>
+      <p class="rv__foot"><span data-i18n="rv_note">التقييمات من عملاء تم تسليم طلباتهم، وتُنشر بعد موافقتنا عليها.</span> <a href="/review" data-i18n="rv_cta">اشتريت منا؟ اترك تقييمك</a></p>
+    </div>
+  </section>
+
+  <section class="section about" id="about" aria-labelledby="aboutTitle">
+    <div class="wrap about__grid">
+      <h2 class="h2" id="aboutTitle" data-i18n="about_title">من نحن</h2>
+      <div>
+        <p class="about__text" data-i18n="about_text">أنا مساعدك الطبي، أهتم بصحتك واحتياجاتك بقدر اهتمامك بنفسك.</p>
+        <p class="about__tag" data-i18n="hero_tag">مستوحاة من الطبيعة، مصقولة بالعلم.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="contact" aria-labelledby="contactTitle">
+    <div class="wrap contact__grid">
+      <div>
+        <h2 class="h2" id="contactTitle" data-i18n="contact_title">لنتواصل</h2>
+        <p class="lead" data-i18n="contact_text">سؤال عن دواء، أو عَرَض لست متأكداً منه، أو ببساطة لا تعرف من أين تبدأ؟ تواصل معنا. صحتك تستحق إجابة حقيقية لا تخميناً.</p>
+        <p class="trust-note" id="trustNote" hidden=""></p>
+      </div>
+      <div>
+        <ul class="contact__list">
+          <li>
+            <span class="contact__label" data-i18n="c_email">البريد الإلكتروني</span>
+            <a class="contact__value" href="mailto:souna.92@gmail.com">souna.92@gmail.com</a>
+          </li>
+          <li>
+            <span class="contact__label" data-i18n="c_phone">الهاتف</span>
+            <a class="contact__value" href="tel:+96176681395" dir="ltr">76 681 395</a>
+          </li>
+          <li id="ct-address" hidden=""><span class="contact__label" data-i18n="c_address">العنوان</span><span class="contact__text" id="ctAddress"></span></li>
+          <li id="ct-hours" hidden=""><span class="contact__label" data-i18n="c_hours">ساعات العمل</span><span class="contact__text" id="ctHours"></span></li>
+          <li id="ct-delivery" hidden=""><span class="contact__label" data-i18n="c_delivery">التوصيل</span><span class="contact__text" id="ctDelivery"></span></li>
+          <li id="ct-payment" hidden=""><span class="contact__label" data-i18n="c_payment">الدفع</span><span class="contact__text" id="ctPayment"></span></li>
+        </ul>
+        <a class="btn btn--solid contact__wa" href="https://wa.me/96176681395" target="_blank" rel="noopener" data-i18n="c_wa">راسلنا عبر واتساب</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--mist" id="chat" aria-labelledby="chatTitle">
+    <div class="wrap">
+      <div class="chat-head">
+        <h2 class="h2" id="chatTitle" data-i18n="chat_title">تحدّث مع AVARA</h2>
+        <p class="lead" data-i18n="chat_sub">اسأل عن الأعراض أو الأدوية أو الاستشفاء أو العناية بالبشرة. مساعدنا هنا لمساعدتك.</p>
+      </div>
+      <p class="chat-emergency" role="note" data-i18n="chat_emergency">حالة طارئة؟ اتصل بالصليب الأحمر اللبناني على 140 أو الدفاع المدني على 125 أو الشرطة على 112.</p>
+      <div class="chat-panel">
+        <div class="chat-log" id="chatLog" role="log" aria-live="polite"></div>
+        <form class="chat-form" id="chatForm">
+          <label class="sr-only" for="chatInput" data-i18n="chat_ph">اكتب سؤالك…</label>
+          <textarea id="chatInput" rows="1" maxlength="1000" required="" data-i18n-ph="chat_ph" placeholder="اكتب سؤالك…"></textarea>
+          <button class="btn btn--solid" type="submit" id="chatSend" data-i18n="chat_send">إرسال</button>
+        </form>
+      </div>
+      <p class="chat-note" data-i18n="chat_note">إرشادات عامة فقط، وليست تشخيصاً طبياً. يرجى عدم مشاركة اسمك أو رقم هاتفك أو بياناتك الشخصية في المحادثة، إذ تُعالج الرسائل بواسطة خدمة ذكاء اصطناعي.</p>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ PANEL: MEDICAL ============ -->
+<div class="panel" data-panel="medical" id="panel-medical" hidden="">
+
+  <section class="hero" aria-label="AVARA Medical care">
+    <img class="hero__img" src="/assets/hero-medical-1536.webp" srcset="/assets/hero-medical-800.webp 800w, /assets/hero-medical-1536.webp 1536w" sizes="100vw" width="1536" height="900" alt="امرأة مبتسمة بجانب فيتامين D3 وزيت السمك أوميغا 3 وميزان حرارة رقمي ومرطّب لا روش بوزيه سيكابلاست." loading="lazy">
+    <div class="hero__copy" style="--x:36.2%;--y:23%;--w:36%">
+      <p class="hero__h" data-i18n="hero_h_medical">صحة أفضل لحياة أجمل.</p>
+      <p class="hero__s" data-i18n="hero_s_medical">نصائح طبية وفيتامينات وأساسيات يومية.</p>
+      <a class="btn btn--solid hero__cta" href="/ar/medical#tools-medical" data-i18n="hero_cta_medical">تسوّق الرعاية الطبية</a>
+    </div>
+  </section>
+
+  <section class="section" id="medical" aria-labelledby="medicalTitle">
+    <div class="wrap">
+      <div class="dept-head dept-head--split">
+        <div>
+          <h2 class="h2" id="medicalTitle" data-i18n="nav_medical">الرعاية الطبية</h2>
+          <p class="lead" data-i18n="lead_medical">إجابات واضحة حول الأعراض وأسئلة الأدوية والرعاية الصحية اليومية.</p>
+          <p class="rx-note" data-i18n="rx_note">لا تُباع الأدوية التي تُصرف بوصفة طبية عبر الإنترنت. للوصفات الطبية يرجى التواصل مع الصيدلية.</p>
+        </div>
+        <aside class="advice">
+          <h3 class="advice__title" data-i18n="advice_title">اسأل قبل أن تقرّر</h3>
+          <ul class="advice__list">
+            <li><a href="/ar/#chat" data-i18n="advice_1">الأعراض ومتى يجب مراجعة الطبيب</a></li>
+            <li><a href="/ar/#chat" data-i18n="advice_2">أسئلة الأدوية والتداخلات الدوائية</a></li>
+            <li><a href="/ar/#chat" data-i18n="advice_3">الفيتامينات والمكمّلات المناسبة لك</a></li>
+          </ul>
+          <a class="btn btn--solid" href="/ar/#chat" data-i18n="chat_cta">تحدّث معنا</a>
+          <p class="advice__note" data-i18n="advice_note">إرشادات عامة فقط، ولا تغني عن استشارة الطبيب.</p>
+        </aside>
+      </div>
+      <div class="toolbar" id="tools-medical"></div>
+      <div class="grid" id="grid-medical"></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ PANEL: BEAUTY ============ -->
+<div class="panel" data-panel="beauty" id="panel-beauty"><h1 class="sr-only">AVARA — العناية بالجمال</h1>
+
+  <section class="hero" aria-label="AVARA Beauty care">
+    <img class="hero__img" src="/assets/hero-beauty-1536.webp" srcset="/assets/hero-beauty-800.webp 800w, /assets/hero-beauty-1536.webp 1536w" sizes="100vw" width="1536" height="900" alt="امرأة ببشرة مشرقة بجانب منتجات جمال من لا روش بوزيه وإستي لودر ولانكوم وكيراستاز وماك ونارس." fetchpriority="high">
+    <div class="hero__copy" style="--x:42.6%;--y:10%;--w:36%">
+      <p class="hero__h" data-i18n="hero_h_beauty">أشهر ماركات الجمال العالمية في مكان واحد.</p>
+      <p class="hero__s" data-i18n="hero_s_beauty">لا روش بوزيه، إستي لودر، لانكوم، كيراستاز، ماك ونارس.</p>
+      <a class="btn btn--solid hero__cta" href="#collTabs-beauty" data-i18n="hero_cta_beauty">تسوّق العناية بالجمال</a>
+    </div>
+  </section>
+
+  <section class="section" id="beauty" aria-labelledby="beautyTitle">
+    <div class="wrap">
+      <h2 class="h2" id="beautyTitle" data-i18n="nav_beauty_full">العناية بالجمال</h2>
+      <p class="lead" data-i18n="lead_beauty">عناية بالبشرة حيث تلتقي المكوّنات الطبيعية بالتركيب العلمي الدقيق.</p>
+      <div class="subtabs" id="collTabs-beauty" style="margin-top:32px"></div>
+      <div class="toolbar" id="tools-beauty"></div>
+      <div class="grid" id="grid-beauty"></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ PANEL: ATHLETE ============ -->
+<div class="panel" data-panel="athlete" id="panel-athlete" hidden="">
+
+  <section class="hero" aria-label="AVARA Athlete care">
+    <img class="hero__img" src="/assets/hero-athlete-1536.webp" srcset="/assets/hero-athlete-800.webp 800w, /assets/hero-athlete-1536.webp 1536w" sizes="100vw" width="1536" height="900" alt="امرأة بملابس رياضية مع منشفة وزجاجة ماء بجانب منتجات لا روش بوزيه وفيشي وكيراستاز وسيرافي وشيكر." loading="lazy">
+    <div class="hero__copy" style="--x:45.3%;--y:14%;--w:40%">
+      <p class="hero__h" data-i18n="hero_h_athlete">عناية تدعم كل خطوة في رحلتك.</p>
+      <p class="hero__s" data-i18n="hero_s_athlete">استشفاء وترطيب وحماية لأيام التمرين وأيام الراحة.</p>
+      <a class="btn btn--solid hero__cta" href="/ar/athlete#tools-athlete" data-i18n="hero_cta_athlete">تسوّق الرعاية الرياضية</a>
+    </div>
+  </section>
+
+  <section class="section" id="athlete" aria-labelledby="athleteTitle">
+    <div class="wrap">
+      <h2 class="h2" id="athleteTitle" data-i18n="nav_athlete_full">الرعاية الرياضية</h2>
+      <p class="lead" data-i18n="lead_athlete">استشفاء وترطيب وحماية لأيام التمرين وأيام الراحة.</p>
+      <div class="toolbar" id="tools-athlete" style="margin-top:32px"></div>
+      <div class="grid" id="grid-athlete"></div>
+    </div>
+  </section>
+
+</div>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="wrap footer__grid">
+    <div class="footer__brand">
+      <img src="/assets/logo-white.png" alt="AVARA" width="132" height="26">
+      <p data-i18n="hero_tag">مستوحاة من الطبيعة، مصقولة بالعلم.</p>
+    </div>
+    <nav aria-label="Shop">
+      <h3 data-i18n="f_shop">تسوّق</h3>
+      <ul>
+        <li><a href="/ar/medical" data-i18n="nav_medical">الرعاية الطبية</a></li>
+        <li><a href="/ar/athlete" data-i18n="nav_athlete_full">الرعاية الرياضية</a></li>
+        <li><a href="#beauty" data-i18n="nav_beauty_full">العناية بالجمال</a></li>
+      </ul>
+    </nav>
+    <div>
+      <h3 data-i18n="f_help">المساعدة والتواصل</h3>
+      <ul>
+        <li><a href="mailto:souna.92@gmail.com">souna.92@gmail.com</a></li>
+        <li><a href="tel:+96176681395" dir="ltr">76 681 395</a></li>
+        <li><a href="/ar/#chat" data-i18n="chat_cta">تحدّث معنا</a></li>
+        <li><a href="/articles" id="articlesLink" data-i18n="f_articles">نصائح الصحة والعناية</a></li>
+        <li><a href="/track" data-i18n="track_order">تتبّع طلبك</a></li>
+        <li><a href="/policies" data-i18n="f_policies">الخصوصية والسياسات</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer__bar"><div class="wrap" data-i18n="f_rights">© 2026 AVARA. جميع الحقوق محفوظة.</div></div>
+</footer>
+
+<!-- ============ CART DRAWER ============ -->
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+  <div class="drawer__head">
+    <h2 class="drawer__title" id="drawerTitle" data-i18n="cart_title">سلّتك</h2>
+    <button class="tool" id="closeCart" type="button" data-i18n-aria="close" aria-label="إغلاق">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+    </button>
+  </div>
+  <div class="drawer__body" id="cartBody"></div>
+  <div class="drawer__foot" id="cartFoot" hidden="">
+    <div class="cart-sum">
+      <div class="cart-sum__row"><span data-i18n="subtotal">المجموع</span><span id="cartSub" dir="ltr">$0.00</span></div>
+      <div class="cart-sum__row" id="feeRow" hidden=""><span data-i18n="delivery">التوصيل</span><span id="cartFee" dir="ltr"></span></div>
+      <div class="cart-sum__row cart-sum__row--disc" id="discRow" hidden=""><span id="discLabel"></span><span id="cartDisc" dir="ltr"></span></div>
+      <div class="subtotal"><span data-i18n="total">المجموع الكلي</span><span id="cartTotal" dir="ltr">$0.00</span></div>
+    </div>
+    <div class="code-box" id="codeBox">
+      <div class="code-box__row">
+        <input id="codeInput" type="text" maxlength="30" autocomplete="off" autocapitalize="characters" dir="ltr" data-i18n-ph="code_ph" placeholder="رمز الخصم" aria-label="Discount code">
+        <button class="btn btn--line" id="codeBtn" type="button" data-i18n="code_apply">تطبيق</button>
+      </div>
+      <p class="code-box__msg" id="codeMsg" role="status" hidden=""></p>
+    </div>
+    <p class="drawer__note" id="cartInfo" hidden=""></p>
+    <form class="order-form" id="orderForm" novalidate="">
+      <label><span data-i18n="name_label">الاسم الكامل</span>
+        <input name="customer" type="text" required="" minlength="2" maxlength="100" autocomplete="name"></label>
+      <label><span data-i18n="phone_label">رقم الهاتف</span>
+        <input name="phone" type="tel" required="" maxlength="30" autocomplete="tel" dir="ltr"></label>
+      <label><span data-i18n="address_label">عنوان التوصيل (اختياري)</span>
+        <input name="address" type="text" maxlength="300" autocomplete="street-address"></label>
+      <label><span data-i18n="notes_label">ملاحظات (اختياري)</span>
+        <textarea name="notes" rows="2" maxlength="500"></textarea></label>
+      <label class="optin"><input type="checkbox" name="wa_optin"><span data-i18n="wa_optin">أرسلوا لي العروض والأخبار عبر واتساب. يمكنني الإيقاف في أي وقت بالرد بكلمة STOP.</span></label>
+      <p class="form-error" id="orderError" role="alert" hidden=""></p>
+      <button class="btn btn--solid btn--block" id="placeBtn" type="submit" data-i18n="place_order">إرسال الطلب</button>
+      <p class="drawer__note consent"><span data-i18n="consent_pre">بإرسال الطلب فإنك توافق على </span><a href="/policies" target="_blank" rel="noopener" data-i18n="policies">الخصوصية والسياسات</a></p>
+      <p class="drawer__note" data-i18n="cart_note">سنتواصل معك لتأكيد الطلب والتوصيل والدفع.</p>
+    </form>
+  </div>
+</aside>
+<div class="install-help" id="installHelp" hidden="" role="dialog" aria-modal="false" aria-labelledby="installHelpTitle">
+  <div class="install-help__in">
+    <h3 id="installHelpTitle" data-i18n="install_help_title">ثبّت تطبيق AVARA</h3>
+    <p id="installHelpText"></p>
+    <button class="btn btn--line" type="button" id="installHelpClose" data-i18n="install_help_close">حسناً</button>
+  </div>
+</div>
+<dialog class="pdp" id="pdp" aria-label="Product details">
+  <button class="tool pdp__close" id="pdpClose" type="button" data-i18n-aria="close" aria-label="إغلاق">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+  </button>
+  <div id="pdpBody"></div>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ============ STORE LOGIC ============ -->
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  'use strict';
+
+  /* ---------- Copy (EN / AR) ---------- */
+  var I18N = {
+    en: {
+      announce:'Inspired by Nature. Perfected by Science',
+      nav_medical:'Medical care', nav_about:'About', nav_contact:'Contact',
+      nav_athlete_full:'Athlete care', nav_beauty_full:'Beauty care',
+      hero_cta_medical:'Shop Medical care', hero_cta_beauty:'Shop Beauty care', hero_cta_athlete:'Shop Athlete care',
+      search:'Search products', search_ph:'Search products', search_none:'No products match your search.', menu:'Menu', close:'Close',
+      hero_tag:'Inspired by Nature. Perfected by Science.',
+      hero_h_medical:'Better health for a more beautiful life.', hero_s_medical:'Medical advice, vitamins and everyday essentials.',
+      hero_h_beauty:'The most famous global beauty brands, all in one place.', hero_s_beauty:'La Roche-Posay, Estée Lauder, Lancôme, Kérastase, MAC and NARS.',
+      hero_h_athlete:'Care that supports every step of your journey.', hero_s_athlete:'Recovery, hydration and protection for training days and rest days.',
+      dept_title:'Shop by department', shop:'Shop',
+      tile_medical:'Health care essentials, with answers you can trust.',
+      tile_athlete:'Recovery, hydration and everyday support for active bodies.',
+      tile_beauty:'Skin care inspired by nature and perfected by science.',
+      lead_medical:'Straight answers on symptoms, medication questions and everyday health care.',
+      lead_athlete:'Recovery, hydration and protection for training days and rest days.',
+      lead_beauty:'Skin care where natural ingredients meet careful formulation.',
+      advice_title:'Ask before you decide',
+      advice_1:'Symptoms, and when to see a doctor', advice_2:'Medication questions and interactions', advice_3:'Vitamins and supplements that suit you',
+      advice_note:'General guidance only. It does not replace your doctor.', chat_cta:'Chat with us',
+      cat_all:'All', sort_label:'Sort by', sort_feat:'Featured', sort_low:'Price, low to high', sort_high:'Price, high to low', sort_az:'Name, A–Z',
+      count:'{n} products', add:'Add to cart', added:'Added to cart', badge_new:'New',
+      out_of_stock:'Out of stock', only_left:'Only {n} left', stock_max:'Only {n} available',
+      delivery:'Delivery', total:'Total', free_word:'Free',
+      code_ph:'Discount code', code_apply:'Apply', code_remove:'Remove', disc_word:'Discount', code_ok:'Code applied: you save {amt}.',
+      code_invalid:'This code is not valid.', code_expired:'This code has expired.', code_used_up:'This code is no longer available.',
+      code_first:'This code is for first orders only.', code_already:'You have already used this code.', code_min:'Spend at least {amt} on products to use this code.',
+      code_busy:'Too many attempts. Please try again in a few minutes.', code_err:'We could not check the code. Please try again.',
+      free_over:'Free delivery on orders over {amt}', add_for_free:'Add {amt} more for free delivery',
+      min_order_note:'Minimum order: {amt}', order_min:'The minimum order is {amt}.',
+      pay_with:'Payment: {text}', deliv_info:'Delivery: {text}',
+      brand_label:'Brand', brand_all:'All brands', cat_sale:'On sale',
+      pdp_share:'Share', pdp_copied:'Link copied', pdp_ask:'Ask on WhatsApp', pdp_related:'You may also like',
+      c_address:'Address', c_hours:'Opening hours', c_delivery:'Delivery', c_payment:'Payment',
+      wa_product:'Hello AVARA, I have a question about: {name}',
+      order_stock:'Some items in your cart are no longer available in that quantity. We refreshed the list, please check your cart.',
+      gallery_prev:'Previous photo', gallery_next:'Next photo',
+      cart_title:'Your cart', cart_empty:'Your cart is empty. Add a product to get started.', subtotal:'Subtotal',
+      remove:'Remove', dec:'Decrease quantity', inc:'Increase quantity',
+      cart_note:"We'll contact you to confirm your order, delivery and payment.",
+      about_title:'About', about_text:"I'm your medical assistant. I care about your health and your needs as much as you care for yourself.",
+      contact_title:"Let's connect",
+      contact_text:"A question about a medication, a symptom you're unsure of, or simply where to start — reach out. Your health deserves a real answer, not a guess.",
+      c_email:'Email', c_phone:'Phone', c_wa:'Message on WhatsApp',
+      chat_title:'Chat with AVARA', chat_sub:'Ask about symptoms, medications, recovery or skin care. Our assistant is here to help.',
+      chat_ph:'Type your question…', chat_send:'Send', chat_typing:'Typing…',
+      chat_note:'General guidance only, not a medical diagnosis. Please do not share your name, phone number or other personal details in the chat; messages are processed by an AI service.',
+      chat_emergency:'Emergency? Call the Lebanese Red Cross on 140, Civil Defence on 125 or the police on 112.',
+      chat_rate:'You have sent many messages in a short time. Please wait a few minutes, or message us on WhatsApp.',
+      order_rate:'Too many orders from this number in a short time. Please wait a little or message us on WhatsApp.',
+      rx_note:'Prescription-only medicines are not sold online. For prescriptions, please contact the pharmacy.',
+      consent_pre:'By placing an order you accept our ', policies:'Privacy and policies', f_policies:'Privacy and policies',
+      chat_greet:'Hello, welcome to AVARA. Ask me about medical advice, athlete recovery or beauty care — I\'m here to help.',
+      chat_err:'Sorry, something went wrong. Please try again, or message us on WhatsApp.',
+      chat_suggest:'Suggested for you',
+      nt_open:'Notify me when it is back', nt_lead:'Leave your phone number and we will message you when it is available again.',
+      nt_phone:'Phone number', nt_name:'Your name (optional)', nt_send:'Notify me', nt_sending:'Sending…',
+      nt_ok:'Done. We will message you as soon as it is back.', nt_bad:'Please enter a valid phone number.',
+      nt_instock:'Good news, this product is available now.', nt_err:'Something went wrong. Please try again, or message us on WhatsApp.',
+      install_app:'Install app', install_added:'AVARA is installed on your device',
+      install_help_title:'Install the AVARA app', install_help_close:'Got it',
+      install_help_ios:'Tap the Share icon in Safari, then choose "Add to Home Screen".',
+      install_help_generic:'Open your browser menu and choose "Add to Home screen" or "Install app".',
+      install_help_installed:'AVARA is already installed. Look for it on your home screen or app list.',
+      f_shop:'Shop', f_help:'Help & contact', f_rights:'© 2026 AVARA. All rights reserved.',
+      loading:'Loading products…', load_err:'We could not load the products. Please refresh the page or try again shortly.', no_products:'No products in this section yet.',
+      name_label:'Full name', phone_label:'Phone number', address_label:'Delivery address (optional)', notes_label:'Notes (optional)',
+      place_order:'Place order', placing:'Placing order…',
+      order_invalid:'Please enter your name and a valid phone number.',
+      order_err:'We could not place your order. Please try again or message us on WhatsApp.',
+      order_unavail:'One of the products in your cart is no longer available. We refreshed the list, please check your cart.',
+      order_ok_title:'Thank you, your order is in', order_ok_text:'Your order number is {no}. We will contact you soon to confirm delivery and payment.',
+      order_wa_confirm:'Message us on WhatsApp', continue:'Continue shopping', wa_order:'Hello AVARA, my order number is #{no}.',
+      track_order:'Track your order', f_articles:'Health & care advice',
+      wa_optin:'Send me offers and news on WhatsApp. I can stop anytime by replying STOP.',
+      promo_offer:'Special offer', promo_bundle:'Bundle', promo_add_all:'Add bundle to cart', promo_view:'View', promo_total:'{n} items',
+      promo_code_note:'Code {code} is applied in your cart.', promo_prev:'Previous offer', promo_next:'Next offer', promo_go:'Show offer {n}',
+      trust_title:'Shopping with AVARA',
+      fx_support_h:'Support', fx_support_p:'Chat with us on the website or on WhatsApp at 76 681 395 about products, orders or delivery.',
+      fx_track_h:'Track your order', fx_track_p:'Follow your order from confirmation to delivery with your order number and phone number.',
+      fx_rx_h:'Prescriptions',
+      fx_order_h:'Delivery and payment', fx_order_p:'We contact you to confirm your order, delivery and payment.',
+      fx_brands_h:'{n} brands', fx_brands_p:'In our catalogue today.',
+      rv_title:'What customers say', rv_one:'1 review', rv_many:'{n} reviews', rv_stars:'{n} out of 5 stars',
+      rv_note:'Reviews come from customers whose order was delivered, and are published after we approve them.', rv_cta:'Bought from us? Leave a review',
+      show_more:'Show more', show_less:'Show less',
+      hero_h_home:'Your Health Matters', hero_s_home:'Medical advice, athlete care and beauty, in one trusted place.',
+      cta_depts:'Shop by department', featured_title:'Featured picks', featured_sub:'A few products from across our three departments.',
+      langBtn:'العربية'
+    },
+    ar: {
+      announce:'مستوحاة من الطبيعة، مصقولة بالعلم',
+      nav_medical:'الرعاية الطبية', nav_about:'من نحن', nav_contact:'تواصل معنا',
+      nav_athlete_full:'الرعاية الرياضية', nav_beauty_full:'العناية بالجمال',
+      hero_cta_medical:'تسوّق الرعاية الطبية', hero_cta_beauty:'تسوّق العناية بالجمال', hero_cta_athlete:'تسوّق الرعاية الرياضية',
+      search:'ابحث عن منتج', search_ph:'ابحث عن منتج', search_none:'لا توجد منتجات مطابقة لبحثك.', menu:'القائمة', close:'إغلاق',
+      hero_tag:'مستوحاة من الطبيعة، مصقولة بالعلم.',
+      hero_h_medical:'صحة أفضل لحياة أجمل.', hero_s_medical:'نصائح طبية وفيتامينات وأساسيات يومية.',
+      hero_h_beauty:'أشهر ماركات الجمال العالمية في مكان واحد.', hero_s_beauty:'لا روش بوزيه، إستي لودر، لانكوم، كيراستاز، ماك ونارس.',
+      hero_h_athlete:'عناية تدعم كل خطوة في رحلتك.', hero_s_athlete:'استشفاء وترطيب وحماية لأيام التمرين وأيام الراحة.',
+      dept_title:'تسوّق حسب القسم', shop:'تسوّق',
+      tile_medical:'أساسيات الرعاية الصحية مع إجابات تثق بها.',
+      tile_athlete:'استشفاء وترطيب ودعم يومي للأجسام النشطة.',
+      tile_beauty:'عناية بالبشرة مستوحاة من الطبيعة ومصقولة بالعلم.',
+      lead_medical:'إجابات واضحة حول الأعراض وأسئلة الأدوية والرعاية الصحية اليومية.',
+      lead_athlete:'استشفاء وترطيب وحماية لأيام التمرين وأيام الراحة.',
+      lead_beauty:'عناية بالبشرة حيث تلتقي المكوّنات الطبيعية بالتركيب العلمي الدقيق.',
+      advice_title:'اسأل قبل أن تقرّر',
+      advice_1:'الأعراض ومتى يجب مراجعة الطبيب', advice_2:'أسئلة الأدوية والتداخلات الدوائية', advice_3:'الفيتامينات والمكمّلات المناسبة لك',
+      advice_note:'إرشادات عامة فقط، ولا تغني عن استشارة الطبيب.', chat_cta:'تحدّث معنا',
+      cat_all:'الكل', sort_label:'ترتيب حسب', sort_feat:'المميّزة', sort_low:'السعر: من الأقل إلى الأعلى', sort_high:'السعر: من الأعلى إلى الأقل', sort_az:'الاسم: أ – ي',
+      count:'{n} منتج', add:'أضف إلى السلة', added:'أُضيف إلى السلة', badge_new:'جديد',
+      out_of_stock:'غير متوفر', only_left:'متبقّي {n} فقط', stock_max:'الكمية المتوفرة {n} فقط',
+      delivery:'التوصيل', total:'المجموع الكلي', free_word:'مجاني',
+      code_ph:'رمز الخصم', code_apply:'تطبيق', code_remove:'إزالة', disc_word:'الخصم', code_ok:'تم تطبيق الرمز: وفّرت {amt}.',
+      code_invalid:'هذا الرمز غير صالح.', code_expired:'انتهت صلاحية هذا الرمز.', code_used_up:'هذا الرمز لم يعد متاحاً.',
+      code_first:'هذا الرمز مخصص للطلب الأول فقط.', code_already:'لقد استخدمت هذا الرمز من قبل.', code_min:'اشترِ منتجات بقيمة {amt} على الأقل لاستخدام هذا الرمز.',
+      code_busy:'محاولات كثيرة. يرجى المحاولة بعد بضع دقائق.', code_err:'تعذّر التحقق من الرمز. يرجى المحاولة مجدداً.',
+      free_over:'توصيل مجاني للطلبات التي تزيد عن {amt}', add_for_free:'أضف {amt} للحصول على توصيل مجاني',
+      min_order_note:'الحد الأدنى للطلب: {amt}', order_min:'الحد الأدنى للطلب هو {amt}.',
+      pay_with:'الدفع: {text}', deliv_info:'التوصيل: {text}',
+      brand_label:'العلامة', brand_all:'كل العلامات', cat_sale:'تخفيضات',
+      pdp_share:'مشاركة', pdp_copied:'تم نسخ الرابط', pdp_ask:'اسأل عبر واتساب', pdp_related:'قد يعجبك أيضاً',
+      c_address:'العنوان', c_hours:'ساعات العمل', c_delivery:'التوصيل', c_payment:'الدفع',
+      wa_product:'مرحباً AVARA، لدي سؤال عن: {name}',
+      order_stock:'بعض المنتجات في سلّتك لم تعد متوفرة بهذه الكمية. حدّثنا القائمة، يرجى مراجعة سلّتك.',
+      gallery_prev:'الصورة السابقة', gallery_next:'الصورة التالية',
+      cart_title:'سلّتك', cart_empty:'سلّتك فارغة. أضف منتجاً للبدء.', subtotal:'المجموع',
+      remove:'إزالة', dec:'إنقاص الكمية', inc:'زيادة الكمية',
+      cart_note:'سنتواصل معك لتأكيد الطلب والتوصيل والدفع.',
+      about_title:'من نحن', about_text:'أنا مساعدك الطبي، أهتم بصحتك واحتياجاتك بقدر اهتمامك بنفسك.',
+      contact_title:'لنتواصل',
+      contact_text:'سؤال عن دواء، أو عَرَض لست متأكداً منه، أو ببساطة لا تعرف من أين تبدأ؟ تواصل معنا. صحتك تستحق إجابة حقيقية لا تخميناً.',
+      c_email:'البريد الإلكتروني', c_phone:'الهاتف', c_wa:'راسلنا عبر واتساب',
+      chat_title:'تحدّث مع AVARA', chat_sub:'اسأل عن الأعراض أو الأدوية أو الاستشفاء أو العناية بالبشرة. مساعدنا هنا لمساعدتك.',
+      chat_ph:'اكتب سؤالك…', chat_send:'إرسال', chat_typing:'يكتب…',
+      chat_note:'إرشادات عامة فقط، وليست تشخيصاً طبياً. يرجى عدم مشاركة اسمك أو رقم هاتفك أو بياناتك الشخصية في المحادثة، إذ تُعالج الرسائل بواسطة خدمة ذكاء اصطناعي.',
+      chat_emergency:'حالة طارئة؟ اتصل بالصليب الأحمر اللبناني على 140 أو الدفاع المدني على 125 أو الشرطة على 112.',
+      chat_rate:'أرسلت عدداً كبيراً من الرسائل خلال وقت قصير. يرجى الانتظار بضع دقائق أو مراسلتنا عبر واتساب.',
+      order_rate:'عدد كبير من الطلبات من هذا الرقم خلال وقت قصير. يرجى الانتظار قليلاً أو مراسلتنا عبر واتساب.',
+      rx_note:'لا تُباع الأدوية التي تُصرف بوصفة طبية عبر الإنترنت. للوصفات الطبية يرجى التواصل مع الصيدلية.',
+      consent_pre:'بإرسال الطلب فإنك توافق على ', policies:'الخصوصية والسياسات', f_policies:'الخصوصية والسياسات',
+      chat_greet:'مرحباً بك في AVARA. اسألني عن النصائح الطبية أو استشفاء الرياضيين أو العناية بالجمال، أنا هنا للمساعدة.',
+      chat_err:'عذراً، حدث خطأ ما. يرجى المحاولة مجدداً أو مراسلتنا عبر واتساب.',
+      chat_suggest:'مقترحات لك',
+      nt_open:'أعلمني عند توفره', nt_lead:'اترك رقم هاتفك وسنراسلك عندما يتوفر المنتج من جديد.',
+      nt_phone:'رقم الهاتف', nt_name:'اسمك (اختياري)', nt_send:'أعلمني', nt_sending:'جارٍ الإرسال…',
+      nt_ok:'تم. سنراسلك فور توفره.', nt_bad:'يرجى إدخال رقم هاتف صحيح.',
+      nt_instock:'خبر سار، المنتج متوفر الآن.', nt_err:'حدث خطأ ما. يرجى المحاولة مجدداً أو مراسلتنا عبر واتساب.',
+      install_app:'تثبيت التطبيق', install_added:'تم تثبيت AVARA على جهازك',
+      install_help_title:'ثبّت تطبيق AVARA', install_help_close:'حسناً',
+      install_help_ios:'اضغط على أيقونة المشاركة في Safari، ثم اختر "إضافة إلى الشاشة الرئيسية".',
+      install_help_generic:'افتح قائمة المتصفح واختر "إضافة إلى الشاشة الرئيسية" أو "تثبيت التطبيق".',
+      install_help_installed:'تطبيق AVARA مثبّت لديك بالفعل. ابحث عنه في شاشتك الرئيسية أو قائمة التطبيقات.',
+      f_shop:'تسوّق', f_help:'المساعدة والتواصل', f_rights:'© 2026 AVARA. جميع الحقوق محفوظة.',
+      loading:'جارٍ تحميل المنتجات…', load_err:'تعذّر تحميل المنتجات. يرجى تحديث الصفحة أو المحاولة بعد قليل.', no_products:'لا توجد منتجات في هذا القسم بعد.',
+      name_label:'الاسم الكامل', phone_label:'رقم الهاتف', address_label:'عنوان التوصيل (اختياري)', notes_label:'ملاحظات (اختياري)',
+      place_order:'إرسال الطلب', placing:'جارٍ إرسال الطلب…',
+      order_invalid:'يرجى إدخال اسمك ورقم هاتف صحيح.',
+      order_err:'تعذّر إرسال طلبك. يرجى المحاولة مجدداً أو مراسلتنا عبر واتساب.',
+      order_unavail:'أحد المنتجات في سلّتك لم يعد متاحاً. حدّثنا القائمة، يرجى مراجعة سلّتك.',
+      order_ok_title:'شكراً لك، وصلنا طلبك', order_ok_text:'رقم طلبك هو {no}. سنتواصل معك قريباً لتأكيد التوصيل والدفع.',
+      order_wa_confirm:'راسلنا عبر واتساب', continue:'متابعة التسوق', wa_order:'مرحباً AVARA، رقم طلبي #{no}.',
+      track_order:'تتبّع طلبك', f_articles:'نصائح الصحة والعناية',
+      wa_optin:'أرسلوا لي العروض والأخبار عبر واتساب. يمكنني الإيقاف في أي وقت بالرد بكلمة STOP.',
+      promo_offer:'عرض خاص', promo_bundle:'باقة', promo_add_all:'أضف الباقة إلى السلة', promo_view:'عرض', promo_total:'{n} منتجات',
+      promo_code_note:'يتم تطبيق الرمز {code} في سلّتك.', promo_prev:'العرض السابق', promo_next:'العرض التالي', promo_go:'عرض {n}',
+      trust_title:'التسوّق مع AVARA',
+      fx_support_h:'الدعم', fx_support_p:'تحدّث معنا على الموقع أو عبر واتساب على 76 681 395 عن المنتجات أو الطلبات أو التوصيل.',
+      fx_track_h:'تتبّع طلبك', fx_track_p:'تابع طلبك من التأكيد حتى التسليم باستخدام رقم الطلب ورقم الهاتف.',
+      fx_rx_h:'الوصفات الطبية',
+      fx_order_h:'التوصيل والدفع', fx_order_p:'نتواصل معك لتأكيد الطلب والتوصيل والدفع.',
+      fx_brands_h:'{n} علامة تجارية', fx_brands_p:'في كتالوجنا اليوم.',
+      rv_title:'آراء العملاء', rv_one:'تقييم واحد', rv_many:'{n} تقييمات', rv_stars:'{n} من 5 نجوم',
+      rv_note:'التقييمات من عملاء تم تسليم طلباتهم، وتُنشر بعد موافقتنا عليها.', rv_cta:'اشتريت منا؟ اترك تقييمك',
+      show_more:'عرض المزيد', show_less:'عرض أقل',
+      hero_h_home:'صحتك تهمّنا', hero_s_home:'نصائح طبية ورعاية رياضية وعناية بالجمال، في مكان واحد تثق به.',
+      cta_depts:'تسوّق حسب القسم', featured_title:'مختارات لك', featured_sub:'مجموعة منتجات من أقسامنا الثلاثة.',
+      langBtn:'English'
+    }
+  };
+
+  /* ---------- Catalogue ---------- */
+  var CATS = {
+    medical: [
+      {id:'vitamins', en:'Vitamins & supplements', ar:'فيتامينات ومكمّلات'},
+      {id:'firstaid', en:'First aid',              ar:'إسعافات أولية'},
+      {id:'devices',  en:'Devices',                ar:'أجهزة'}
+    ],
+    athlete: [
+      {id:'recovery',  en:'Recovery',              ar:'استشفاء'},
+      {id:'nutrition', en:'Hydration & nutrition', ar:'ترطيب وتغذية'},
+      {id:'protection',en:'Protection',            ar:'حماية'}
+    ]
+  };
+
+  // Beauty is split into three collections, each with its own category set.
+  var COLLECTIONS = {
+    beauty: [
+      { id:'avara_care', en:'Avara Care', ar:'أفارا كير', cats:[
+        {id:'cleanser',      en:'Cleanser',          ar:'منظّفات'},
+        {id:'moisturizers',  en:'Moisturizers',      ar:'مرطّبات'},
+        {id:'sun_care',      en:'Sun care',          ar:'العناية بالشمس'},
+        {id:'bath_body',     en:'Bath & Body',       ar:'الاستحمام والجسم'},
+        {id:'mask_patches',  en:'Mask & Patches',    ar:'الأقنعة واللصقات'},
+        {id:'others',        en:'Others',            ar:'أخرى'}
+      ]},
+      { id:'avara_hair', en:'Avara Hair', ar:'أفارا هير', cats:[
+        {id:'hair_care',      en:'Hair care',        ar:'العناية بالشعر'},
+        {id:'hair_treatment', en:'Hair treatment',   ar:'علاج الشعر'},
+        {id:'hair_color',     en:'Hair color',       ar:'صبغات الشعر'},
+        {id:'hair_styling',   en:'Hair styling',     ar:'تصفيف الشعر'},
+        {id:'others',         en:'Others',           ar:'أخرى'}
+      ]},
+      { id:'avara_cosmetics', en:'Avara Cosmetics', ar:'أفارا كوزمتكس', cats:[
+        {id:'face',          en:'Face',              ar:'الوجه'},
+        {id:'eyes',          en:'Eyes',              ar:'العيون'},
+        {id:'cheeks',        en:'Cheeks',            ar:'الخدود'},
+        {id:'lips',          en:'Lips',              ar:'الشفاه'},
+        {id:'nails',         en:'Nails',             ar:'الأظافر'},
+        {id:'makeup_tools',  en:'Makeup tools',      ar:'أدوات المكياج'},
+        {id:'others',        en:'Others',            ar:'أخرى'}
+      ]}
+    ]
+  };
+  function beautyColl(id){ return COLLECTIONS.beauty.filter(function(c){ return c.id === id; })[0] || COLLECTIONS.beauty[0]; }
+
+  var PRODUCTS = [];   // loaded from Supabase (table: products)
+  var DEPTS = ['medical','athlete','beauty'];
+  var DEPT_LABEL = {
+    medical:{en:'Medical care', ar:'الرعاية الطبية'},
+    athlete:{en:'Athlete care', ar:'الرعاية الرياضية'},
+    beauty: {en:'Beauty care', ar:'العناية بالجمال'}
+  };
+  var WA_NUMBER = '96176681395';
+
+  // Analytics: sends a named event to Plausible. Never include names, phones or addresses.
+  function track(eventName, props){
+    try{ if(window.plausible) window.plausible(eventName, props ? {props: props} : undefined); }catch(e){}
+  }
+  function waProductUrl(p){
+    return 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(t('wa_product').replace('{name}', name(p)));
+  }
+
+  /* ---------- State ---------- */
+  var $  = function(s,r){ return (r||document).querySelector(s); };
+  var $$ = function(s,r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+  // Each language and department has its own URL; the page says which one it is.
+  var lang = document.documentElement.getAttribute('data-lang') || 'en', cart = {};
+  if(!document.documentElement.getAttribute('data-lang')){ try{ lang = localStorage.getItem('avara-lang') === 'ar' ? 'ar' : 'en'; }catch(e){} }
+  try{ localStorage.setItem('avara-lang', lang); }catch(e){}
+  try{ cart = JSON.parse(localStorage.getItem('avara-cart') || '{}') || {}; }catch(e){ cart = {}; }
+  var view = {
+    medical:{cat:'all', sort:'featured', brand:'all', sale:false},
+    athlete:{cat:'all', sort:'featured', brand:'all', sale:false},
+    beauty: {cat:'all', sort:'featured', brand:'all', sale:false, collection:'avara_care'}
+  };
+  var byId = {};
+  var loadState = 'loading';   // 'loading' | 'ok' | 'error'
+  var lastOrder = null;        // order number shown after a successful checkout
+  var cfg = window.AVARA_CONFIG || {};
+  var sb = (window.supabase && cfg.url && cfg.anonKey && !/YOUR-/.test(cfg.url + cfg.anonKey))
+    ? window.supabase.createClient(cfg.url, cfg.anonKey) : null;
+
+  function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function mapRow(r){
+    var images = (Array.isArray(r.images) && r.images.length) ? r.images.filter(Boolean) : (r.image_url ? [r.image_url] : []);
+    return {id:r.id, dept:r.dept, cat:r.cat, collection:r.collection || null, brand:r.brand || '', type:r.type || 'box',
+      price:Number(r.price), salePrice: r.sale_price != null ? Number(r.sale_price) : null, isNew:!!r.is_new,
+      stock: r.stock != null ? Number(r.stock) : null,
+      size:[r.size_en || '', r.size_ar || r.size_en || ''], en:r.name_en, ar:r.name_ar || r.name_en,
+      de:r.desc_en || '', da:r.desc_ar || r.desc_en || '', images:images, img:images[0] || ''};
+  }
+  function effPrice(p){ return p.salePrice != null ? p.salePrice : p.price; }
+  // stock === null means the column is not available yet: treat as unlimited.
+  function avail(p){ return p.stock == null ? Infinity : p.stock; }
+
+  /* ---------- Store settings (delivery, hours, payment) ---------- */
+  var store = {delivery_fee:0, free_delivery_over:null, min_order:0};
+  function storeText(k){ return String(store[k + '_' + lang] || store[k + '_en'] || '').trim(); }
+  function deliveryFor(sub){
+    var f = Number(store.delivery_fee) || 0; if(f <= 0) return 0;
+    var th = Number(store.free_delivery_over) || 0;
+    return (th > 0 && sub >= th) ? 0 : f;
+  }
+  function loadStore(){
+    if(!sb) return;
+    sb.from('settings').select('*').eq('id', 1).maybeSingle().then(function(res){
+      if(res.error || !res.data) return;   // table not created yet: keep defaults
+      store = res.data; applyStore(); renderCart();
+    }).catch(function(){});
+  }
+  function applyStore(){
+    [['address','ctAddress'],['hours','ctHours'],['delivery','ctDelivery'],['payment','ctPayment']].forEach(function(r){
+      var txt = storeText(r[0]), li = document.getElementById('ct-' + r[0]), box = document.getElementById(r[1]);
+      if(!li || !box) return;
+      li.hidden = !txt;
+      box.textContent = '';
+      if(!txt) return;
+      if(r[0] === 'address' && /^https?:\/\//i.test(store.map_url || '')){
+        var a = document.createElement('a'); a.href = store.map_url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = txt; box.appendChild(a);
+      } else { box.textContent = txt; }
+    });
+    updateBusinessLd(); renderTrust();
+    var tn = document.getElementById('trustNote'), tt = storeText('trust');
+    if(tn){ tn.hidden = !tt; tn.textContent = tt; }
+  }
+  function indexProducts(){
+    byId = {}; PRODUCTS.forEach(function(p){ byId[p.id] = p; });
+    Object.keys(cart).forEach(function(id){
+      if(!byId[id] || !(cart[id] > 0) || avail(byId[id]) <= 0){ delete cart[id]; return; }
+      if(cart[id] > avail(byId[id])) cart[id] = avail(byId[id]);
+    });
+    saveCart();
+  }
+  function loadProducts(){
+    loadState = 'loading'; DEPTS.forEach(renderGrid);
+    if(!sb){ loadState = 'error'; DEPTS.forEach(renderGrid); return Promise.resolve(); }
+    return sb.from('products').select('*').eq('is_active', true)
+      .order('sort_order', {ascending:true}).order('created_at', {ascending:true})
+      .then(function(res){
+        if(res.error){ throw res.error; }
+        PRODUCTS = (res.data || []).map(mapRow); loadState = 'ok'; indexProducts();
+        DEPTS.forEach(renderDept); renderFeatured(); renderCart(); runSearch();
+        updateItemList(); loadPromos(); renderTrust();
+        if(!hashHandled){ hashHandled = true; openFromHash(); }
+        if(!cartOpened){ cartOpened = true; if(/[?&]cart=1\b/.test(location.search)){ Object.keys(cart).forEach(function(id){ var pr = byId[id]; if(!pr) return; var av = avail(pr); if(av <= 0) delete cart[id]; else if(cart[id] > av) cart[id] = av; }); saveCart(); renderCart(); openCart(); try{ history.replaceState(null, '', location.pathname + location.hash); }catch(e){} } }
+      })
+      .catch(function(){ loadState = 'error'; DEPTS.forEach(renderGrid); });
+  }
+
+  function t(k){ return I18N[lang][k]; }
+  function pick(o){ return o[lang === 'ar' ? 'ar' : 'en']; }
+  function name(p){ return p[lang]; }
+  function money(n){ return '$' + n.toFixed(2); }
+  function saveCart(){ try{ localStorage.setItem('avara-cart', JSON.stringify(cart)); }catch(e){} }
+  function catLabel(p){
+    if(p.dept === 'beauty'){
+      var cc = beautyColl(p.collection).cats.filter(function(x){ return x.id === p.cat; })[0];
+      return cc ? cc[lang] : '';
+    }
+    var c = CATS[p.dept].filter(function(x){ return x.id === p.cat; })[0]; return c ? c[lang] : '';
+  }
+
+  /* ---------- Packshot ---------- */
+  function pack(type){ return '<svg class="pack" viewBox="0 0 120 140" aria-hidden="true"><use href="#pk-' + esc(type) + '"/></svg>'; }
+  function media(p){ return p.img ? '<img class="photo" src="' + esc(p.img) + '" alt="' + esc(name(p)) + '" loading="lazy">' : pack(p.type); }
+  function cardMedia(p){
+    if(!p.images || p.images.length < 2) return media(p);
+    var imgs = p.images.map(function(src){ return '<img class="g-img" src="' + esc(src) + '" alt="' + esc(name(p)) + '" loading="lazy">'; }).join('');
+    var dots = p.images.map(function(_, i){ return '<span class="gallery__dot' + (i === 0 ? ' is-active' : '') + '"></span>'; }).join('');
+    return '<div class="gallery" data-gallery>' +
+      '<div class="gallery__track">' + imgs + '</div>' +
+      '<button class="gallery__nav gallery__nav--prev" type="button" aria-label="' + t('gallery_prev') + '">‹</button>' +
+      '<button class="gallery__nav gallery__nav--next" type="button" aria-label="' + t('gallery_next') + '">›</button>' +
+      '<div class="gallery__dots">' + dots + '</div>' +
+    '</div>';
+  }
+  // Descriptions are clamped to 2 lines by CSS; a "Show more" link is added only where the text is really cut off.
+  function wireDescs(root){
+    (root || document).querySelectorAll('.card__desc').forEach(function(d){
+      var nx = d.nextElementSibling, more = (nx && nx.hasAttribute('data-more')) ? nx : null;
+      var over = d.classList.contains('is-open') || d.scrollHeight > d.clientHeight + 1;
+      if(over && !more){
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'card__more'; b.setAttribute('data-more', '');
+        b.setAttribute('aria-expanded', 'false'); b.textContent = t('show_more');
+        d.parentNode.insertBefore(b, d.nextSibling); d.classList.add('has-more');
+      } else if(!over && more){
+        more.parentNode.removeChild(more); d.classList.remove('has-more');
+      }
+    });
+  }
+  var descTimer;
+  window.addEventListener('resize', function(){ clearTimeout(descTimer); descTimer = setTimeout(function(){ wireDescs(document); }, 150); });
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ wireDescs(document); });
+  function wireGalleries(container){
+    container.querySelectorAll('[data-gallery]').forEach(function(g){
+      var track = g.querySelector('.gallery__track');
+      var dots = g.querySelectorAll('.gallery__dot');
+      var rtl = document.documentElement.dir === 'rtl';
+      function sync(){
+        var i = Math.max(0, Math.min(dots.length - 1, Math.round(Math.abs(track.scrollLeft) / track.clientWidth)));
+        dots.forEach(function(d, idx){ d.classList.toggle('is-active', idx === i); });
+      }
+      track.addEventListener('scroll', function(){ requestAnimationFrame(sync); }, {passive: true});
+      g.querySelector('.gallery__nav--prev').addEventListener('click', function(){ track.scrollBy({left: (rtl ? 1 : -1) * track.clientWidth, behavior: 'smooth'}); });
+      g.querySelector('.gallery__nav--next').addEventListener('click', function(){ track.scrollBy({left: (rtl ? -1 : 1) * track.clientWidth, behavior: 'smooth'}); });
+    });
+  }
+
+  /* ---------- Toolbar + grid ---------- */
+  function renderTools(d){
+    var collTabsEl = $('#collTabs-' + d);
+    if(collTabsEl){
+      collTabsEl.innerHTML = COLLECTIONS[d].map(function(c){
+        return '<button class="subtab" type="button" data-coll="' + d + ':' + c.id + '" aria-pressed="' + (view[d].collection === c.id) + '">' + c[lang] + '</button>';
+      }).join('');
+    }
+    var catList = collTabsEl ? beautyColl(view[d].collection).cats : CATS[d];
+    var chips = '<button class="chip" type="button" data-chip="' + d + ':all" aria-pressed="' + (view[d].cat === 'all') + '">' + t('cat_all') + '</button>' +
+      catList.map(function(c){
+        return '<button class="chip" type="button" data-chip="' + d + ':' + c.id + '" aria-pressed="' + (view[d].cat === c.id) + '">' + c[lang] + '</button>';
+      }).join('');
+    var sorts = [['featured','sort_feat'],['low','sort_low'],['high','sort_high'],['az','sort_az']].map(function(s){
+      return '<option value="' + s[0] + '"' + (view[d].sort === s[0] ? ' selected' : '') + '>' + t(s[1]) + '</option>';
+    }).join('');
+    var base = PRODUCTS.filter(function(p){ return p.dept === d && (d !== 'beauty' || p.collection === view[d].collection); });
+    var brands = [];
+    base.forEach(function(p){ if(p.brand && brands.indexOf(p.brand) < 0) brands.push(p.brand); });
+    brands.sort();
+    if(view[d].brand !== 'all' && brands.indexOf(view[d].brand) < 0) view[d].brand = 'all';
+    if(base.some(function(p){ return p.salePrice != null; }) || view[d].sale){
+      chips += '<button class="chip" type="button" data-sale="' + d + '" aria-pressed="' + view[d].sale + '">' + t('cat_sale') + '</button>';
+    }
+    var brandSel = brands.length
+      ? '<label class="sort">' + t('brand_label') + '<select data-brand="' + d + '"><option value="all">' + t('brand_all') + '</option>' +
+        brands.map(function(b){ return '<option value="' + esc(b) + '"' + (view[d].brand === b ? ' selected' : '') + '>' + esc(b) + '</option>'; }).join('') + '</select></label>'
+      : '';
+    $('#tools-' + d).innerHTML =
+      '<div class="chips" role="group">' + chips + '</div>' +
+      '<div class="toolbar__right"><span class="count" id="count-' + d + '"></span>' + brandSel +
+      '<label class="sort">' + t('sort_label') + '<select data-sort="' + d + '">' + sorts + '</select></label></div>';
+  }
+
+  function renderGrid(d){
+    var v = view[d], grid = $('#grid-' + d), countEl = $('#count-' + d);
+    if(loadState !== 'ok'){
+      grid.innerHTML = '<p class="state-msg">' + t(loadState === 'loading' ? 'loading' : 'load_err') + '</p>';
+      if(countEl) countEl.textContent = '';
+      return;
+    }
+    var list = PRODUCTS.filter(function(p){
+      return p.dept === d && (d !== 'beauty' || p.collection === v.collection) && (v.cat === 'all' || p.cat === v.cat) &&
+        (v.brand === 'all' || p.brand === v.brand) && (!v.sale || p.salePrice != null);
+    });
+    if(v.sort === 'low')  list.sort(function(a,b){ return effPrice(a) - effPrice(b); });
+    if(v.sort === 'high') list.sort(function(a,b){ return effPrice(b) - effPrice(a); });
+    if(v.sort === 'az')   list.sort(function(a,b){ return name(a).localeCompare(name(b), lang); });
+    grid.innerHTML = list.length ? list.map(function(p){
+      var priceHtml = p.salePrice != null
+        ? '<span class="card__price card__price--sale" dir="ltr"><span class="card__price-was">' + money(p.price) + '</span><span class="card__price-now">' + money(p.salePrice) + '</span></span>'
+        : '<span class="card__price" dir="ltr">' + money(p.price) + '</span>';
+      var out = avail(p) <= 0, low = !out && avail(p) <= 5;
+      return '<article class="card' + (out ? ' is-soldout' : '') + '" id="p-' + esc(p.id) + '">' +
+        '<div class="card__media" data-open="' + esc(p.id) + '">' + cardMedia(p) + (out ? '<span class="badge badge--out">' + t('out_of_stock') + '</span>' : (p.isNew ? '<span class="badge">' + t('badge_new') + '</span>' : '')) + '</div>' +
+        '<div class="card__body">' +
+          '<p class="card__cat">' + (p.brand ? esc(p.brand) + ' · ' : '') + esc(catLabel(p)) + '</p>' +
+          '<h3 class="card__name"><button class="card__name-btn" type="button" data-open="' + esc(p.id) + '">' + esc(name(p)) + '</button></h3>' +
+          '<p class="card__desc">' + esc(lang === 'ar' ? p.da : p.de) + '</p>' +
+          (low ? '<p class="card__stock">' + t('only_left').replace('{n}', p.stock) + '</p>' : '') +
+          '<div class="card__foot"><span class="card__size">' + esc(pick({en:p.size[0], ar:p.size[1]})) + '</span>' + priceHtml + '</div>' +
+          (out ? '<button class="btn btn--line is-soldout" type="button" disabled>' + t('out_of_stock') + '</button>' + notifyHtml(p)
+               : '<button class="btn btn--line" type="button" data-add="' + esc(p.id) + '">' + t('add') + '</button>') +
+          '<a class="card__ask" data-ask="' + esc(p.id) + '" href="' + esc(waProductUrl(p)) + '" target="_blank" rel="noopener">' + t('pdp_ask') + '</a>' +
+        '</div></article>';
+    }).join('') : '<p class="state-msg">' + t('no_products') + '</p>';
+    countEl.textContent = t('count').replace('{n}', list.length);
+    wireGalleries(grid); wireDescs(grid);
+  }
+
+  // "Notify me when it is back" box for sold-out products (card and product dialog).
+  function notifyHtml(p){
+    return '<div class="notify" data-notify-box="' + esc(p.id) + '">' +
+      '<button class="notify__open" type="button" data-notify-open>' + t('nt_open') + '</button>' +
+      '<form class="notify__form" data-notify="' + esc(p.id) + '" hidden novalidate>' +
+        '<p>' + t('nt_lead') + '</p>' +
+        '<input name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="' + esc(t('nt_phone')) + '" aria-label="' + esc(t('nt_phone')) + '" dir="ltr">' +
+        '<input name="name" type="text" autocomplete="name" maxlength="80" placeholder="' + esc(t('nt_name')) + '" aria-label="' + esc(t('nt_name')) + '">' +
+        '<button class="btn btn--solid" type="submit">' + t('nt_send') + '</button>' +
+        '<p class="notify__msg" role="status" hidden></p>' +
+      '</form></div>';
+  }
+
+  /* ---------- Promotions banner (chosen in admin > Promotions) ---------- */
+  var PROMOS = [], promoIdx = 0;
+  function loadPromos(){
+    if(!sb) return Promise.resolve();
+    return sb.from('promotions').select('*').eq('is_active', true).order('sort_order', {ascending:true}).order('created_at', {ascending:true})
+      .then(function(res){ PROMOS = res.error ? [] : (res.data || []); renderPromos(); })
+      .catch(function(){ PROMOS = []; renderPromos(); });
+  }
+  function promoSlides(){
+    return PROMOS.map(function(pr){
+      var items = (pr.product_ids || []).map(function(id){ return byId[id]; }).filter(function(p){ return p && avail(p) > 0; });
+      return items.length ? {pr:pr, items:items} : null;
+    }).filter(Boolean);
+  }
+  function placePromoBanner(){
+    // The banner lives right under the hero image of the department being shown.
+    var box = $('#promoBanner'); if(!box || box.getAttribute('data-placed')) return;
+    var hero = document.querySelector('.panel[data-panel="' + activePanel + '"] .hero') || document.querySelector('.panel .hero') || document.querySelector('main .hero');
+    if(hero && hero.parentNode){ hero.parentNode.insertBefore(box, hero.nextSibling); box.setAttribute('data-placed', '1'); }
+  }
+  var ARROW_L = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>';
+  var ARROW_R = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 3 5 5-5 5"/></svg>';
+  function pad2(n){ return (n < 10 ? '0' : '') + n; }
+  function renderPromos(){
+    var box = $('#promoBanner'); if(!box) return;
+    var slides = promoSlides();
+    if(!slides.length){ box.hidden = true; box.innerHTML = ''; return; }
+    placePromoBanner();
+    if(promoIdx >= slides.length) promoIdx = 0;
+    var many = slides.length > 1;
+    box.innerHTML = '<div class="promo__in"><div class="promo__stage">' + slides.map(function(sl, i){
+      var pr = sl.pr, items = sl.items, multi = items.length > 1;
+      var title = (lang === 'ar' ? (pr.title_ar || pr.title_en) : (pr.title_en || pr.title_ar)) || (multi ? t('promo_bundle') : name(items[0]));
+      var text = lang === 'ar' ? (pr.text_ar || pr.text_en) : (pr.text_en || pr.text_ar);
+      var now = 0, was = 0;
+      items.forEach(function(p){ now += effPrice(p); was += p.price; });
+      var imgs = items.slice(0, 4).map(function(p){ return '<span class="promo__img">' + media(p) + '</span>'; }).join('');
+      return '<div class="promo__slide' + (i === promoIdx ? ' is-active' : '') + '" role="group" aria-roledescription="slide" aria-label="' + (i + 1) + ' / ' + slides.length + '">' +
+        '<div class="promo__imgs">' + imgs + '</div>' +
+        '<div><span class="promo__tag">' + (multi ? t('promo_bundle') + ' · ' + t('promo_total').replace('{n}', items.length) : t('promo_offer')) + '</span>' +
+          '<h2 class="promo__title">' + (multi ? esc(title) : '<button type="button" data-open="' + esc(items[0].id) + '">' + esc(title) + '</button>') + '</h2>' +
+          (text ? '<p class="promo__text">' + esc(text) + '</p>' : '') +
+          (pr.code ? '<p class="promo__note">' + esc(t('promo_code_note').replace('{code}', pr.code)) + '</p>' : '') + '</div>' +
+        '<div class="promo__buy"><span class="promo__price" dir="ltr">' + (was > now + 0.004 ? '<del>' + money(was) + '</del>' : '') + money(now) + '</span>' +
+          '<div class="promo__btns">' +
+            (multi ? '' : '<button class="btn btn--line" type="button" data-open="' + esc(items[0].id) + '">' + t('promo_view') + '</button>') +
+            '<button class="btn btn--solid" type="button" data-promo-add="' + i + '">' + (multi ? t('promo_add_all') : t('add')) + '</button></div></div>' +
+      '</div>';
+    }).join('') + '</div>' + (many ? '<div class="promo__ctrl">' +
+      '<button class="promo__arrow" type="button" data-promo-step="-1" aria-label="' + esc(t('promo_prev')) + '">' + ARROW_L + '</button>' +
+      '<div class="promo__dots">' + slides.map(function(_, i){
+        return '<button type="button" data-promo-go="' + i + '" aria-label="' + esc(t('promo_go').replace('{n}', i + 1)) + '"' + (i === promoIdx ? ' class="is-active"' : '') + '></button>';
+      }).join('') + '</div>' +
+      '<span class="promo__count" dir="ltr">' + pad2(promoIdx + 1) + ' / ' + pad2(slides.length) + '</span>' +
+      '<button class="promo__arrow" type="button" data-promo-step="1" aria-label="' + esc(t('promo_next')) + '">' + ARROW_R + '</button>' +
+    '</div>' : '') + '</div>';
+    box.hidden = false;
+  }
+  function showPromo(i){
+    var box = $('#promoBanner'), sl = $$('.promo__slide', box); if(!sl.length) return;
+    promoIdx = (i + sl.length) % sl.length;
+    sl.forEach(function(el, k){ el.classList.toggle('is-active', k === promoIdx); });
+    $$('.promo__dots button', box).forEach(function(b, k){ b.classList.remove('is-active'); if(k === promoIdx){ void b.offsetWidth; b.classList.add('is-active'); } });   // restarts the progress line
+    var c = $('.promo__count', box); if(c) c.textContent = pad2(promoIdx + 1) + ' / ' + pad2(sl.length);
+  }
+  // Auto-advance when the progress line of the active dot has finished (it pauses while the banner is hovered or focused).
+  document.addEventListener('animationend', function(e){
+    if(e.animationName === 'promoFill' && e.target.closest && e.target.closest('#promoBanner')) showPromo(promoIdx + 1);
+  });
+  function addPromo(i){
+    var sl = promoSlides()[i]; if(!sl) return;
+    var added = 0;
+    sl.items.forEach(function(p){
+      if((cart[p.id] || 0) + 1 <= avail(p)){ cart[p.id] = (cart[p.id] || 0) + 1; added++; }
+    });
+    if(!added){ toast(t('stock_max').replace('{n}', 0)); return; }
+    lastOrder = null; saveCart(); renderCart();
+    track('Promo Add', {promo: sl.pr.title_en || sl.pr.title_ar || 'promo', items: String(sl.items.length)});
+    if(sl.pr.code && !appliedCode && !codeBusy){
+      $('#codeInput').value = sl.pr.code; validateCode(false); openCart();   // show the customer the discount
+    } else toast(t('added'));
+  }
+  // Swipe inside the banner changes the offer (and does not change department).
+  (function(){
+    var box = $('#promoBanner'), x0 = null;
+    if(!box) return;
+    box.addEventListener('touchstart', function(e){ x0 = e.touches.length === 1 ? e.touches[0].clientX : null; }, {passive:true});
+    box.addEventListener('touchend', function(e){
+      if(x0 == null) return; var dx = e.changedTouches[0].clientX - x0; x0 = null;
+      if(Math.abs(dx) < 50) return;
+      showPromo(promoIdx + ((lang === 'ar' ? dx > 0 : dx < 0) ? 1 : -1));
+    }, {passive:true});
+  })();
+
+  /* ---------- Facts block (only things that are true and come from the store itself) ---------- */
+  function renderTrust(){
+    var grid = $('#factsGrid'); if(!grid) return;
+    var seen = {}, nb = 0;
+    PRODUCTS.forEach(function(p){ if(p.brand && !seen[p.brand]){ seen[p.brand] = 1; nb++; } });
+    var dp = [storeText('delivery'), storeText('payment')].filter(Boolean).join(' · ');
+    var items = [
+      {h:t('fx_support_h'), p:t('fx_support_p'), href:'https://wa.me/' + WA_NUMBER, label:t('c_wa'), ext:true},
+      {h:t('fx_track_h'), p:t('fx_track_p'), href:'/track', label:t('track_order')},
+      {h:t('fx_rx_h'), p:t('rx_note')},
+      {h:t('fx_order_h'), p:dp || t('fx_order_p')}
+    ];
+    if(nb >= 3) items.push({h:t('fx_brands_h').replace('{n}', nb), p:t('fx_brands_p')});
+    grid.innerHTML = items.map(function(i){
+      return '<li class="fact"><h3>' + esc(i.h) + '</h3><p>' + esc(i.p) + '</p>' +
+        (i.href ? '<a href="' + esc(i.href) + '"' + (i.ext ? ' target="_blank" rel="noopener"' : '') + '>' + esc(i.label) + '</a>' : '') + '</li>';
+    }).join('');
+  }
+
+  /* ---------- Customer reviews (approved in admin; the section stays hidden until there is one) ---------- */
+  var REVIEWS = null;
+  function starsHtml(n){
+    var s = '';
+    for(var i = 1; i <= 5; i++) s += '<span class="rv__star' + (i <= n ? ' on' : '') + '" aria-hidden="true">★</span>';
+    return '<span class="rv__stars" role="img" aria-label="' + esc(t('rv_stars').replace('{n}', n)) + '">' + s + '</span>';
+  }
+  function loadReviews(){
+    if(!sb) return Promise.resolve();
+    return sb.rpc('public_reviews').then(function(r){
+      if(r.error || !r.data) return;   // table not created yet: the section just stays hidden
+      REVIEWS = r.data; renderReviews();
+    }).catch(function(){});
+  }
+  function renderReviews(){
+    var sec = $('#reviews'); if(!sec) return;
+    var d = REVIEWS, count = d ? Number(d.count) : 0;
+    if(!d || !(count > 0)){ sec.hidden = true; return; }
+    var avg = Number(d.avg) || 0;
+    $('#rvSum').innerHTML = '<span class="rv__avg" dir="ltr">' + esc(avg.toFixed(1)) + '</span><div>' + starsHtml(Math.round(avg)) +
+      '<div class="rv__count">' + esc(count === 1 ? t('rv_one') : t('rv_many').replace('{n}', count)) + '</div></div>';
+    $('#rvList').innerHTML = (d.items || []).filter(function(r){ return r.comment; }).map(function(r){
+      var date = new Date(r.created_at).toLocaleDateString(lang === 'ar' ? 'ar' : 'en', {dateStyle:'medium'});
+      return '<li class="rv__item">' + starsHtml(Number(r.rating)) +
+        '<p class="rv__text" dir="auto">' + esc(r.comment) + '</p>' +
+        '<div class="rv__who"><strong>' + esc(r.name) + '</strong><span>' + esc(date) + '</span></div></li>';
+    }).join('');
+    sec.hidden = false;
+  }
+
+  function renderDept(d){ renderTools(d); renderGrid(d); }
+
+  /* ---------- Cart ---------- */
+  // Only cart lines whose product is loaded. Before the catalogue arrives (or if a
+  // saved cart holds an id that no longer exists) byId[id] is undefined, which used
+  // to throw and stop the whole page from loading products.
+  function cartIds(){ return Object.keys(cart).filter(function(id){ return byId[id]; }); }
+  function cartTotals(){
+    var n = 0, sum = 0;
+    cartIds().forEach(function(id){ n += cart[id]; sum += cart[id] * effPrice(byId[id]); });
+    return {n:n, sum:sum};
+  }
+
+  function renderCart(){
+    var ids = cartIds(), tot = cartTotals();
+    var badge = $('#cartCount');
+    badge.textContent = tot.n; badge.hidden = tot.n === 0;
+
+    if(lastOrder){
+      var wa = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(t('wa_order').replace('{no}', lastOrder));
+      $('#cartBody').innerHTML = '<div class="done"><h3>' + t('order_ok_title') + '</h3><p>' + t('order_ok_text').replace('{no}', '<strong dir="ltr">#' + esc(lastOrder) + '</strong>') + '</p>' +
+        '<a class="btn btn--solid btn--block" href="' + wa + '" target="_blank" rel="noopener">' + t('order_wa_confirm') + '</a>' +
+        '<a class="btn btn--line btn--block" href="/track?no=' + encodeURIComponent(lastOrder) + '">' + t('track_order') + '</a>' +
+        '<button class="btn btn--line btn--block" type="button" data-close-cart>' + t('continue') + '</button></div>' + storeInfoHtml();
+      $('#cartFoot').hidden = true;
+      return;
+    }
+    if(!ids.length){
+      $('#cartBody').innerHTML = '<p class="drawer__empty">' + t('cart_empty') + '</p>' + storeInfoHtml();
+      $('#cartFoot').hidden = true;
+      return;
+    }
+    $('#cartBody').innerHTML = ids.map(function(id){
+      var p = byId[id];
+      return '<div class="line">' +
+        '<div class="line__img">' + media(p) + '</div>' +
+        '<div><div class="line__name">' + esc(name(p)) + '</div><div class="line__price' + (p.salePrice != null ? ' line__price--sale' : '') + '" dir="ltr">' + (p.salePrice != null ? '<span class="line__price-was">' + money(p.price) + '</span>' + money(p.salePrice) : money(p.price)) + '</div>' +
+          '<div class="qty"><button type="button" data-qty="' + esc(id) + ':-1" aria-label="' + t('dec') + '">−</button><span>' + cart[id] + '</span><button type="button" data-qty="' + esc(id) + ':1" aria-label="' + t('inc') + '">+</button></div></div>' +
+        '<div><div class="line__total" dir="ltr">' + money(effPrice(p) * cart[id]) + '</div><button class="line__rm" type="button" data-rm="' + esc(id) + '">' + t('remove') + '</button></div>' +
+      '</div>';
+    }).join('') + storeInfoHtml();
+    var fee = deliveryFor(tot.sum), baseFee = Number(store.delivery_fee) || 0;
+    var minO = Number(store.min_order) || 0, th = Number(store.free_delivery_over) || 0;
+    $('#cartSub').textContent = money(tot.sum);
+    $('#feeRow').hidden = baseFee <= 0;
+    $('#cartFee').textContent = fee > 0 ? money(fee) : t('free_word');
+    var disc = 0;
+    if(appliedCode){
+      if(appliedCode.forSub !== tot.sum) validateCode(true);   // cart changed: ask the server again
+      disc = Math.min(appliedCode.discount || 0, tot.sum);
+    }
+    $('#discRow').hidden = !(appliedCode && disc > 0);
+    if(appliedCode && disc > 0){ $('#discLabel').textContent = t('disc_word') + ' (' + appliedCode.code + ')'; $('#cartDisc').textContent = '−' + money(disc); }
+    $('#cartTotal').textContent = money(tot.sum - disc + fee);
+    var notes = [];
+    if(minO > 0 && tot.sum < minO) notes.push(t('min_order_note').replace('{amt}', money(minO)));
+    if(baseFee > 0 && th > 0) notes.push(tot.sum < th ? t('add_for_free').replace('{amt}', money(th - tot.sum)) : t('free_over').replace('{amt}', money(th)));
+    var info = $('#cartInfo'); info.innerHTML = notes.map(esc).join('<br>'); info.hidden = !notes.length;
+    $('#cartFoot').hidden = false;
+  }
+
+  // Store details the customer should see while ordering: trust statement, delivery, payment, hours, address.
+  function storeInfoHtml(){
+    var rows = [['delivery','c_delivery'],['payment','c_payment'],['hours','c_hours'],['address','c_address']];
+    var h = '', tt = storeText('trust');
+    if(tt) h += '<p class="cart-trust">' + esc(tt) + '</p>';
+    var list = rows.filter(function(r){ return storeText(r[0]); }).map(function(r){
+      return '<li><strong>' + t(r[1]) + '</strong><span>' + esc(storeText(r[0])) + '</span></li>';
+    }).join('');
+    if(list) h += '<ul class="cart-facts">' + list + '</ul>';
+    return h ? '<div class="cart-store">' + h + '</div>' : '';
+  }
+
+  /* ---------- Discount code ---------- */
+  var appliedCode = null, codeBusy = false;   // appliedCode = {code, discount, forSub}
+  function codeMsg(text, kind){
+    var el = $('#codeMsg'); if(!el) return;
+    el.textContent = text || ''; el.hidden = !text;
+    el.className = 'code-box__msg' + (kind ? ' code-box__msg--' + kind : '');
+  }
+  function codeReason(r, min){
+    var map = {invalid:'code_invalid', expired:'code_expired', used_up:'code_used_up', first_order:'code_first', already_used:'code_already', min:'code_min'};
+    return t(map[r] || 'code_invalid').replace('{amt}', money(Number(min) || 0));
+  }
+  function setCodeUi(){
+    var on = !!appliedCode;
+    $('#codeBtn').textContent = on ? t('code_remove') : t('code_apply');
+    $('#codeInput').readOnly = on;
+    if(on) $('#codeInput').value = appliedCode.code;
+  }
+  function validateCode(silent){
+    var input = ($('#codeInput').value || '').trim().toUpperCase();
+    var code = appliedCode ? appliedCode.code : input;
+    if(!code){ codeMsg('', ''); return; }
+    if(!sb){ codeMsg(t('code_err'), 'err'); return; }
+    var sub = cartTotals().sum, phone = ($('#orderForm').elements.phone.value || '').trim();
+    if(appliedCode) appliedCode.forSub = sub;   // prevents asking again while this request is running
+    codeBusy = true;
+    sb.rpc('check_discount', {p_code: code, p_phone: phone || null, p_subtotal: sub}).then(function(res){
+      codeBusy = false;
+      if(res.error){
+        var busy = /too many/i.test(res.error.message || '');
+        if(!silent || busy){ codeMsg(t(busy ? 'code_busy' : 'code_err'), 'err'); }
+        if(!appliedCode) return;
+        return;
+      }
+      var d = res.data || {};
+      if(d.ok){
+        var first = !appliedCode;
+        appliedCode = {code: d.code || code, discount: Number(d.discount) || 0, forSub: sub};
+        codeMsg(t('code_ok').replace('{amt}', money(appliedCode.discount)), 'ok');
+        if(first) track('Discount Applied', {code: appliedCode.code});
+      } else {
+        appliedCode = null;
+        codeMsg(codeReason(d.reason, d.min), 'err');
+      }
+      setCodeUi(); renderCart();
+    }).catch(function(){ codeBusy = false; if(!silent) codeMsg(t('code_err'), 'err'); });
+  }
+  $('#codeBtn').addEventListener('click', function(){
+    if(appliedCode){ appliedCode = null; $('#codeInput').value = ''; codeMsg('', ''); setCodeUi(); renderCart(); return; }
+    if(!codeBusy) validateCode(false);
+  });
+  $('#codeInput').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); if(!appliedCode && !codeBusy) validateCode(false); }
+  });
+  // First-order and one-use-per-phone rules depend on the phone number: check again once it is typed.
+  $('#orderForm').elements.phone.addEventListener('change', function(){ if(appliedCode && !codeBusy) validateCode(true); });
+
+  function showOrderError(key){ var el = $('#orderError'); el.textContent = t(key); el.hidden = false; }
+
+  function submitOrder(e){
+    e.preventDefault();
+    var f = e.target.elements, btn = $('#placeBtn');
+    var nm = f.customer.value.trim(), ph = f.phone.value.trim();
+    $('#orderError').hidden = true;
+    if(nm.length < 2 || ph.replace(/\D/g, '').length < 6){ showOrderError('order_invalid'); return; }
+    if(!sb){ showOrderError('order_err'); return; }
+    var minNeed = Number(store.min_order) || 0;
+    if(minNeed > 0 && cartTotals().sum < minNeed){
+      var me = $('#orderError'); me.textContent = t('order_min').replace('{amt}', money(minNeed)); me.hidden = false; return;
+    }
+    var items = Object.keys(cart).map(function(id){ return {id:id, qty:cart[id]}; });
+    btn.disabled = true; btn.textContent = t('placing');
+    var codeUsed = appliedCode ? appliedCode.code : '';
+    var sumNow = cartTotals().sum - (appliedCode ? Math.min(appliedCode.discount || 0, cartTotals().sum) : 0), countNow = items.length;
+    var optin = !!f.wa_optin.checked;
+    var args = {p_name:nm, p_phone:ph, p_address:f.address.value.trim(), p_notes:f.notes.value.trim(), p_items:items};
+    if(codeUsed) args.p_code = codeUsed;
+    sb.rpc('place_order', args)
+      .then(function(res){
+        btn.disabled = false; btn.textContent = t('place_order');
+        if(res.error){
+          var msg = res.error.message || '';
+          var noStock = /not enough stock/i.test(msg), unavailable = /unavailable/i.test(msg), belowMin = /minimum order/i.test(msg), tooMany = /too many orders/i.test(msg);
+          var codeErr = msg.match(/discount code:\s*(\w+)/i);
+          if(codeErr){
+            // The order was not placed (nothing was reserved). Drop the code and tell the customer why.
+            var ce = $('#orderError'); ce.textContent = codeErr[1] === 'min' ? t('code_invalid') : codeReason(codeErr[1], 0); ce.hidden = false;
+            appliedCode = null; $('#codeInput').value = ''; codeMsg('', ''); setCodeUi(); renderCart();
+          }
+          else if(tooMany){ showOrderError('order_rate'); }
+          else if(belowMin){
+            var be = $('#orderError'); be.textContent = t('order_min').replace('{amt}', money(Number(store.min_order) || 0)); be.hidden = false; loadStore();
+          } else showOrderError(noStock ? 'order_stock' : unavailable ? 'order_unavail' : 'order_err');
+          if(noStock || unavailable) loadProducts();
+          return;
+        }
+        // Opt-in for WhatsApp offers: only when the customer ticked the box. A failure here never affects the order.
+        if(optin){
+          sb.rpc('wa_subscribe', {p_order_no: Number(res.data), p_phone: ph, p_name: nm, p_lang: lang, p_consent: t('wa_optin')})
+            .then(function(r){ if(r && r.data && r.data.ok) track('WhatsApp Optin', {}); }).catch(function(){});
+        }
+        lastOrder = res.data; cart = {}; saveCart(); e.target.reset();
+        appliedCode = null; $('#codeInput').value = ''; codeMsg('', ''); setCodeUi(); renderCart();
+        try{ if(window.plausible) window.plausible('Order Placed', {props: {items: String(countNow), code: codeUsed || 'none'}, revenue: {currency: 'USD', amount: sumNow}}); }catch(x){}
+      })
+      .catch(function(){ btn.disabled = false; btn.textContent = t('place_order'); showOrderError('order_err'); });
+  }
+
+  document.addEventListener('submit', function(e){
+    var f = e.target.closest ? e.target.closest('form[data-notify]') : null; if(!f) return;
+    e.preventDefault();
+    var msg = f.querySelector('.notify__msg'), btn = f.querySelector('button[type="submit"]');
+    var say = function(key, bad){ msg.textContent = t(key); msg.className = 'notify__msg' + (bad ? ' notify__msg--err' : ''); msg.hidden = false; };
+    var phone = f.elements.phone.value.trim();
+    if(phone.replace(/\D/g, '').length < 6){ say('nt_bad', true); return; }
+    if(!sb){ say('nt_err', true); return; }
+    var pid = f.getAttribute('data-notify'), prod = byId[pid];
+    btn.disabled = true; btn.textContent = t('nt_sending');
+    sb.rpc('request_restock', {p_product_id: String(pid), p_phone: phone, p_name: f.elements.name.value.trim() || null, p_lang: lang}).then(function(r){
+      btn.disabled = false; btn.textContent = t('nt_send');
+      if(r.error || !r.data){ say('nt_err', true); return; }
+      if(r.data.ok){
+        say('nt_ok'); f.elements.phone.hidden = true; f.elements.name.hidden = true; btn.hidden = true;
+        track('Notify Request', {product: prod ? prod.en : 'unknown'});
+      } else if(r.data.reason === 'phone'){ say('nt_bad', true); }
+      else if(r.data.reason === 'in_stock'){ say('nt_instock'); loadProducts(); }
+      else say('nt_err', true);
+    }).catch(function(){ btn.disabled = false; btn.textContent = t('nt_send'); say('nt_err', true); });
+  });
+
+  var toastTimer;
+  function toast(msg){
+    var el = $('#toast'); el.textContent = msg; el.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 1800);
+  }
+
+  var lastFocus = null;
+  function openCart(){ lastFocus = document.activeElement; document.body.classList.add('cart-open'); setTimeout(function(){ $('#closeCart').focus(); }, 60); }
+  function closeCart(){ document.body.classList.remove('cart-open'); if(lastOrder){ lastOrder = null; renderCart(); } if(lastFocus && lastFocus.focus) lastFocus.focus(); }
+
+  /* ---------- Search ---------- */
+  function openSearch(){ $('#searchPanel').hidden = false; $('#searchBtn').setAttribute('aria-expanded','true'); $('#searchInput').focus(); }
+  function closeSearch(){ $('#searchPanel').hidden = true; $('#searchBtn').setAttribute('aria-expanded','false'); $('#searchInput').value = ''; $('#searchResults').innerHTML = ''; }
+  function runSearch(){
+    var q = $('#searchInput').value.trim().toLowerCase(), out = $('#searchResults');
+    if(!q){ out.innerHTML = ''; return; }
+    var hits = PRODUCTS.filter(function(p){
+      var coll = p.dept === 'beauty' ? beautyColl(p.collection) : null;
+      var hay = p.en + ' ' + p.ar + ' ' + (p.brand || '') + ' ' + DEPT_LABEL[p.dept].en + ' ' + DEPT_LABEL[p.dept].ar + ' ' + (coll ? coll.en + ' ' + coll.ar : '');
+      return hay.toLowerCase().indexOf(q) > -1;
+    }).slice(0, 8);
+    out.innerHTML = hits.length ? hits.map(function(p){
+      return '<li><button type="button" data-goto="' + esc(p.id) + '"><span>' + esc(name(p)) + '<br><small>' + esc(pick(DEPT_LABEL[p.dept])) + '</small></span><span dir="ltr">' + money(effPrice(p)) + '</span></button></li>';
+    }).join('') : '<li class="search-empty">' + t('search_none') + '</li>';
+  }
+
+  /* ---------- Home: featured picks (real products only) ---------- */
+  // In stock; products with a photo, on sale or new come first, then your own order from admin.
+  // Spread across the three departments, at most 8. The section stays hidden until there is something to show.
+  function renderFeatured(){
+    var sec = $('#featured'), grid = $('#grid-featured'); if(!sec || !grid) return;
+    if(loadState !== 'ok'){ sec.hidden = true; return; }
+    var by = {medical: [], beauty: [], athlete: []};
+    PRODUCTS.forEach(function(p, i){
+      if(avail(p) <= 0 || !by[p.dept]) return;
+      by[p.dept].push({p: p, k: (p.img ? 0 : 4) + (p.salePrice != null ? 0 : 2) + (p.isNew ? 0 : 1), i: i});
+    });
+    var lists = ['medical', 'beauty', 'athlete'].map(function(d){
+      return by[d].sort(function(a, b){ return a.k - b.k || a.i - b.i; });
+    });
+    var picks = [];
+    for(var n = 0; picks.length < 8 && n < 8; n++){
+      lists.forEach(function(l){ if(picks.length < 8 && l[n]) picks.push(l[n].p); });
+    }
+    sec.hidden = !picks.length;
+    grid.innerHTML = picks.map(function(p){
+      var priceHtml = p.salePrice != null
+        ? '<span class="card__price card__price--sale" dir="ltr"><span class="card__price-was">' + money(p.price) + '</span><span class="card__price-now">' + money(p.salePrice) + '</span></span>'
+        : '<span class="card__price" dir="ltr">' + money(p.price) + '</span>';
+      return '<article class="card">' +
+        '<div class="card__media" data-open="' + esc(p.id) + '">' + media(p) + (p.isNew ? '<span class="badge">' + t('badge_new') + '</span>' : '') + '</div>' +
+        '<div class="card__body">' +
+          '<p class="card__cat">' + (p.brand ? esc(p.brand) + ' · ' : '') + esc(catLabel(p)) + '</p>' +
+          '<h3 class="card__name"><button class="card__name-btn" type="button" data-open="' + esc(p.id) + '">' + esc(name(p)) + '</button></h3>' +
+          '<div class="card__foot"><span class="card__size">' + esc(pick({en: p.size[0], ar: p.size[1]})) + '</span>' + priceHtml + '</div>' +
+          '<button class="btn btn--line" type="button" data-add="' + esc(p.id) + '">' + t('add') + '</button>' +
+        '</div></article>';
+    }).join('');
+  }
+
+  /* ---------- Panels (Medical / Beauty / Athlete are separate screens, not scroll anchors) ---------- */
+  var activePanel = document.documentElement.getAttribute('data-panel') || 'home';
+  function deptUrl(d){ var b = lang === 'ar' ? '/ar' : ''; return d === 'home' ? b + '/' : b + '/' + d; }
+  function routeTo(panel, hash){ location.href = deptUrl(panel) + (hash ? '#' + hash : ''); }
+  function showPanel(name){
+    if(!name || name === activePanel){ return; }
+    routeTo(name);
+  }
+
+  /* ---------- Swipe between departments (touch screens only) ---------- */
+  // A clear sideways swipe opens the neighbouring department: Medical > Athlete > Beauty.
+  // Ignored when the swipe starts on something that scrolls sideways (galleries, filter chips),
+  // on a form field, or while the cart, product window or search is open.
+  (function(){
+    var sx = 0, sy = 0, st = 0, ok = false;
+    function scrollsSideways(el){
+      for(; el && el !== document.body; el = el.parentElement){
+        if(el.matches && el.matches('input,textarea,select,[contenteditable],.gallery,.gallery__track,.promo')) return true;
+        if(el.scrollWidth > el.clientWidth + 4){
+          var ox = getComputedStyle(el).overflowX;
+          if(ox === 'auto' || ox === 'scroll') return true;
+        }
+      }
+      return false;
+    }
+    function blocked(){
+      var pd = document.getElementById('pdp'), sp = $('#searchPanel');
+      return document.body.classList.contains('cart-open') || (pd && pd.open) || (sp && !sp.hidden);
+    }
+    document.addEventListener('touchstart', function(e){
+      ok = false;
+      if(e.touches.length !== 1 || blocked() || scrollsSideways(e.target)) return;
+      var t0 = e.touches[0]; sx = t0.clientX; sy = t0.clientY; st = Date.now(); ok = true;
+    }, {passive:true});
+    document.addEventListener('touchend', function(e){
+      if(!ok) return; ok = false;
+      var t1 = e.changedTouches[0], dx = t1.clientX - sx, dy = t1.clientY - sy;
+      if(Date.now() - st > 700 || Math.abs(dx) < 80 || Math.abs(dx) < Math.abs(dy) * 2) return;
+      if(window.getSelection && String(window.getSelection())) return;      // text was being selected
+      var i = DEPTS.indexOf(activePanel); if(i < 0) return;
+      var forward = (lang === 'ar') ? dx > 0 : dx < 0;                     // Arabic pages are mirrored
+      var next = DEPTS[i + (forward ? 1 : -1)];
+      if(next) routeTo(next);
+    }, {passive:true});
+  })();
+  function jumpTo(id){
+    var elx = document.getElementById(id); if(!elx) return;
+    var panel = elx.closest('.panel'), pn = panel && panel.getAttribute('data-panel');
+    if(pn && pn !== activePanel){ routeTo(pn, id); return; }
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ elx.scrollIntoView({behavior: 'smooth', block: 'start'}); }); });
+  }
+
+  function goTo(id){
+    var p = byId[id];
+    if(p.dept !== activePanel){ routeTo(p.dept, 'p-' + id); return; }
+    view[p.dept].cat = 'all'; view[p.dept].brand = 'all'; view[p.dept].sale = false;
+    if(p.dept === 'beauty') view.beauty.collection = p.collection || 'avara_care';
+    renderDept(p.dept); closeSearch();
+    showPanel(p.dept);
+    var el = document.getElementById('p-' + id); if(!el) return;
+    requestAnimationFrame(function(){
+      el.scrollIntoView({behavior: 'smooth', block: 'center'});
+      el.classList.add('is-found'); setTimeout(function(){ el.classList.remove('is-found'); }, 2400);
+    });
+  }
+
+  /* ---------- Product detail dialog ---------- */
+  function slug(s){ var x = String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60).replace(/-+$/, ''); return x || 'product'; }
+  function productPath(p){ return (lang === 'ar' ? '/ar' : '') + '/p/' + slug(p.en) + '-' + p.id; }
+  function setLd(id, obj){
+    var el = document.getElementById(id);
+    if(!el){ el = document.createElement('script'); el.type = 'application/ld+json'; el.id = id; document.head.appendChild(el); }
+    el.textContent = JSON.stringify(obj);
+  }
+  // Lists this department's products for search engines (each links to its own product page).
+  function updateItemList(){
+    var list = PRODUCTS.filter(function(p){ return p.dept === activePanel; }).slice(0, 50);
+    if(!list.length) return;
+    setLd('ld-itemlist', {'@context': 'https://schema.org', '@type': 'ItemList',
+      itemListElement: list.map(function(p, i){ return {'@type': 'ListItem', position: i + 1, url: location.origin + productPath(p), name: name(p)}; })});
+  }
+  // Adds the address from admin Settings to the business data on the home page.
+  function updateBusinessLd(){
+    var el = document.getElementById('ld-business'), a = storeText('address');
+    if(!el || !a) return;
+    try{
+      var d = JSON.parse(el.textContent);
+      (d['@graph'] || []).forEach(function(n){ if(n['@type'] === 'HealthAndBeautyBusiness') n.address = {'@type': 'PostalAddress', streetAddress: a, addressCountry: 'LB'}; });
+      el.textContent = JSON.stringify(d);
+    }catch(e){}
+  }
+  var pdpId = null;
+  function openPdp(id){
+    var p = byId[id]; if(!p) return;
+    pdpId = id;
+    var out = avail(p) <= 0, low = !out && avail(p) <= 5;
+    var rel = PRODUCTS.filter(function(x){
+      return x.id !== id && x.dept === p.dept && (p.dept !== 'beauty' || x.collection === p.collection) && x.cat === p.cat && avail(x) > 0;
+    }).slice(0, 4);
+    var priceHtml = p.salePrice != null
+      ? '<span class="card__price card__price--sale" dir="ltr"><span class="card__price-was">' + money(p.price) + '</span><span class="card__price-now">' + money(p.salePrice) + '</span></span>'
+      : '<span class="card__price" dir="ltr">' + money(p.price) + '</span>';
+    var wa = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(t('wa_product').replace('{name}', name(p)));
+    $('#pdpBody').innerHTML =
+      '<div class="pdp__grid">' +
+        '<div class="card__media">' + cardMedia(p) + (out ? '<span class="badge badge--out">' + t('out_of_stock') + '</span>' : (p.isNew ? '<span class="badge">' + t('badge_new') + '</span>' : '')) + '</div>' +
+        '<div class="pdp__info">' +
+          '<p class="card__cat">' + (p.brand ? esc(p.brand) + ' · ' : '') + esc(catLabel(p)) + '</p>' +
+          '<h2 class="pdp__name">' + esc(name(p)) + '</h2>' +
+          '<div class="pdp__meta"><span class="card__size">' + esc(pick({en:p.size[0], ar:p.size[1]})) + '</span>' + priceHtml + '</div>' +
+          (low ? '<p class="card__stock">' + t('only_left').replace('{n}', p.stock) + '</p>' : '') +
+          '<p class="pdp__desc">' + esc(lang === 'ar' ? p.da : p.de) + '</p>' +
+          '<div class="pdp__actions">' +
+            (out ? '<button class="btn btn--solid is-soldout" type="button" disabled>' + t('out_of_stock') + '</button>'
+                 : '<button class="btn btn--solid" type="button" data-add="' + esc(p.id) + '">' + t('add') + '</button>') +
+            '<a class="btn btn--line" data-ask="' + esc(p.id) + '" href="' + wa + '" target="_blank" rel="noopener">' + t('pdp_ask') + '</a>' +
+            '<button class="btn btn--line" type="button" data-share>' + t('pdp_share') + '</button>' +
+          '</div>' +
+          (out ? notifyHtml(p) : '') +
+          (rel.length ? '<div class="pdp__rel"><h3>' + t('pdp_related') + '</h3><ul style="list-style:none">' + rel.map(function(x){
+            return '<li><button type="button" data-open="' + esc(x.id) + '"><span>' + esc(name(x)) + '</span><span dir="ltr">' + money(effPrice(x)) + '</span></button></li>';
+          }).join('') + '</ul></div>' : '') +
+        '</div>' +
+      '</div>';
+    wireGalleries($('#pdpBody'));
+    var dlg = $('#pdp');
+    if(!dlg.open){ if(dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', ''); }
+    dlg.scrollTop = 0;
+    try{ history.replaceState(null, '', '#p-' + id); }catch(e){}
+  }
+  function sharePdp(btn){
+    var p = byId[pdpId]; if(!p) return;
+    var url = location.origin + productPath(p);
+    if(navigator.share){ navigator.share({title: name(p), url: url}).catch(function(){}); return; }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(function(){
+        btn.textContent = t('pdp_copied'); setTimeout(function(){ btn.textContent = t('pdp_share'); }, 1600);
+      }).catch(function(){});
+    }
+  }
+  var hashHandled = false, cartOpened = false;
+  function openFromHash(){
+    var h = location.hash.slice(1);
+    if(h.indexOf('p-') !== 0) return;
+    var id = h.slice(2), p = byId[id]; if(!p) return;
+    if(p.dept !== activePanel){ routeTo(p.dept, 'p-' + id); return; }
+    openPdp(id);
+  }
+
+  /* ---------- Language ---------- */
+  function applyLang(){
+    var html = document.documentElement;
+    html.lang = lang; html.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.title = lang === 'ar' ? 'AVARA — مستوحاة من الطبيعة، مصقولة بالعلم' : 'AVARA — Inspired by Nature. Perfected by Science';
+    $$('[data-i18n]').forEach(function(el){ var v = t(el.getAttribute('data-i18n')); if(v) el.textContent = v; });
+    $$('[data-i18n-ph]').forEach(function(el){ el.placeholder = t(el.getAttribute('data-i18n-ph')); });
+    $$('[data-i18n-aria]').forEach(function(el){ el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria'))); });
+    $('#langBtn').textContent = t('langBtn');
+    var al = $('#articlesLink'); if(al) al.setAttribute('href', (lang === 'ar' ? '/ar' : '') + '/articles');
+    $('#langBtn').setAttribute('lang', lang === 'ar' ? 'en' : 'ar');
+    var pd = document.getElementById('pdp'); if(pd && pd.open) pd.close();
+    DEPTS.forEach(renderDept); renderFeatured();
+    applyStore();
+    renderCart();
+    runSearch(); renderPromos(); renderTrust(); renderReviews();
+  }
+
+  /* ---------- Events ---------- */
+  document.addEventListener('click', function(e){
+    var el;
+    if((el = e.target.closest('[data-add]'))){
+      var id = el.getAttribute('data-add'), prod = byId[id]; if(!prod) return;
+      // The product dialog sits above the toast, so inside it we flash the message on the button itself.
+      var say = function(msg){
+        if(el.closest('#pdp')){ el.textContent = msg; setTimeout(function(){ el.textContent = t('add'); }, 1500); } else toast(msg);
+      };
+      if((cart[id] || 0) + 1 > avail(prod)){ say(avail(prod) <= 0 ? t('out_of_stock') : t('stock_max').replace('{n}', avail(prod))); return; }
+      lastOrder = null; cart[id] = (cart[id] || 0) + 1; saveCart(); renderCart(); say(t('added'));
+      track('Add to Cart', {product: prod.en || id, source: el.closest('#chatLog') ? 'chat' : 'store'});
+      return;
+    }
+    if((el = e.target.closest('[data-more]'))){
+      var dd = el.previousElementSibling, isOpen = dd.classList.toggle('is-open');
+      el.textContent = t(isOpen ? 'show_less' : 'show_more'); el.setAttribute('aria-expanded', String(isOpen));
+      return;
+    }
+    if((el = e.target.closest('[data-promo-add]'))){ addPromo(parseInt(el.getAttribute('data-promo-add'), 10)); return; }
+    if((el = e.target.closest('[data-promo-step]'))){ showPromo(promoIdx + parseInt(el.getAttribute('data-promo-step'), 10)); return; }
+    if((el = e.target.closest('[data-promo-go]'))){ showPromo(parseInt(el.getAttribute('data-promo-go'), 10)); return; }
+    if((el = e.target.closest('[data-notify-open]'))){
+      var nf = el.parentNode.querySelector('form'); el.hidden = true; nf.hidden = false;
+      var ni = nf.querySelector('input'); if(ni) ni.focus();
+      return;
+    }
+    if((el = e.target.closest('[data-ask]'))){
+      var ap = byId[el.getAttribute('data-ask')];
+      track('WhatsApp Product', {product: ap ? ap.en : 'unknown'});
+      return;   // the link itself opens WhatsApp
+    }
+    if((el = e.target.closest('[data-chip]'))){
+      var parts = el.getAttribute('data-chip').split(':'); view[parts[0]].cat = parts[1]; renderDept(parts[0]);
+      var again = $('[data-chip="' + parts.join(':') + '"]'); if(again) again.focus(); return;
+    }
+    if((el = e.target.closest('[data-coll]'))){
+      var cparts = el.getAttribute('data-coll').split(':');
+      view[cparts[0]].collection = cparts[1]; view[cparts[0]].cat = 'all'; view[cparts[0]].brand = 'all';
+      renderDept(cparts[0]);
+      var againC = $('[data-coll="' + cparts.join(':') + '"]'); if(againC) againC.focus(); return;
+    }
+    if((el = e.target.closest('[data-qty]'))){
+      var q = el.getAttribute('data-qty').split(':'), pid = q[0];
+      var next = (cart[pid] || 0) + parseInt(q[1], 10);
+      if(byId[pid] && next > avail(byId[pid])){ toast(t('stock_max').replace('{n}', avail(byId[pid]))); return; }
+      cart[pid] = next; if(cart[pid] <= 0) delete cart[pid]; saveCart(); renderCart(); return;
+    }
+    if((el = e.target.closest('[data-rm]'))){ delete cart[el.getAttribute('data-rm')]; saveCart(); renderCart(); return; }
+    if(e.target.closest('[data-close-cart]')){ closeCart(); return; }
+    if((el = e.target.closest('[data-goto]'))){ goTo(el.getAttribute('data-goto')); return; }
+    if((el = e.target.closest('[data-sale]'))){
+      var sd = el.getAttribute('data-sale'); view[sd].sale = !view[sd].sale; renderDept(sd);
+      var againS = $('[data-sale="' + sd + '"]'); if(againS) againS.focus(); return;
+    }
+    if((el = e.target.closest('[data-share]'))){ sharePdp(el); return; }
+    if((el = e.target.closest('[data-open]'))){
+      if(e.target.closest('.gallery__nav')) return;
+      openPdp(el.getAttribute('data-open')); return;
+    }
+    if((el = e.target.closest('a[href^="#"]'))){
+      var hashId = el.getAttribute('href').slice(1);
+      if(hashId && document.getElementById(hashId)){
+        e.preventDefault();
+        jumpTo(hashId);
+        history.replaceState(null, '', '#' + hashId);
+      }
+      $('#siteHeader').classList.remove('nav-open'); $('#menuBtn').setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  document.addEventListener('change', function(e){
+    var el = e.target.closest('[data-sort]');
+    if(el){ var d = el.getAttribute('data-sort'); view[d].sort = el.value; renderGrid(d); return; }
+    var bl = e.target.closest('[data-brand]');
+    if(bl){ var bd = bl.getAttribute('data-brand'); view[bd].brand = bl.value; renderGrid(bd); }
+  });
+
+  $('#orderForm').addEventListener('submit', submitOrder);
+  $('#pdpClose').addEventListener('click', function(){ $('#pdp').close(); });
+  $('#pdp').addEventListener('click', function(e){ if(e.target === this) this.close(); });
+  $('#pdp').addEventListener('close', function(){
+    pdpId = null;
+    try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){}
+  });
+  $('#cartBtn').addEventListener('click', openCart);
+  $('#closeCart').addEventListener('click', closeCart);
+  $('#overlay').addEventListener('click', closeCart);
+  $('#searchBtn').addEventListener('click', function(){ $('#searchPanel').hidden ? openSearch() : closeSearch(); });
+  $('#searchInput').addEventListener('input', runSearch);
+  $('#menuBtn').addEventListener('click', function(){
+    var h = $('#siteHeader'), open = h.classList.toggle('nav-open'); this.setAttribute('aria-expanded', String(open));
+  });
+  $('#langBtn').addEventListener('click', function(){
+    var next = lang === 'ar' ? 'en' : 'ar';
+    try{ localStorage.setItem('avara-lang', next); }catch(e){}
+    var alt = document.documentElement.getAttribute('data-alt-url');
+    if(alt){ location.href = alt + location.hash; return; }   // separate URL per language
+    lang = next; applyLang(); resetChat();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Escape') return;
+    if(document.body.classList.contains('cart-open')) closeCart();
+    else if(!$('#searchPanel').hidden) closeSearch();
+  });
+
+  /* ---------- AI chat (calls /api/chat, Gemini key stays server-side) ---------- */
+  var chatLog = [], chatBusy = false;
+
+  function autosize(ta){ ta.style.height = 'auto'; ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'; }
+  function scrollChatEnd(){ var el = $('#chatLog'); if(el) el.scrollTop = el.scrollHeight; }
+
+  // Product cards under an assistant reply. The server only sends ids of products that are in stock;
+  // name, price and stock shown here come from the live catalogue already loaded in the page.
+  function chatProducts(m){
+    var list = (m.products || []).map(function(id){ return byId[id]; }).filter(function(p){ return p && avail(p) > 0; });
+    if(!list.length) return '';
+    return '<div class="chat-prods" aria-label="' + esc(t('chat_suggest')) + '">' + list.map(function(p){
+      return '<div class="chat-prod">' +
+        '<div class="chat-prod__info"><button class="chat-prod__name" type="button" data-open="' + esc(p.id) + '">' + esc(name(p)) + '</button>' +
+        '<span class="chat-prod__price" dir="ltr">' + money(effPrice(p)) + '</span></div>' +
+        '<button class="btn btn--solid" type="button" data-add="' + esc(p.id) + '">' + t('add') + '</button></div>';
+    }).join('') + '</div>';
+  }
+
+  function renderChat(){
+    var el = $('#chatLog'); if(!el) return;
+    el.innerHTML = chatLog.map(function(m){
+      var cls = m.role === 'user' ? 'msg msg--user' : m.role === 'error' ? 'msg msg--error' : 'msg msg--bot';
+      return '<div class="' + cls + '">' + esc(m.text).replace(/\n/g, '<br>') + '</div>' + chatProducts(m);
+    }).join('') + (chatBusy ? '<div class="msg msg--bot msg--typing">' + t('chat_typing') + '</div>' : '');
+    scrollChatEnd();
+  }
+
+  function resetChat(){
+    chatLog = [{role: 'model', text: t('chat_greet')}];
+    chatBusy = false;
+    renderChat();
+  }
+
+  var chatStarted = false;
+  function sendChat(e){
+    e.preventDefault();
+    if(chatBusy) return;
+    var ta = $('#chatInput'), text = ta.value.trim();
+    if(!text) return;
+    if(!chatStarted){ chatStarted = true; track('Chat Started'); }
+    chatLog.push({role: 'user', text: text});
+    ta.value = ''; autosize(ta);
+    chatBusy = true; renderChat();
+    var apiMsgs = chatLog.filter(function(m){ return m.role === 'user' || m.role === 'model'; }).slice(-12).map(function(m){ return {role: m.role, text: m.text}; });
+    fetch('/api/chat', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({messages: apiMsgs, lang: lang})
+    })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return {ok: r.ok, status: r.status, data: d}; }); })
+      .then(function(res){
+        chatBusy = false;
+        if(res.status === 429) chatLog.push({role: 'error', text: t('chat_rate')});
+        else if(!res.ok || !res.data || !res.data.reply) chatLog.push({role: 'error', text: t('chat_err')});
+        else chatLog.push({role: 'model', text: res.data.reply, products: Array.isArray(res.data.products) ? res.data.products.slice(0, 3) : []});
+        renderChat();
+      })
+      .catch(function(){ chatBusy = false; chatLog.push({role: 'error', text: t('chat_err')}); renderChat(); });
+  }
+
+  // "Chat Opened": fires once per visit when the chat section is actually on screen.
+  (function(){
+    var sec = $('#chat');
+    if(!sec || !('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function(entries){
+      if(entries.some(function(en){ return en.isIntersecting; })){ track('Chat Opened'); io.disconnect(); }
+    }, {threshold: 0.4});
+    io.observe(sec);
+  })();
+
+  var chatForm = $('#chatForm');
+  if(chatForm){
+    chatForm.addEventListener('submit', sendChat);
+    $('#chatInput').addEventListener('input', function(){ autosize(this); });
+    $('#chatInput').addEventListener('keydown', function(e){
+      if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); chatForm.requestSubmit(); }
+    });
+  }
+
+  /* ---------- Install app (PWA) ---------- */
+  var deferredInstall = null;
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+
+  function hideInstallBtn(){ $('#installBtn').hidden = true; }
+  if(isStandalone) hideInstallBtn();   // already installed: no need to offer it again
+
+  function openInstallHelp(text){
+    $('#installHelpText').textContent = text;
+    var el = $('#installHelp'); el.hidden = false;
+    requestAnimationFrame(function(){ el.classList.add('show'); });
+  }
+  function closeInstallHelp(){
+    var el = $('#installHelp'); el.classList.remove('show');
+    setTimeout(function(){ el.hidden = true; }, 300);
+  }
+  $('#installHelpClose').addEventListener('click', closeInstallHelp);
+
+  // Chrome/Edge/Android may offer their own native install prompt; we keep
+  // it and fire it from our button instead of Chrome's mini-infobar.
+  window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferredInstall = e; });
+  window.addEventListener('appinstalled', function(){
+    deferredInstall = null; hideInstallBtn(); toast(t('install_added'));
+  });
+
+  $('#installBtn').addEventListener('click', function(){
+    if(deferredInstall){
+      deferredInstall.prompt();
+      deferredInstall.userChoice.then(function(){ deferredInstall = null; });
+      return;
+    }
+    // No native prompt available (iOS Safari, desktop Safari/Firefox, or
+    // Chrome hasn't offered one yet): show the manual steps instead.
+    if(isStandalone){ openInstallHelp(t('install_help_installed')); return; }
+    openInstallHelp(isIOS ? t('install_help_ios') : t('install_help_generic'));
+  });
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('/sw.js').catch(function(){});
+    });
+  }
+
+  // Deep link support: open straight into the right panel if the URL
+  // already points at something inside Beauty or Athlete (e.g. a shared link).
+  (function(){
+    var id = location.hash.slice(1), elx = id && document.getElementById(id);
+    var panel = elx && elx.closest('.panel'), pn = panel && panel.getAttribute('data-panel');
+    if(pn && pn !== activePanel) routeTo(pn, id);
+  })();
+  window.addEventListener('hashchange', function(){
+    var id = location.hash.slice(1), elx = id && document.getElementById(id);
+    var panel = elx && elx.closest('.panel'), pn = panel && panel.getAttribute('data-panel');
+    if(pn && pn !== activePanel) routeTo(pn, id);
+  });
+
+  window.AVARA_I18N = I18N;
+  applyLang();
+  loadProducts();
+  loadStore();
+  loadReviews();
+  resetChat();
+});
+</script>
+
+<script src="/assets/float-contact.js" defer=""></script>
+
+
+</body></html>

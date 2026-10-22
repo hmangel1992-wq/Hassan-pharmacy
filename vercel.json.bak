@@ -59,6 +59,14 @@
     {
       "source": "/review",
       "destination": "/review.html"
+    },
+    {
+      "source": "/medical",
+      "destination": "/medical.html"
+    },
+    {
+      "source": "/ar/medical",
+      "destination": "/ar/medical.html"
     }
   ],
   "headers": [

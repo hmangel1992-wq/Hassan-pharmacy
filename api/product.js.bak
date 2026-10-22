@@ -20,7 +20,7 @@ function slugify(s) {
 }
 
 const DEPT = {
-  medical: { en: 'Medical care', ar: 'الرعاية الطبية', path: '' },
+  medical: { en: 'Medical care', ar: 'الرعاية الطبية', path: 'medical' },
   athlete: { en: 'Athlete care', ar: 'الرعاية الرياضية', path: 'athlete' },
   beauty: { en: 'Beauty care', ar: 'العناية بالجمال', path: 'beauty' },
 };

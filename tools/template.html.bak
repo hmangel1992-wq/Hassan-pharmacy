@@ -27,13 +27,10 @@
 
 <script src="/config.js" defer></script>
 <script src="/vendor/supabase-2.45.4.js" defer></script>
-<!-- Privacy-friendly analytics by Plausible -->
-<script async src="https://plausible.io/js/pa-hl02LMOrQ1w2cM0awG3nn.js"></script>
-<script>
-  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-  plausible.init()
-</script>
-
+<!-- Privacy-friendly analytics (Plausible): no cookies, no personal data.
+     data-domain must match the site name you create in Plausible. -->
+<script defer data-domain="avara-nu-beige.vercel.app" src="https://plausible.io/js/script.js"></script>
+<script>window.plausible = window.plausible || function(){ (window.plausible.q = window.plausible.q || []).push(arguments); };</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -711,6 +708,13 @@
   .dtile__name{ font-size: 1.45rem; font-weight: 400; line-height: 1.2; }
   .dtile__desc{ color: var(--ink-soft); flex: 1; }
   @media (max-width: 860px){ .dtiles{ grid-template-columns: 1fr; } }
+  /* The doctor photo has a white background, so it is blended into the soft green of the headline area. */
+  .home-hero__doctor{ align-self: end; padding: 0; margin-bottom: calc(-1 * clamp(40px, 6vw, 84px)); }
+  .home-hero__doctor img{ position: relative; height: clamp(340px, 40vw, 540px); width: auto; max-width: 100%; mix-blend-mode: multiply; }
+  @media (max-width: 860px){
+    .home-hero__doctor{ margin-bottom: -28px; }
+    .home-hero__doctor img{ height: auto; width: min(72vw, 340px); }
+  }
   #featured .grid{ margin-top: 36px; }
   #grid-featured .card__foot{ margin-top: auto; }
   #featured[hidden]{ display: none; }
@@ -851,10 +855,8 @@
         <a class="btn btn--line" href="#chat" data-i18n="chat_cta"></a>
       </div>
     </div>
-    <div class="home-hero__art" aria-hidden="true">
-      <svg class="pack" viewBox="0 0 120 140"><use href="#pk-tube"/></svg>
-      <svg class="pack" viewBox="0 0 120 140"><use href="#pk-dropper"/></svg>
-      <svg class="pack" viewBox="0 0 120 140"><use href="#pk-pump"/></svg>
+    <div class="home-hero__art home-hero__doctor">
+      <img src="/assets/doctor-844.webp" srcset="/assets/doctor-600.webp 600w, /assets/doctor-844.webp 844w" sizes="(max-width: 860px) 70vw, 40vw" width="844" height="879" alt="">
     </div>
   </section>
 

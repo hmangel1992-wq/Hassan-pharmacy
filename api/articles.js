@@ -4,12 +4,12 @@
 // (vercel.json rewrites those paths here). Pages are rendered on the server so Google and
 // WhatsApp can read them without running JavaScript. Articles are written in admin.html > Articles.
 
-const SITE = (process.env.SITE_URL || 'https://avara-nu-beige.vercel.app').replace(/\/$/, '');
+const SITE = (process.env.SITE_URL || 'https://avaracare.online').replace(/\/$/, '');
 const SUPABASE_URL = (process.env.SUPABASE_URL || 'https://wmmgzwjiaoyjilftkjir.supabase.co').replace(/\/$/, '');
 // The anon key is public by design (it is also in config.js); row-level security protects the data.
 const ANON = process.env.SUPABASE_ANON_KEY ||
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndtbWd6d2ppYW95amlsZnRramlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyMzMxNzAsImV4cCI6MjEwNTgwOTE3MH0.ta9s3UliyYC12vnZhaeySGgrVydKm5tqSF4xVIRwr0k';
-const DOMAIN = 'avara-nu-beige.vercel.app';   // the Plausible site name
+const DOMAIN = 'avaracare.online';   // the Plausible site name
 const WA = '96176681395';
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 

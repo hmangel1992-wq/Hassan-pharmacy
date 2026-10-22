@@ -3,7 +3,7 @@
 // with its own title, description, social preview image and Product structured data,
 // so Google and WhatsApp can read it without running any JavaScript.
 
-const SITE = (process.env.SITE_URL || 'https://avara-nu-beige.vercel.app').replace(/\/$/, '');
+const SITE = (process.env.SITE_URL || 'https://avaracare.online').replace(/\/$/, '');
 const SUPABASE_URL = (process.env.SUPABASE_URL || 'https://wmmgzwjiaoyjilftkjir.supabase.co').replace(/\/$/, '');
 // The anon key is public by design (it is also in config.js); row-level security protects the data.
 const ANON = process.env.SUPABASE_ANON_KEY ||
@@ -109,7 +109,7 @@ ${ogImage ? `<meta property="og:image" content="${esc(ogImage)}">` : ''}
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
 ${ld ? `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>` : ''}
-<script defer data-domain="avara-nu-beige.vercel.app" src="https://plausible.io/js/script.js"></script>
+<script defer data-domain="avaracare.online" src="https://plausible.io/js/script.js"></script>
 <script>window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments)}</script>
 <style>${STYLE}</style>
 </head>

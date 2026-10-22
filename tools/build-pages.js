@@ -22,7 +22,7 @@ const fs = require('fs');
 const path = require('path');
 const { JSDOM } = require('jsdom');
 
-const SITE = (process.env.SITE_URL || 'https://avara-nu-beige.vercel.app').replace(/\/$/, '');
+const SITE = (process.env.SITE_URL || 'https://avaracare.online').replace(/\/$/, '');
 const ROOT = path.join(__dirname, '..');
 const tpl = fs.readFileSync(path.join(__dirname, 'template.html'), 'utf8');
 

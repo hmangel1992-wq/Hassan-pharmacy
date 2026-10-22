@@ -48,7 +48,7 @@ module.exports = async function handler(req, res) {
     return '';
   }).join('');
 
-  const pages = [['/', '/ar/'], ['/beauty', '/ar/beauty'], ['/athlete', '/ar/athlete'], ['/articles', '/ar/articles']].map(([en, ar]) => entry(en, ar)).join('') +
+  const pages = [['/', '/ar/'], ['/medical', '/ar/medical'], ['/beauty', '/ar/beauty'], ['/athlete', '/ar/athlete'], ['/articles', '/ar/articles']].map(([en, ar]) => entry(en, ar)).join('') +
     `<url><loc>${esc(SITE + '/policies')}</loc></url>`;
   const prods = products.map((p) => { const s = slugify(p.name_en) + '-' + p.id; return entry('/p/' + s, '/ar/p/' + s); }).join('');
 

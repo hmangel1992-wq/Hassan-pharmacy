@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://avara-nu-beige.vercel.app/sitemap.xml
+Sitemap: https://avaracare.online/sitemap.xml

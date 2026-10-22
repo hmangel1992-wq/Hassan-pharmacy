@@ -26,7 +26,7 @@ map link, opening hours, delivery areas, payment methods and a trust statement. 
 4. Supabase > Database > Webhooks > Create a new hook:
    - Table: `orders`, Events: **Insert**
    - Type: HTTP Request, Method: POST
-   - URL: `https://avara-nu-beige.vercel.app/api/notify-order`
+   - URL: `https://avaracare.online/api/notify-order`
    - HTTP Headers: add `x-webhook-secret` with the same value as `NOTIFY_SECRET`
 5. Place a test order on the site. You should get a Telegram message within seconds.
 
