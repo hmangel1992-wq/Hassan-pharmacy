@@ -87,8 +87,8 @@ const META = {
 };
 
 // Home page: takes over the old Medical title and description; the Medical page gets its own.
-META.en.home = Object.assign({}, META.en.medical, { h1: 'AVARA — Health care and cosmetics', hero: null, alt: 'A smiling doctor in a white coat with a stethoscope.' });
-META.ar.home = Object.assign({}, META.ar.medical, { h1: 'AVARA — رعاية صحية ومستحضرات تجميل', hero: null, alt: 'طبيبة مبتسمة بالمعطف الأبيض وسماعة طبية.' });
+META.en.home = Object.assign({}, META.en.medical, { h1: 'AVARA — Health care and cosmetics', hero: null, alt: 'A smiling AVARA doctor in a white coat with a stethoscope.' });
+META.ar.home = Object.assign({}, META.ar.medical, { h1: 'AVARA — رعاية صحية ومستحضرات تجميل', hero: null, alt: 'طبيبة أفارا مبتسمة بالمعطف الأبيض وسماعة طبية.' });
 Object.assign(META.en.medical, {
   title: 'Medical care | AVARA: medical advice, vitamins and everyday essentials',
   desc: 'Medical advice, vitamins, first aid and health devices from AVARA. Straight answers on symptoms and medication questions. Prescription-only medicines are not sold online.',
