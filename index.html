@@ -647,6 +647,12 @@
   .order-form label[hidden]{ display: none; }
   .order-form select{ width: 100%; padding: 10px 12px; font-size: 1rem; color: var(--ink); background: var(--ivory); border: 1px solid var(--teal); border-radius: 2px; }
   .form-error[hidden]{ display: none; }
+  .paybox{ border: 0; display: grid; gap: 8px; }
+  .paybox legend{ font-size: .88rem; color: var(--ink-soft); padding: 0; margin-bottom: 2px; }
+  .paybox label.payopt{ display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--teal); border-radius: 2px; background: var(--ivory); color: var(--ink); font-size: .95rem; cursor: pointer; }
+  .paybox label.payopt input{ width: 18px; height: 18px; min-width: 18px; padding: 0; accent-color: var(--teal-deep); }
+  .paybox .pay-hint{ font-size: .86rem; color: var(--ink-soft); line-height: 1.45; }
+  .done .pay-next{ padding: 12px 14px; background: var(--mint); border-inline-start: 3px solid var(--teal-deep); font-size: .94rem; color: var(--ink); }
   .btn[disabled]{ opacity: .6; cursor: progress; }
   .done{ padding: 36px 0; display: grid; gap: 14px; }
   .done h3{ font-size: 1.4rem; font-weight: 400; }
@@ -1127,8 +1133,14 @@
         <select name="region" id="regionSel"></select></label>
       <label><span data-i18n="address_label">Delivery address (optional)</span>
         <input name="address" type="text" maxlength="300" autocomplete="street-address"></label>
+      <fieldset class="paybox" id="payBox">
+        <legend data-i18n="pay_label">Payment</legend>
+        <label class="payopt"><input type="radio" name="pay" value="cod" checked=""><span data-i18n="pay_cod">Cash on delivery</span></label>
+        <label class="payopt"><input type="radio" name="pay" value="whish"><span data-i18n="pay_whish">Whish</span></label>
+        <p class="pay-hint" id="payHint" role="status"></p>
+      </fieldset>
       <label><span data-i18n="notes_label">Notes (optional)</span>
-        <textarea name="notes" rows="2" maxlength="500"></textarea></label>
+        <textarea name="notes" rows="2" maxlength="450"></textarea></label>
       <label class="optin"><input type="checkbox" name="wa_optin"><span data-i18n="wa_optin">Send me offers and news on WhatsApp. I can stop anytime by replying STOP.</span></label>
       <p class="form-error" id="orderError" role="alert" hidden=""></p>
       <button class="btn btn--solid btn--block" id="placeBtn" type="submit" data-i18n="place_order">Place order</button>
@@ -1245,6 +1257,11 @@ document.addEventListener('DOMContentLoaded', function(){
       rv_title:'What customers say', rv_one:'1 review', rv_many:'{n} reviews', rv_stars:'{n} out of 5 stars',
       rv_note:'Reviews come from customers whose order was delivered, and are published after we approve them.', rv_cta:'Bought from us? Leave a review',
       show_more:'Show more', show_less:'Show less',
+      pay_label:'Payment', pay_cod:'Cash on delivery', pay_whish:'Whish',
+      pay_hint_cod:'Pay in cash when your order arrives.',
+      pay_hint_whish:'We will send you the Whish payment details when we confirm your order.',
+      pay_next_cod:'You pay in cash when your order arrives. We will contact you to confirm delivery.',
+      pay_next_whish:'You chose Whish. We will contact you shortly to confirm your order and send the Whish payment details.',
       region_label:'Delivery region', region_choose:'Choose your region', region_required:'Please choose your delivery region.',
       hero_h_home:'Your Health Matters', hero_s_home:'Medical advice, athlete care and beauty, in one trusted place.',
       cta_depts:'Shop by department', featured_title:'Featured picks', featured_sub:'A few products from across our three departments.',
@@ -1336,6 +1353,11 @@ document.addEventListener('DOMContentLoaded', function(){
       rv_title:'آراء العملاء', rv_one:'تقييم واحد', rv_many:'{n} تقييمات', rv_stars:'{n} من 5 نجوم',
       rv_note:'التقييمات من عملاء تم تسليم طلباتهم، وتُنشر بعد موافقتنا عليها.', rv_cta:'اشتريت منا؟ اترك تقييمك',
       show_more:'عرض المزيد', show_less:'عرض أقل',
+      pay_label:'طريقة الدفع', pay_cod:'الدفع عند الاستلام', pay_whish:'ويش (Whish)',
+      pay_hint_cod:'تدفع نقداً عند وصول طلبك.',
+      pay_hint_whish:'سنرسل لك تفاصيل الدفع عبر ويش عند تأكيد طلبك.',
+      pay_next_cod:'تدفع نقداً عند وصول طلبك. سنتواصل معك لتأكيد التوصيل.',
+      pay_next_whish:'اخترت الدفع عبر ويش. سنتواصل معك قريباً لتأكيد طلبك وإرسال تفاصيل الدفع.',
       region_label:'منطقة التوصيل', region_choose:'اختر منطقتك', region_required:'يرجى اختيار منطقة التوصيل.',
       hero_h_home:'صحتك تهمّنا', hero_s_home:'نصائح طبية ورعاية رياضية وعناية بالجمال، في مكان واحد تثق به.',
       cta_depts:'تسوّق حسب القسم', featured_title:'مختارات لك', featured_sub:'مجموعة منتجات من أقسامنا الثلاثة.',
@@ -1833,6 +1855,7 @@ document.addEventListener('DOMContentLoaded', function(){
     if(lastOrder){
       var wa = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(t('wa_order').replace('{no}', lastOrder));
       $('#cartBody').innerHTML = '<div class="done"><h3>' + t('order_ok_title') + '</h3><p>' + t('order_ok_text').replace('{no}', '<strong dir="ltr">#' + esc(lastOrder) + '</strong>') + '</p>' +
+        '<p class="pay-next">' + esc(t('pay_next_' + lastPay)) + '</p>' +
         '<a class="btn btn--solid btn--block" href="' + wa + '" target="_blank" rel="noopener">' + t('order_wa_confirm') + '</a>' +
         '<a class="btn btn--line btn--block" href="/track?no=' + encodeURIComponent(lastOrder) + '">' + t('track_order') + '</a>' +
         '<button class="btn btn--line btn--block" type="button" data-close-cart>' + t('continue') + '</button></div>' + storeInfoHtml();
@@ -1941,6 +1964,18 @@ document.addEventListener('DOMContentLoaded', function(){
   // First-order and one-use-per-phone rules depend on the phone number: check again once it is typed.
   $('#orderForm').elements.phone.addEventListener('change', function(){ if(appliedCode && !codeBusy) validateCode(true); });
 
+  /* ---------- Payment choice (cash on delivery or Whish) ---------- */
+  var lastPay = 'cod';
+  function payChoice(f){ return (f && f.pay && f.pay.value === 'whish') ? 'whish' : 'cod'; }
+  function renderPayHint(){
+    var el = document.getElementById('payHint'), f = document.getElementById('orderForm');
+    if(el && f) el.textContent = t('pay_hint_' + payChoice(f.elements));
+  }
+  function payNote(f){
+    var tag = payChoice(f) === 'whish' ? 'Payment: Whish' : 'Payment: Cash on delivery';
+    return ('[' + tag + '] ' + f.notes.value.trim()).trim();
+  }
+
   function showOrderError(key){ var el = $('#orderError'); el.textContent = t(key); el.hidden = false; }
 
   function submitOrder(e){
@@ -1960,7 +1995,7 @@ document.addEventListener('DOMContentLoaded', function(){
     var codeUsed = appliedCode ? appliedCode.code : '';
     var sumNow = cartTotals().sum - (appliedCode ? Math.min(appliedCode.discount || 0, cartTotals().sum) : 0), countNow = items.length;
     var optin = !!f.wa_optin.checked;
-    var args = {p_name:nm, p_phone:ph, p_address:f.address.value.trim(), p_notes:f.notes.value.trim(), p_items:items};
+    var args = {p_name:nm, p_phone:ph, p_address:f.address.value.trim(), p_notes:payNote(f), p_items:items};
     if(REGIONS.length && regionById(regionId)){ args.p_code = codeUsed || null; args.p_region = Number(regionId); }
     else if(codeUsed) args.p_code = codeUsed;
     sb.rpc('place_order', args)
@@ -1988,7 +2023,7 @@ document.addEventListener('DOMContentLoaded', function(){
           sb.rpc('wa_subscribe', {p_order_no: Number(res.data), p_phone: ph, p_name: nm, p_lang: lang, p_consent: t('wa_optin')})
             .then(function(r){ if(r && r.data && r.data.ok) track('WhatsApp Optin', {}); }).catch(function(){});
         }
-        lastOrder = res.data; cart = {}; saveCart(); e.target.reset(); renderRegions();
+        lastOrder = res.data; lastPay = payChoice(f); cart = {}; saveCart(); e.target.reset(); renderRegions();
         appliedCode = null; $('#codeInput').value = ''; codeMsg('', ''); setCodeUi(); renderCart();
         try{ if(window.plausible) window.plausible('Order Placed', {props: {items: String(countNow), code: codeUsed || 'none'}, revenue: {currency: 'USD', amount: sumNow}}); }catch(x){}
       })
@@ -2242,7 +2277,7 @@ document.addEventListener('DOMContentLoaded', function(){
     applyStore();
     renderRegions();
     renderCart();
-    runSearch(); renderPromos(); renderTrust(); renderReviews();
+    runSearch(); renderPromos(); renderTrust(); renderReviews(); renderPayHint();
   }
 
   /* ---------- Events ---------- */
@@ -2324,6 +2359,7 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 
   $('#orderForm').addEventListener('submit', submitOrder);
+  $('#orderForm').addEventListener('change', function(e){ if(e.target && e.target.name === 'pay') renderPayHint(); });
   $('#regionSel').addEventListener('change', function(){
     regionId = this.value; try{ localStorage.setItem('avara-region', regionId); }catch(e){}
     renderCart();

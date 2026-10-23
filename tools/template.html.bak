@@ -941,7 +941,7 @@
         <ul class="contact__list">
           <li>
             <span class="contact__label" data-i18n="c_email">Email</span>
-            <a class="contact__value" href="mailto:souna.92@gmail.com">souna.92@gmail.com</a>
+            <a class="contact__value" href="mailto:avaracare@zohomail.com">avaracare@zohomail.com</a>
           </li>
           <li>
             <span class="contact__label" data-i18n="c_phone">Phone</span>
@@ -1083,7 +1083,7 @@
     <div>
       <h3 data-i18n="f_help">Help &amp; contact</h3>
       <ul>
-        <li><a href="mailto:souna.92@gmail.com">souna.92@gmail.com</a></li>
+        <li><a href="mailto:avaracare@zohomail.com">avaracare@zohomail.com</a></li>
         <li><a href="tel:+96176681395" dir="ltr">76 681 395</a></li>
         <li><a href="#chat" data-i18n="chat_cta">Chat with us</a></li>
         <li><a href="/articles" id="articlesLink" data-i18n="f_articles">Health &amp; care advice</a></li>
