@@ -644,6 +644,8 @@
     background: var(--ivory); border: 1px solid var(--teal); border-radius: 2px; resize: vertical;
   }
   .form-error{ color: #8A2E20; font-size: .9rem; }
+  .order-form label[hidden]{ display: none; }
+  .order-form select{ width: 100%; padding: 10px 12px; font-size: 1rem; color: var(--ink); background: var(--ivory); border: 1px solid var(--teal); border-radius: 2px; }
   .form-error[hidden]{ display: none; }
   .btn[disabled]{ opacity: .6; cursor: progress; }
   .done{ padding: 36px 0; display: grid; gap: 14px; }
@@ -937,7 +939,7 @@
         <ul class="contact__list">
           <li>
             <span class="contact__label" data-i18n="c_email">البريد الإلكتروني</span>
-            <a class="contact__value" href="mailto:souna.92@gmail.com">souna.92@gmail.com</a>
+            <a class="contact__value" href="mailto:avaracare@zohomail.com">avaracare@zohomail.com</a>
           </li>
           <li>
             <span class="contact__label" data-i18n="c_phone">الهاتف</span>
@@ -1079,7 +1081,7 @@
     <div>
       <h3 data-i18n="f_help">المساعدة والتواصل</h3>
       <ul>
-        <li><a href="mailto:souna.92@gmail.com">souna.92@gmail.com</a></li>
+        <li><a href="mailto:avaracare@zohomail.com">avaracare@zohomail.com</a></li>
         <li><a href="tel:+96176681395" dir="ltr">76 681 395</a></li>
         <li><a href="/ar/#chat" data-i18n="chat_cta">تحدّث معنا</a></li>
         <li><a href="/articles" id="articlesLink" data-i18n="f_articles">نصائح الصحة والعناية</a></li>
@@ -1121,6 +1123,8 @@
         <input name="customer" type="text" required="" minlength="2" maxlength="100" autocomplete="name"></label>
       <label><span data-i18n="phone_label">رقم الهاتف</span>
         <input name="phone" type="tel" required="" maxlength="30" autocomplete="tel" dir="ltr"></label>
+      <label id="regionBox" hidden=""><span data-i18n="region_label">منطقة التوصيل</span>
+        <select name="region" id="regionSel"></select></label>
       <label><span data-i18n="address_label">عنوان التوصيل (اختياري)</span>
         <input name="address" type="text" maxlength="300" autocomplete="street-address"></label>
       <label><span data-i18n="notes_label">ملاحظات (اختياري)</span>
@@ -1241,6 +1245,7 @@ document.addEventListener('DOMContentLoaded', function(){
       rv_title:'What customers say', rv_one:'1 review', rv_many:'{n} reviews', rv_stars:'{n} out of 5 stars',
       rv_note:'Reviews come from customers whose order was delivered, and are published after we approve them.', rv_cta:'Bought from us? Leave a review',
       show_more:'Show more', show_less:'Show less',
+      region_label:'Delivery region', region_choose:'Choose your region', region_required:'Please choose your delivery region.',
       hero_h_home:'Your Health Matters', hero_s_home:'Medical advice, athlete care and beauty, in one trusted place.',
       cta_depts:'Shop by department', featured_title:'Featured picks', featured_sub:'A few products from across our three departments.',
       langBtn:'العربية'
@@ -1331,6 +1336,7 @@ document.addEventListener('DOMContentLoaded', function(){
       rv_title:'آراء العملاء', rv_one:'تقييم واحد', rv_many:'{n} تقييمات', rv_stars:'{n} من 5 نجوم',
       rv_note:'التقييمات من عملاء تم تسليم طلباتهم، وتُنشر بعد موافقتنا عليها.', rv_cta:'اشتريت منا؟ اترك تقييمك',
       show_more:'عرض المزيد', show_less:'عرض أقل',
+      region_label:'منطقة التوصيل', region_choose:'اختر منطقتك', region_required:'يرجى اختيار منطقة التوصيل.',
       hero_h_home:'صحتك تهمّنا', hero_s_home:'نصائح طبية ورعاية رياضية وعناية بالجمال، في مكان واحد تثق به.',
       cta_depts:'تسوّق حسب القسم', featured_title:'مختارات لك', featured_sub:'مجموعة منتجات من أقسامنا الثلاثة.',
       langBtn:'English'
@@ -1434,9 +1440,43 @@ document.addEventListener('DOMContentLoaded', function(){
 
   /* ---------- Store settings (delivery, hours, payment) ---------- */
   var store = {delivery_fee:0, free_delivery_over:null, min_order:0};
+
+  /* ---------- Delivery regions (fee by region; set in admin > Settings) ---------- */
+  var REGIONS = [], regionId = '';
+  try{ regionId = localStorage.getItem('avara-region') || ''; }catch(e){}
+  function regionById(id){
+    for(var i = 0; i < REGIONS.length; i++){ if(String(REGIONS[i].id) === String(id)) return REGIONS[i]; }
+    return null;
+  }
+  // Fee of the chosen region, or null when none is chosen or the region has no fee of its own (then the general fee applies).
+  function regionFee(){
+    var r = regionById(regionId);
+    return (r && r.fee != null && r.fee !== '') ? Number(r.fee) : null;
+  }
+  function renderRegions(){
+    var box = document.getElementById('regionBox'), sel = document.getElementById('regionSel');
+    if(!box || !sel) return;
+    if(!REGIONS.length){ box.hidden = true; return; }
+    sel.innerHTML = '<option value="">' + esc(t('region_choose')) + '</option>' + REGIONS.map(function(r){
+      var nm = lang === 'ar' ? (r.name_ar || r.name_en) : (r.name_en || r.name_ar);
+      return '<option value="' + esc(r.id) + '">' + esc(nm) + (r.fee != null && r.fee !== '' ? ' — ' + money(Number(r.fee)) : '') + '</option>';
+    }).join('');
+    sel.value = regionById(regionId) ? String(regionId) : '';
+    box.hidden = false;
+  }
+  function loadRegions(){
+    if(!sb) return;
+    sb.from('delivery_regions').select('id,name_en,name_ar,fee').eq('is_active', true)
+      .order('sort_order', {ascending:true}).order('id', {ascending:true}).then(function(res){
+        if(res.error || !res.data) return;   // table not created yet: no region list, the general fee applies
+        REGIONS = res.data;
+        if(!regionById(regionId)) regionId = '';
+        renderRegions(); renderCart();
+      }).catch(function(){});
+  }
   function storeText(k){ return String(store[k + '_' + lang] || store[k + '_en'] || '').trim(); }
   function deliveryFor(sub){
-    var f = Number(store.delivery_fee) || 0; if(f <= 0) return 0;
+    var rf = regionFee(), f = rf != null ? rf : (Number(store.delivery_fee) || 0); if(f <= 0) return 0;
     var th = Number(store.free_delivery_over) || 0;
     return (th > 0 && sub >= th) ? 0 : f;
   }
@@ -1813,7 +1853,7 @@ document.addEventListener('DOMContentLoaded', function(){
         '<div><div class="line__total" dir="ltr">' + money(effPrice(p) * cart[id]) + '</div><button class="line__rm" type="button" data-rm="' + esc(id) + '">' + t('remove') + '</button></div>' +
       '</div>';
     }).join('') + storeInfoHtml();
-    var fee = deliveryFor(tot.sum), baseFee = Number(store.delivery_fee) || 0;
+    var rf = regionFee(), fee = deliveryFor(tot.sum), baseFee = rf != null ? rf : (Number(store.delivery_fee) || 0);
     var minO = Number(store.min_order) || 0, th = Number(store.free_delivery_over) || 0;
     $('#cartSub').textContent = money(tot.sum);
     $('#feeRow').hidden = baseFee <= 0;
@@ -1910,6 +1950,7 @@ document.addEventListener('DOMContentLoaded', function(){
     $('#orderError').hidden = true;
     if(nm.length < 2 || ph.replace(/\D/g, '').length < 6){ showOrderError('order_invalid'); return; }
     if(!sb){ showOrderError('order_err'); return; }
+    if(REGIONS.length && !regionById(regionId)){ showOrderError('region_required'); return; }
     var minNeed = Number(store.min_order) || 0;
     if(minNeed > 0 && cartTotals().sum < minNeed){
       var me = $('#orderError'); me.textContent = t('order_min').replace('{amt}', money(minNeed)); me.hidden = false; return;
@@ -1920,7 +1961,8 @@ document.addEventListener('DOMContentLoaded', function(){
     var sumNow = cartTotals().sum - (appliedCode ? Math.min(appliedCode.discount || 0, cartTotals().sum) : 0), countNow = items.length;
     var optin = !!f.wa_optin.checked;
     var args = {p_name:nm, p_phone:ph, p_address:f.address.value.trim(), p_notes:f.notes.value.trim(), p_items:items};
-    if(codeUsed) args.p_code = codeUsed;
+    if(REGIONS.length && regionById(regionId)){ args.p_code = codeUsed || null; args.p_region = Number(regionId); }
+    else if(codeUsed) args.p_code = codeUsed;
     sb.rpc('place_order', args)
       .then(function(res){
         btn.disabled = false; btn.textContent = t('place_order');
@@ -1933,6 +1975,7 @@ document.addEventListener('DOMContentLoaded', function(){
             var ce = $('#orderError'); ce.textContent = codeErr[1] === 'min' ? t('code_invalid') : codeReason(codeErr[1], 0); ce.hidden = false;
             appliedCode = null; $('#codeInput').value = ''; codeMsg('', ''); setCodeUi(); renderCart();
           }
+          else if(/delivery region/i.test(msg)){ showOrderError('region_required'); loadRegions(); }
           else if(tooMany){ showOrderError('order_rate'); }
           else if(belowMin){
             var be = $('#orderError'); be.textContent = t('order_min').replace('{amt}', money(Number(store.min_order) || 0)); be.hidden = false; loadStore();
@@ -1945,7 +1988,7 @@ document.addEventListener('DOMContentLoaded', function(){
           sb.rpc('wa_subscribe', {p_order_no: Number(res.data), p_phone: ph, p_name: nm, p_lang: lang, p_consent: t('wa_optin')})
             .then(function(r){ if(r && r.data && r.data.ok) track('WhatsApp Optin', {}); }).catch(function(){});
         }
-        lastOrder = res.data; cart = {}; saveCart(); e.target.reset();
+        lastOrder = res.data; cart = {}; saveCart(); e.target.reset(); renderRegions();
         appliedCode = null; $('#codeInput').value = ''; codeMsg('', ''); setCodeUi(); renderCart();
         try{ if(window.plausible) window.plausible('Order Placed', {props: {items: String(countNow), code: codeUsed || 'none'}, revenue: {currency: 'USD', amount: sumNow}}); }catch(x){}
       })
@@ -2197,6 +2240,7 @@ document.addEventListener('DOMContentLoaded', function(){
     var pd = document.getElementById('pdp'); if(pd && pd.open) pd.close();
     DEPTS.forEach(renderDept); renderFeatured();
     applyStore();
+    renderRegions();
     renderCart();
     runSearch(); renderPromos(); renderTrust(); renderReviews();
   }
@@ -2280,6 +2324,10 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 
   $('#orderForm').addEventListener('submit', submitOrder);
+  $('#regionSel').addEventListener('change', function(){
+    regionId = this.value; try{ localStorage.setItem('avara-region', regionId); }catch(e){}
+    renderCart();
+  });
   $('#pdpClose').addEventListener('click', function(){ $('#pdp').close(); });
   $('#pdp').addEventListener('click', function(e){ if(e.target === this) this.close(); });
   $('#pdp').addEventListener('close', function(){
@@ -2447,6 +2495,7 @@ document.addEventListener('DOMContentLoaded', function(){
   applyLang();
   loadProducts();
   loadStore();
+  loadRegions();
   loadReviews();
   resetChat();
 });

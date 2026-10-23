@@ -147,6 +147,8 @@
   .settings__foot{ display:flex; align-items:center; gap:14px; padding:6px 0 18px; }
   [dir="rtl-field"]{ direction:rtl; }
   .ar{ direction:rtl; text-align:right; }
+  #regionRows input:not([type="checkbox"]){ width:100%; padding:7px 9px; border:1px solid var(--sage-deep); border-radius:2px; background:var(--white); }
+  #regionRows input[type="checkbox"]{ width:18px; height:18px; accent-color:var(--moss); }
 </style>
 </head>
 <body>
@@ -501,6 +503,23 @@
         </div>
       </form>
 
+      <div class="settings" id="regionsBox" style="margin-top:20px">
+        <h3>Delivery regions</h3>
+        <p class="hint" style="margin-bottom:12px">Customers choose one of these regions in the cart, and the delivery fee below is added to their order. Leave a fee blank to use the general delivery fee above. A fee of 0 means free delivery to that region. "Free delivery over" in the box above still applies to every region.</p>
+        <p class="msg msg--err" id="regionsErr" role="alert" hidden></p>
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr><th>Region (English)</th><th>Region (Arabic)</th><th>Fee (USD)</th><th>Order</th><th>On</th><th></th></tr></thead>
+            <tbody id="regionRows"></tbody>
+          </table>
+        </div>
+        <div class="settings__foot" style="padding-top:14px">
+          <button class="btn btn--solid" type="button" id="regionsSave">Save regions</button>
+          <button class="btn" type="button" id="regionAdd">Add a region</button>
+          <span class="msg msg--ok" id="regionsOk" hidden style="margin:0">Saved.</span>
+        </div>
+      </div>
+
       <div class="settings" id="mfaBox" style="margin-top:20px">
         <h3>Two-step sign-in</h3>
         <p class="hint" id="mfaStatus" style="margin-bottom:12px">Checking…</p>
@@ -655,7 +674,7 @@
       return ensureMfa().then(function(passed){
         if(!passed) return;
         $('#who').textContent = user.email; show('viewApp');
-        loadProducts().then(loadWaiting); loadOrders(); loadSettings(); refreshMfaStatus(); loadReviews();
+        loadProducts().then(loadWaiting); loadOrders(); loadSettings(); loadRegions(); refreshMfaStatus(); loadReviews();
         clearInterval(timer); timer = setInterval(loadOrders, 60000);
       });
     });
@@ -1109,6 +1128,64 @@
       if(r.error){ err.textContent = 'Could not save: ' + r.error.message; err.hidden = false; return; }
       ok.hidden = false; setTimeout(function(){ ok.hidden = true; }, 2500);
     });
+  });
+
+  /* ---------- Delivery regions ---------- */
+  var regions = [];
+  function regionRow(r){
+    r = r || {};
+    return '<tr data-rid="' + esc(r.id || '') + '">' +
+      '<td><input data-f="name_en" maxlength="80" value="' + esc(r.name_en || '') + '"></td>' +
+      '<td><input class="ar" data-f="name_ar" maxlength="80" value="' + esc(r.name_ar || '') + '"></td>' +
+      '<td><input data-f="fee" type="number" min="0" step="0.01" placeholder="General fee" value="' + (r.fee != null ? esc(r.fee) : '') + '" style="min-width:110px"></td>' +
+      '<td><input data-f="sort_order" type="number" step="1" value="' + esc(r.sort_order != null ? r.sort_order : regions.length + 1) + '" style="min-width:64px"></td>' +
+      '<td><input data-f="is_active" type="checkbox"' + (r.is_active === false ? '' : ' checked') + '></td>' +
+      '<td><button class="btn btn--sm btn--danger" type="button" data-region-del>Delete</button></td></tr>';
+  }
+  function renderRegionRows(){ $('#regionRows').innerHTML = regions.map(regionRow).join(''); }
+  function loadRegions(){
+    return sb.from('delivery_regions').select('*').order('sort_order').order('id').then(function(r){
+      var err = $('#regionsErr');
+      if(r.error){ err.textContent = 'Delivery regions are not available yet. Run phase6-delivery-regions.sql in the Supabase SQL Editor. (' + r.error.message + ')'; err.hidden = false; $('#regionRows').innerHTML = ''; return; }
+      err.hidden = true; regions = r.data || []; renderRegionRows();
+    });
+  }
+  $('#regionAdd').addEventListener('click', function(){
+    $('#regionRows').insertAdjacentHTML('beforeend', regionRow(null));
+    var rows = $('#regionRows').querySelectorAll('tr'); rows[rows.length - 1].querySelector('input').focus();
+  });
+  $('#regionRows').addEventListener('click', function(e){
+    var b = e.target.closest('[data-region-del]'); if(!b) return;
+    var tr = b.closest('tr'), id = tr.getAttribute('data-rid');
+    if(!id){ tr.remove(); return; }
+    if(!confirm('Delete this region? Past orders keep their region.')) return;
+    sb.from('delivery_regions').delete().eq('id', id).then(function(r){
+      if(r.error) alert('Could not delete: ' + r.error.message); else loadRegions();
+    });
+  });
+  $('#regionsSave').addEventListener('click', function(){
+    var err = $('#regionsErr'), ok = $('#regionsOk'), btn = $('#regionsSave');
+    err.hidden = true; ok.hidden = true;
+    var fail = function(m){ err.textContent = m; err.hidden = false; };
+    var upd = [], ins = [], bad = false;
+    $('#regionRows').querySelectorAll('tr').forEach(function(tr){
+      var g = function(f){ return tr.querySelector('[data-f="' + f + '"]'); };
+      var en = g('name_en').value.trim(), ar = g('name_ar').value.trim(), feeRaw = g('fee').value.trim();
+      var fee = feeRaw === '' ? null : parseFloat(feeRaw), so = parseInt(g('sort_order').value, 10) || 0;
+      if(!en || !ar || (fee != null && (isNaN(fee) || fee < 0))){ bad = true; return; }
+      var row = {name_en: en, name_ar: ar, fee: fee, sort_order: so, is_active: g('is_active').checked}, id = tr.getAttribute('data-rid');
+      if(id) upd.push({id: id, row: row}); else ins.push(row);
+    });
+    if(bad){ fail('Each region needs a name in English and Arabic, and a fee of 0 or more (or leave the fee blank).'); return; }
+    btn.disabled = true; btn.textContent = 'Saving…';
+    var jobs = upd.map(function(u){ return sb.from('delivery_regions').update(u.row).eq('id', u.id); });
+    if(ins.length) jobs.push(sb.from('delivery_regions').insert(ins));
+    Promise.all(jobs).then(function(rs){
+      btn.disabled = false; btn.textContent = 'Save regions';
+      var e1 = rs.filter(function(r){ return r.error; })[0];
+      if(e1){ fail('Could not save: ' + e1.error.message); return; }
+      ok.hidden = false; setTimeout(function(){ ok.hidden = true; }, 2500); loadRegions();
+    }).catch(function(){ btn.disabled = false; btn.textContent = 'Save regions'; fail('Could not reach Supabase. Try again.'); });
   });
 
   /* ---------- Discount codes ---------- */

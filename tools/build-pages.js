@@ -219,7 +219,7 @@ PAGES.forEach((page) => {
           '@type': 'HealthAndBeautyBusiness', '@id': abs('/#business'), name: 'AVARA', url: abs('/'),
           logo: abs('/assets/logo.png'), image: abs('/assets/hero-banner.jpg'),
           slogan: 'Inspired by Nature. Perfected by Science.',
-          telephone: '+96176681395', email: 'souna.92@gmail.com',
+          telephone: '+96176681395', email: 'avaracare@zohomail.com',
         },
       ],
     });
