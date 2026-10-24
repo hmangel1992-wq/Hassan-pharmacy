@@ -135,5 +135,11 @@
       "destination": "https://avaracare.online/$1",
       "permanent": true
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/keepalive",
+      "schedule": "0 6 * * *"
+    }
   ]
 }

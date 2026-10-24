@@ -122,5 +122,18 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/((?!api/).*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "avara-nu-beige.vercel.app"
+        }
+      ],
+      "destination": "https://avaracare.online/$1",
+      "permanent": true
+    }
   ]
 }
