@@ -572,7 +572,18 @@
           </div>
         </div>
         <p class="msg msg--err" id="mfaErr" role="alert" hidden></p>
-        <div style="padding-bottom:18px"><button class="btn" id="mfaStart" type="button" hidden>Set up two-step sign-in</button></div>
+        <div style="padding-bottom:18px">
+          <button class="btn" id="mfaStart" type="button" hidden>Set up two-step sign-in</button>
+          <button class="btn btn--danger" id="mfaOff" type="button" hidden>Turn off two-step sign-in</button>
+          <div id="mfaOffRow" hidden style="margin-top:12px">
+            <p class="hint">Type a current 6-digit code from your authenticator app to confirm. After this, only your password protects the account.</p>
+            <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin:10px 0 0">
+              <label class="field" style="margin:0">6-digit code<input id="mfaOffCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code"></label>
+              <button class="btn btn--danger" id="mfaOffConfirm" type="button">Turn off</button>
+              <button class="btn" id="mfaOffCancel" type="button">Cancel</button>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -771,7 +782,7 @@
       var on = (r.data && r.data.totp || []).length > 0;
       st.textContent = on ? 'Two-step sign-in is ON. A code from your authenticator app is asked every time you sign in.'
                           : 'Two-step sign-in is OFF. Turning it on is strongly recommended, because this account can see customer names, phones and addresses.';
-      start.hidden = on; $('#mfaEnroll').hidden = true;
+      start.hidden = on; $('#mfaOff').hidden = !on; $('#mfaOffRow').hidden = true; $('#mfaEnroll').hidden = true;
     }).catch(function(e){
       console.error('MFA status check failed', e);
       st.textContent = 'Could not check two-step sign-in: ' + (e && e.message === 'timeout' ? 'no response from Supabase.' : ((e && e.message) || 'unknown error')) +
@@ -794,6 +805,28 @@
       if(r.error){ mfaMsg('That code did not work. Check the app and try again.', true); return; }
       enrollId = null; mfaMsg('Two-step sign-in is now on.', false); refreshMfaStatus();
     }).catch(function(e){ console.error('MFA verify failed', e); mfaMsg('Could not verify the code: ' + ((e && e.message) || 'unknown error'), true); });
+  });
+  $('#mfaOff').addEventListener('click', function(){
+    mfaMsg(''); $('#mfaOffRow').hidden = false; $('#mfaOffCode').value = ''; $('#mfaOffCode').focus();
+  });
+  $('#mfaOffCancel').addEventListener('click', function(){ $('#mfaOffRow').hidden = true; mfaMsg(''); });
+  $('#mfaOffConfirm').addEventListener('click', function(){
+    var code = $('#mfaOffCode').value.trim(), btn = $('#mfaOffConfirm');
+    if(code.length < 6){ mfaMsg('Enter the 6-digit code from the app.', true); return; }
+    if(!confirm('Turn off two-step sign-in? Your account will be protected by the password only.')) return;
+    btn.disabled = true; mfaMsg('');
+    var done = function(){ btn.disabled = false; };
+    withTimeout(sb.auth.mfa.listFactors(), 10000).then(function(r){
+      var f = r.data && r.data.totp && r.data.totp[0];
+      if(r.error || !f){ mfaMsg('Could not find the two-step setup. Reload the page and try again.', true); return; }
+      return sb.auth.mfa.challengeAndVerify({factorId: f.id, code: code}).then(function(v){
+        if(v.error){ mfaMsg('That code did not work. Check the app and try again.', true); return; }
+        return sb.auth.mfa.unenroll({factorId: f.id}).then(function(u){
+          if(u.error){ mfaMsg('Could not turn it off: ' + (u.error.message || 'unknown error'), true); return; }
+          $('#mfaOffRow').hidden = true; mfaMsg('Two-step sign-in is now off.', false); refreshMfaStatus();
+        });
+      });
+    }).then(done, function(e){ done(); console.error('MFA turn-off failed', e); mfaMsg('Could not turn it off: ' + ((e && e.message === 'timeout') ? 'no response from Supabase.' : ((e && e.message) || 'unknown error')), true); });
   });
   sb.auth.getSession().then(function(r){
     if(r.data && r.data.session) enter(r.data.session.user); else show('viewLogin');

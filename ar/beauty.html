@@ -426,6 +426,8 @@
   .cart-sum__row{ display: flex; justify-content: space-between; font-size: .98rem; color: var(--ink-soft); }
   .cart-sum__row[hidden]{ display: none; }
   .cart-sum__row--disc{ color: var(--teal-deep); font-weight: 500; }
+  .line__bogo{ margin-top: 6px; font-size: .82rem; line-height: 1.35; color: var(--teal-deep); }
+  .line__bogo--hint{ color: var(--ink-soft); }
   .code-box{ display: grid; gap: 6px; margin: 12px 0 4px; }
   .code-box__row{ display: flex; gap: 8px; }
   .code-box input{ flex: 1; min-width: 0; padding: 9px 11px; font: inherit; font-size: .92rem; text-transform: uppercase; color: var(--ink); background: var(--white); border: 1px solid var(--teal); border-radius: 2px; }
@@ -1114,6 +1116,7 @@
       <div class="cart-sum__row"><span data-i18n="subtotal">المجموع</span><span id="cartSub" dir="ltr">$0.00</span></div>
       <div class="cart-sum__row" id="feeRow" hidden=""><span data-i18n="delivery">التوصيل</span><span id="cartFee" dir="ltr"></span></div>
       <div class="cart-sum__row cart-sum__row--disc" id="discRow" hidden=""><span id="discLabel"></span><span id="cartDisc" dir="ltr"></span></div>
+      <div class="cart-sum__row cart-sum__row--disc" id="bogoRow" hidden=""><span data-i18n="bogo_row">منتجات مجانية</span><span id="cartBogo" dir="ltr"></span></div>
       <div class="subtotal"><span data-i18n="total">المجموع الكلي</span><span id="cartTotal" dir="ltr">$0.00</span></div>
     </div>
     <div class="code-box" id="codeBox">
@@ -1257,6 +1260,8 @@ document.addEventListener('DOMContentLoaded', function(){
       rv_title:'What customers say', rv_one:'1 review', rv_many:'{n} reviews', rv_stars:'{n} out of 5 stars',
       rv_note:'Reviews come from customers whose order was delivered, and are published after we approve them.', rv_cta:'Bought from us? Leave a review',
       show_more:'Show more', show_less:'Show less',
+      promo_bogo:'Buy {n}, get 1 free', promo_add_offer:'Add offer to cart', bogo_row:'Free items',
+      bogo_free:'{n} free', bogo_more:'Add {n} more to get 1 free',
       pay_label:'Payment', pay_cod:'Cash on delivery', pay_whish:'Whish',
       pay_hint_cod:'Pay in cash when your order arrives.',
       pay_hint_whish:'We will send you the Whish payment details when we confirm your order.',
@@ -1353,6 +1358,8 @@ document.addEventListener('DOMContentLoaded', function(){
       rv_title:'آراء العملاء', rv_one:'تقييم واحد', rv_many:'{n} تقييمات', rv_stars:'{n} من 5 نجوم',
       rv_note:'التقييمات من عملاء تم تسليم طلباتهم، وتُنشر بعد موافقتنا عليها.', rv_cta:'اشتريت منا؟ اترك تقييمك',
       show_more:'عرض المزيد', show_less:'عرض أقل',
+      promo_bogo:'اشترِ {n} واحصل على واحد مجاناً', promo_add_offer:'أضف العرض إلى السلة', bogo_row:'منتجات مجانية',
+      bogo_free:'{n} مجاناً', bogo_more:'أضف {n} للحصول على واحد مجاناً',
       pay_label:'طريقة الدفع', pay_cod:'الدفع عند الاستلام', pay_whish:'ويش (Whish)',
       pay_hint_cod:'تدفع نقداً عند وصول طلبك.',
       pay_hint_whish:'سنرسل لك تفاصيل الدفع عبر ويش عند تأكيد طلبك.',
@@ -1696,8 +1703,8 @@ document.addEventListener('DOMContentLoaded', function(){
   function loadPromos(){
     if(!sb) return Promise.resolve();
     return sb.from('promotions').select('*').eq('is_active', true).order('sort_order', {ascending:true}).order('created_at', {ascending:true})
-      .then(function(res){ PROMOS = res.error ? [] : (res.data || []); renderPromos(); })
-      .catch(function(){ PROMOS = []; renderPromos(); });
+      .then(function(res){ PROMOS = res.error ? [] : (res.data || []); renderPromos(); renderCart(); })
+      .catch(function(){ PROMOS = []; renderPromos(); renderCart(); });
   }
   function promoSlides(){
     return PROMOS.map(function(pr){
@@ -1725,19 +1732,19 @@ document.addEventListener('DOMContentLoaded', function(){
       var pr = sl.pr, items = sl.items, multi = items.length > 1;
       var title = (lang === 'ar' ? (pr.title_ar || pr.title_en) : (pr.title_en || pr.title_ar)) || (multi ? t('promo_bundle') : name(items[0]));
       var text = lang === 'ar' ? (pr.text_ar || pr.text_en) : (pr.text_en || pr.text_ar);
-      var now = 0, was = 0;
-      items.forEach(function(p){ now += effPrice(p); was += p.price; });
+      var bogo = pr.kind === 'bogo', buy = Math.max(1, Number(pr.buy_qty) || 1), now = 0, was = 0;
+      items.forEach(function(p){ if(bogo){ now += effPrice(p) * buy; was += effPrice(p) * (buy + 1); } else { now += effPrice(p); was += p.price; } });
       var imgs = items.slice(0, 4).map(function(p){ return '<span class="promo__img">' + media(p) + '</span>'; }).join('');
       return '<div class="promo__slide' + (i === promoIdx ? ' is-active' : '') + '" role="group" aria-roledescription="slide" aria-label="' + (i + 1) + ' / ' + slides.length + '">' +
         '<div class="promo__imgs">' + imgs + '</div>' +
-        '<div><span class="promo__tag">' + (multi ? t('promo_bundle') + ' · ' + t('promo_total').replace('{n}', items.length) : t('promo_offer')) + '</span>' +
+        '<div><span class="promo__tag">' + (bogo ? t('promo_bogo').replace('{n}', buy) : multi ? t('promo_bundle') + ' · ' + t('promo_total').replace('{n}', items.length) : t('promo_offer')) + '</span>' +
           '<h2 class="promo__title">' + (multi ? esc(title) : '<button type="button" data-open="' + esc(items[0].id) + '">' + esc(title) + '</button>') + '</h2>' +
           (text ? '<p class="promo__text">' + esc(text) + '</p>' : '') +
           (pr.code ? '<p class="promo__note">' + esc(t('promo_code_note').replace('{code}', pr.code)) + '</p>' : '') + '</div>' +
         '<div class="promo__buy"><span class="promo__price" dir="ltr">' + (was > now + 0.004 ? '<del>' + money(was) + '</del>' : '') + money(now) + '</span>' +
           '<div class="promo__btns">' +
             (multi ? '' : '<button class="btn btn--line" type="button" data-open="' + esc(items[0].id) + '">' + t('promo_view') + '</button>') +
-            '<button class="btn btn--solid" type="button" data-promo-add="' + i + '">' + (multi ? t('promo_add_all') : t('add')) + '</button></div></div>' +
+            '<button class="btn btn--solid" type="button" data-promo-add="' + i + '">' + (bogo ? t('promo_add_offer') : multi ? t('promo_add_all') : t('add')) + '</button></div></div>' +
       '</div>';
     }).join('') + '</div>' + (many ? '<div class="promo__ctrl">' +
       '<button class="promo__arrow" type="button" data-promo-step="-1" aria-label="' + esc(t('promo_prev')) + '">' + ARROW_L + '</button>' +
@@ -1763,8 +1770,10 @@ document.addEventListener('DOMContentLoaded', function(){
   function addPromo(i){
     var sl = promoSlides()[i]; if(!sl) return;
     var added = 0;
+    var k = sl.pr.kind === 'bogo' ? Math.max(1, Number(sl.pr.buy_qty) || 1) + 1 : 1;   // a buy-and-get-free offer adds N + 1 units
     sl.items.forEach(function(p){
-      if((cart[p.id] || 0) + 1 <= avail(p)){ cart[p.id] = (cart[p.id] || 0) + 1; added++; }
+      var n = Math.min(k, avail(p) - (cart[p.id] || 0));
+      if(n > 0){ cart[p.id] = (cart[p.id] || 0) + n; added++; }
     });
     if(!added){ toast(t('stock_max').replace('{n}', 0)); return; }
     lastOrder = null; saveCart(); renderCart();
@@ -1841,6 +1850,34 @@ document.addEventListener('DOMContentLoaded', function(){
   // saved cart holds an id that no longer exists) byId[id] is undefined, which used
   // to throw and stop the whole page from loading products.
   function cartIds(){ return Object.keys(cart).filter(function(id){ return byId[id]; }); }
+
+  /* ---------- Buy N, get 1 free (promotions of type "bogo"; the server applies the same rule when the order is placed) ---------- */
+  // For each product in a live buy-and-get-free promotion, every (N + 1) units include 1 free unit.
+  // A product in several offers gets the best one (smallest N), once.
+  function bogoFor(ids){
+    var best = {};
+    PROMOS.forEach(function(pr){
+      if(pr.kind !== 'bogo') return;
+      var b = Math.max(1, Number(pr.buy_qty) || 1);
+      (pr.product_ids || []).forEach(function(id){ id = String(id); if(!(id in best) || b < best[id]) best[id] = b; });
+    });
+    var total = 0, free = {};
+    ids.forEach(function(id){
+      if(!(id in best) || !byId[id]) return;
+      var n = Math.floor(cart[id] / (best[id] + 1));
+      if(n > 0){ free[id] = n; total += n * effPrice(byId[id]); }
+    });
+    return {total: total, free: free, best: best};
+  }
+  function bogoNote(id){
+    var bg = bogoFor(cartIds()), h = '';
+    if(bg.free[id]) h += '<div class="line__bogo">' + esc(t('bogo_free').replace('{n}', bg.free[id])) + '</div>';
+    if(id in bg.best){
+      var per = bg.best[id] + 1, rest = cart[id] % per;
+      if(rest !== 0) h += '<div class="line__bogo line__bogo--hint">' + esc(t('bogo_more').replace('{n}', per - rest)) + '</div>';
+    }
+    return h;
+  }
   function cartTotals(){
     var n = 0, sum = 0;
     cartIds().forEach(function(id){ n += cart[id]; sum += cart[id] * effPrice(byId[id]); });
@@ -1871,7 +1908,7 @@ document.addEventListener('DOMContentLoaded', function(){
       var p = byId[id];
       return '<div class="line">' +
         '<div class="line__img">' + media(p) + '</div>' +
-        '<div><div class="line__name">' + esc(name(p)) + '</div><div class="line__price' + (p.salePrice != null ? ' line__price--sale' : '') + '" dir="ltr">' + (p.salePrice != null ? '<span class="line__price-was">' + money(p.price) + '</span>' + money(p.salePrice) : money(p.price)) + '</div>' +
+        '<div><div class="line__name">' + esc(name(p)) + '</div>' + bogoNote(id) + '<div class="line__price' + (p.salePrice != null ? ' line__price--sale' : '') + '" dir="ltr">' + (p.salePrice != null ? '<span class="line__price-was">' + money(p.price) + '</span>' + money(p.salePrice) : money(p.price)) + '</div>' +
           '<div class="qty"><button type="button" data-qty="' + esc(id) + ':-1" aria-label="' + t('dec') + '">−</button><span>' + cart[id] + '</span><button type="button" data-qty="' + esc(id) + ':1" aria-label="' + t('inc') + '">+</button></div></div>' +
         '<div><div class="line__total" dir="ltr">' + money(effPrice(p) * cart[id]) + '</div><button class="line__rm" type="button" data-rm="' + esc(id) + '">' + t('remove') + '</button></div>' +
       '</div>';
@@ -1888,7 +1925,9 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     $('#discRow').hidden = !(appliedCode && disc > 0);
     if(appliedCode && disc > 0){ $('#discLabel').textContent = t('disc_word') + ' (' + appliedCode.code + ')'; $('#cartDisc').textContent = '−' + money(disc); }
-    $('#cartTotal').textContent = money(tot.sum - disc + fee);
+    var bogo = Math.min(bogoFor(ids).total, Math.max(tot.sum - disc, 0));
+    $('#bogoRow').hidden = !(bogo > 0); if(bogo > 0) $('#cartBogo').textContent = '−' + money(bogo);
+    $('#cartTotal').textContent = money(tot.sum - disc - bogo + fee);
     var notes = [];
     if(minO > 0 && tot.sum < minO) notes.push(t('min_order_note').replace('{amt}', money(minO)));
     if(baseFee > 0 && th > 0) notes.push(tot.sum < th ? t('add_for_free').replace('{amt}', money(th - tot.sum)) : t('free_over').replace('{amt}', money(th)));
@@ -1993,7 +2032,7 @@ document.addEventListener('DOMContentLoaded', function(){
     var items = Object.keys(cart).map(function(id){ return {id:id, qty:cart[id]}; });
     btn.disabled = true; btn.textContent = t('placing');
     var codeUsed = appliedCode ? appliedCode.code : '';
-    var sumNow = cartTotals().sum - (appliedCode ? Math.min(appliedCode.discount || 0, cartTotals().sum) : 0), countNow = items.length;
+    var sumNow = Math.max(cartTotals().sum - (appliedCode ? Math.min(appliedCode.discount || 0, cartTotals().sum) : 0) - bogoFor(cartIds()).total, 0), countNow = items.length;
     var optin = !!f.wa_optin.checked;
     var args = {p_name:nm, p_phone:ph, p_address:f.address.value.trim(), p_notes:payNote(f), p_items:items};
     if(REGIONS.length && regionById(regionId)){ args.p_code = codeUsed || null; args.p_region = Number(regionId); }
