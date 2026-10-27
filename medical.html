@@ -726,6 +726,51 @@
   #featured .grid{ margin-top: 36px; }
   #grid-featured .card__foot{ margin-top: auto; }
   #featured[hidden]{ display: none; }
+  /* ===== AVARA home hero style (start) ===== */
+  .hero--home .home-hero__copy, .hero--home .home-hero__doctor{ position: relative; z-index: 1; }
+  .home-hero__copy > *{ animation: avHeroRise .8s cubic-bezier(.2,.7,.2,1) both; }
+  .home-hero__copy > :nth-child(2){ animation-delay: .08s; }
+  .home-hero__copy > :nth-child(3){ animation-delay: .16s; }
+  .home-hero__copy > :nth-child(4){ animation-delay: .26s; }
+  .home-hero__doctor img{ animation: avHeroRise 1s cubic-bezier(.2,.7,.2,1) .12s both; }
+  .home-hero__cta{ gap: 14px; }
+  .home-hero__cta .btn{
+    gap: .7em; padding: .95em 2.1em; border-radius: 999px; font-weight: 600; letter-spacing: .03em; font-size: 1rem;
+    transition: transform .25s ease, background .25s ease, color .25s ease, border-color .25s ease, box-shadow .25s ease;
+  }
+  .home-hero__cta .btn svg{ width: 1.2em; height: 1.2em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .home-hero__cta .btn:hover{ transform: translateY(-3px); }
+  .home-hero__cta .btn:active{ transform: translateY(0) scale(.98); }
+  .home-hero__cta .btn--solid{ box-shadow: 0 8px 22px rgba(31,95,107,.35); animation: avHeroPulse 2.4s ease-out infinite; }
+  .home-hero__cta .btn--solid:hover{ animation-play-state: paused; box-shadow: 0 12px 28px rgba(31,95,107,.42); }
+  .home-hero__cta .btn--solid::after{
+    content: ""; width: .5em; height: .5em; flex: none;
+    border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+    transform: rotate(45deg) translate(-2px, -2px); animation: avHeroBob 1.6s ease-in-out infinite;
+  }
+  .home-hero__cta .btn--line{ background: rgba(255,255,255,.72); border-color: var(--teal-deep); color: var(--teal-deep); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .home-hero__cta .btn--line:hover{ background: var(--teal-deep); color: var(--white); box-shadow: 0 10px 24px rgba(31,95,107,.28); }
+  .home-hero__cta .btn--line:hover svg{ animation: avHeroWiggle .6s ease; }
+  @keyframes avHeroRise{ from{ opacity: 0; transform: translateY(18px); } to{ opacity: 1; transform: none; } }
+  @keyframes avHeroPulse{
+    0%   { box-shadow: 0 8px 22px rgba(31,95,107,.35), 0 0 0 0 rgba(47,143,157,.55); }
+    70%  { box-shadow: 0 8px 22px rgba(31,95,107,.35), 0 0 0 18px rgba(47,143,157,0); }
+    100% { box-shadow: 0 8px 22px rgba(31,95,107,.35), 0 0 0 0 rgba(47,143,157,0); }
+  }
+  @keyframes avHeroBob{ 0%, 100%{ transform: rotate(45deg) translate(-2px, -2px); } 50%{ transform: rotate(45deg) translate(2px, 2px); } }
+  @keyframes avHeroWiggle{ 0%, 100%{ transform: rotate(0); } 30%{ transform: rotate(-14deg); } 65%{ transform: rotate(10deg); } }
+  /* style: dissolve */
+  /* style A: dissolve */
+  .hero.hero--home{
+    background:
+      radial-gradient(50% 78% at 76% 58%, rgba(47,143,157,.22) 0%, rgba(47,143,157,0) 70%),
+      radial-gradient(42% 52% at 10% 0%, rgba(255,255,255,.75) 0%, rgba(255,255,255,0) 70%),
+      linear-gradient(135deg, var(--mint) 0%, #F3FBF9 58%, var(--ivory) 100%);
+  }
+  .home-hero__art::before{ inset: 0 -12% 6% -12%; background: radial-gradient(closest-side, rgba(255,255,255,.95) 0%, rgba(255,255,255,.55) 55%, rgba(255,255,255,0) 100%); }
+  .home-hero__doctor img{ filter: none; -webkit-mask-image: linear-gradient(to top, transparent 0, #000 28%); mask-image: linear-gradient(to top, transparent 0, #000 28%); }
+  .hero.hero--home::after{ content: ""; position: absolute; inset: auto 0 0; height: 96px; background: linear-gradient(to top, var(--ivory), rgba(250,249,246,0)); pointer-events: none; z-index: 2; }
+  /* ===== AVARA home hero style (end) ===== */
 </style>
 <title>Medical care | AVARA: medical advice, vitamins and everyday essentials</title><meta name="description" content="Medical advice, vitamins, first aid and health devices from AVARA. Straight answers on symptoms and medication questions. Prescription-only medicines are not sold online."><link rel="canonical" href="https://avaracare.online/medical"><link rel="alternate" hreflang="en" href="https://avaracare.online/medical"><link rel="alternate" hreflang="ar" href="https://avaracare.online/ar/medical"><link rel="alternate" hreflang="x-default" href="https://avaracare.online/medical"><meta property="og:site_name" content="AVARA"><meta property="og:type" content="website"><meta property="og:title" content="Medical care | AVARA: medical advice, vitamins and everyday essentials"><meta property="og:description" content="Medical advice, vitamins, first aid and health devices from AVARA. Straight answers on symptoms and medication questions. Prescription-only medicines are not sold online."><meta property="og:url" content="https://avaracare.online/medical"><meta property="og:image" content="https://avaracare.online/assets/hero-banner.jpg"><meta property="og:locale" content="en_US"><meta property="og:locale:alternate" content="ar_AR"><meta name="twitter:card" content="summary_large_image"><link rel="preload" as="image" href="/assets/hero-medical-1536.webp" imagesrcset="/assets/hero-medical-800.webp 800w, /assets/hero-medical-1536.webp 1536w" imagesizes="100vw" fetchpriority="high"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AVARA","item":"https://avaracare.online/"},{"@type":"ListItem","position":2,"name":"Medical care","item":"https://avaracare.online/medical"}]}</script></head>
 <body id="top">
@@ -859,8 +904,8 @@
       <p class="home-hero__h" data-i18n="hero_h_home">Your Health Matters</p>
       <p class="home-hero__s" data-i18n="hero_s_home">Medical advice, athlete care and beauty, in one trusted place.</p>
       <div class="home-hero__cta">
-        <a class="btn btn--solid" href="/#departments" data-i18n="cta_depts">Shop by department</a>
-        <a class="btn btn--line" href="/#chat" data-i18n="chat_cta">Chat with us</a>
+        <a class="btn btn--solid" href="/#departments"><span data-i18n="cta_depts">Shop by department</span></a>
+        <a class="btn btn--line" href="/#chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"></path></svg><span data-i18n="chat_cta">Chat with us</span></a>
       </div>
     </div>
     <div class="home-hero__art home-hero__doctor">
