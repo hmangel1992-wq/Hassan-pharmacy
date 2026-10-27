@@ -135,6 +135,34 @@ Recommending products:
 - If nothing in the catalogue fits, say so honestly and suggest checking the store or asking on WhatsApp. Never recommend an item that is not in the catalogue.
 - To show products, put exactly one extra line at the very end of your reply, in this form: PRODUCTS: 4, 17 (the catalogue numbers, separated by commas). Leave that line out when you are not recommending anything. Never write catalogue numbers anywhere else in the reply.`;
 
+const llm = require('./_llm');
+
+// When every AI model is busy, the customer still gets a useful answer: matching in-stock products from the live
+// catalogue (with the usual Add buttons) and your WhatsApp number, instead of an error.
+const SKIP_WORDS = new Set(['the', 'and', 'for', 'with', 'you', 'your', 'have', 'has', 'what', 'which', 'that', 'this', 'can', 'are', 'how', 'any', 'some', 'need', 'want', 'best', 'good', 'please', 'hello', 'thanks', 'about', 'from', 'get', 'buy', 'does', 'not', 'but', 'care', 'avara', 'health', 'store', 'product', 'products', 'item', 'items']);
+function offlineReply(lang, text, items) {
+  const ar = /[؀-ۿ]/.test(text) || (lang === 'Arabic' && !/[a-z]/i.test(text));
+  const words = String(text).toLowerCase().split(/[^\p{L}\p{N}]+/u).filter((w) => w.length >= 3 && !SKIP_WORDS.has(w));
+  const scored = [];
+  if (words.length) {
+    items.forEach((p) => {
+      const hay = [p.name_en, p.name_ar, p.brand, p.dept, p.collection, p.cat].filter(Boolean).join(' ').toLowerCase();
+      const s = words.reduce((n, w) => n + (hay.includes(w) ? 1 : 0), 0);
+      if (s > 0) scored.push({ id: p.id, s: s });
+    });
+  }
+  scored.sort((a, b) => b.s - a.s);
+  const ids = scored.slice(0, MAX_RECOMMEND).map((x) => x.id);
+  const msg = ar
+    ? (ids.length
+        ? 'المساعد مشغول جداً لحظة، وإليك منتجات من متجرنا قد تناسب ما تبحث عنه. للحصول على نصيحة شخصية، حاول مجدداً بعد قليل أو راسلنا عبر واتساب على 76 681 395.'
+        : 'المساعد مشغول جداً لحظة. يرجى المحاولة بعد قليل، أو مراسلتنا عبر واتساب على 76 681 395 وسنساعدك.')
+    : (ids.length
+        ? 'Our assistant is very busy for a moment. Here are items from our store that may match what you are looking for. For personal advice, please try again shortly or message us on WhatsApp on 76 681 395.'
+        : 'Our assistant is very busy for a moment. Please try again shortly, or message us on WhatsApp on 76 681 395 and we will help you.');
+  return { text: msg, ids: ids };
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -185,27 +213,19 @@ module.exports = async function handler(req, res) {
     if (/^gemini-2\.5-flash/.test(MODEL)) generationConfig.thinkingConfig = { thinkingBudget: 0 };
     else if (/^gemini-3/.test(MODEL)) generationConfig.thinkingConfig = { thinkingLevel: 'low' };
 
-    const r = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemText }] },
-          contents,
-          generationConfig,
-        }),
-      }
-    );
-
-    if (!r.ok) {
-      console.error('Gemini error', r.status, await r.text());
-      return res.status(502).json({ error: 'Upstream error' });
+    const out = await llm.generate({
+      system: systemText,
+      contents: contents,
+      model: MODEL,
+      fallbackModel: process.env.GEMINI_FALLBACK_MODEL || '',
+      geminiKey: key,
+    });
+    if (!out.reply) {
+      // Every model is busy: no error for the customer, a short helpful answer from the catalogue instead.
+      const d = offlineReply(lang, lastText, items);
+      return res.status(200).json({ reply: d.text, products: d.ids, degraded: true });
     }
-
-    const data = await r.json();
-    const reply = (data.candidates?.[0]?.content?.parts || []).map((p) => p.text || '').join('').trim();
-    if (!reply) return res.status(502).json({ error: 'Empty reply' });
+    const reply = out.reply;
 
     const { text, ids } = extractProducts(reply, items);
     // If the model only sent the PRODUCTS line, give the cards a short lead-in instead of failing.
