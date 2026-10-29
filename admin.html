@@ -205,6 +205,7 @@
       <div class="tabs" role="tablist">
         <button class="tab" role="tab" id="tabProducts" aria-selected="true">Products</button>
         <button class="tab" role="tab" id="tabPromos" aria-selected="false">Promotions</button>
+        <button class="tab" role="tab" id="tabAnnouncements" aria-selected="false">Announcements</button>
         <button class="tab" role="tab" id="tabOrders" aria-selected="false">Orders <span class="pill" id="newPill" hidden>0</span></button>
         <button class="tab" role="tab" id="tabDiscounts" aria-selected="false">Discounts</button>
         <button class="tab" role="tab" id="tabWaiting" aria-selected="false">Waiting list <span class="pill" id="waitPill" hidden>0</span></button>
@@ -322,6 +323,46 @@
         </table>
       </div>
       <p class="empty" id="promoEmpty" hidden>No promotions yet. Tap New promotion and pick products from your list.</p>
+    </section>
+
+    <!-- Announcements (ticker in the top bar) -->
+    <section id="panelAnnouncements" hidden>
+      <div class="bar">
+        <h2>Announcements</h2>
+        <button class="btn btn--solid" id="newAnn" type="button">New announcement</button>
+      </div>
+      <p class="hint" style="margin:0 0 12px">Short messages that scroll across the very top of the website, like a news ticker: offers, new arrivals, holiday opening hours. Write each one in English and Arabic (keep it short, up to 200 characters). Several messages scroll one after another. When none is switched on, the bar shows your tagline.</p>
+      <p class="msg msg--err" id="annListErr" role="alert" hidden></p>
+      <form class="settings" id="annForm" novalidate hidden>
+        <h3 id="annFormTitle">New announcement</h3>
+        <label class="field">Message (English)<input name="text_en" maxlength="200" placeholder="Free delivery this weekend on orders over $40"></label>
+        <label class="field">الرسالة (العربية)<input class="ar" name="text_ar" maxlength="200" dir="rtl"></label>
+        <div class="row3">
+          <label class="field">Link when tapped (optional)<input name="link_url" maxlength="500" placeholder="/beauty  or  https://…" autocomplete="off"></label>
+          <label class="field">Order (1 = first)<input name="sort_order" type="number" step="1" value="1"></label>
+          <span></span>
+        </div>
+        <div class="row3">
+          <label class="field">Starts on (optional)<input name="starts" type="date"></label>
+          <label class="field">Ends on (optional)<input name="ends" type="date"></label>
+          <span></span>
+        </div>
+        <label class="check"><input type="checkbox" name="is_active" checked> Turned on</label>
+        <p class="hint" style="margin:-4px 0 12px">A link can be a page of your site (for example /beauty, /athlete, /articles or #chat) or a full address starting with https://. Leave it blank for a plain message.</p>
+        <p class="msg msg--err" id="annErr" role="alert" hidden></p>
+        <div class="settings__foot">
+          <button class="btn btn--solid" type="submit" id="annSave">Save announcement</button>
+          <button class="btn" type="button" id="annCancel">Cancel</button>
+          <span class="msg msg--ok" id="annOk" hidden style="margin:0">Saved.</span>
+        </div>
+      </form>
+      <div class="table-wrap" style="margin-top:20px">
+        <table class="tbl">
+          <thead><tr><th>Message</th><th>Link</th><th>Dates</th><th>Status</th><th></th></tr></thead>
+          <tbody id="annRows"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="annEmpty" hidden>No announcements yet. Tap New announcement to add your first one.</p>
     </section>
 
     <!-- WhatsApp opt-in list -->
@@ -876,6 +917,8 @@
     $('#panelWaList').hidden = name !== 'walist';
     $('#tabPromos').setAttribute('aria-selected', name === 'promos');
     $('#panelPromos').hidden = name !== 'promos';
+    $('#tabAnnouncements').setAttribute('aria-selected', name === 'announcements');
+    $('#panelAnnouncements').hidden = name !== 'announcements';
     $('#panelDiscounts').hidden = name !== 'discounts';
     $('#panelProducts').hidden = name !== 'products';
     $('#panelOrders').hidden = name !== 'orders';
@@ -892,6 +935,7 @@
   $('#tabArticles').addEventListener('click', function(){ tab('articles'); loadArticles(); });
   $('#tabWaList').addEventListener('click', function(){ tab('walist'); loadWaList(); });
   $('#tabPromos').addEventListener('click', function(){ tab('promos'); loadPromos(); });
+  $('#tabAnnouncements').addEventListener('click', function(){ tab('announcements'); loadAnns(); });
   $('#tabOrders').addEventListener('click', function(){ tab('orders'); loadOrders(); });
   $('#tabSales').addEventListener('click', function(){ tab('sales'); loadSales(); });
   $('#tabReviews').addEventListener('click', function(){ tab('reviews'); loadReviews(); });
@@ -1524,6 +1568,79 @@
     } else if((b = e.target.closest('[data-promo-del]'))){
       if(!confirm('Delete this promotion? The products are not affected.')) return;
       sb.from('promotions').delete().eq('id', b.getAttribute('data-promo-del')).then(function(r){ if(r.error) alert('Could not delete: ' + r.error.message); else loadPromos(); });
+    }
+  });
+
+  /* ---------- Announcements (ticker in the top bar) ---------- */
+  var anns = [], editingAnn = null;
+  function annShortDate(v){ return new Date(v).toLocaleDateString('en', {dateStyle:'medium'}); }
+  function annStatus(a){
+    var now = Date.now();
+    if(!a.is_active) return 'Off';
+    if(a.starts_at && new Date(a.starts_at) > now) return 'Scheduled';
+    if(a.ends_at && new Date(a.ends_at) <= now) return 'Ended';
+    return '<strong style="color:#1F5F6B">Showing</strong>';
+  }
+  function renderAnns(){
+    $('#annEmpty').hidden = anns.length > 0;
+    $('#annRows').innerHTML = anns.map(function(a){
+      var dates = (a.starts_at ? annShortDate(a.starts_at) : 'now') + ' to ' + (a.ends_at ? annShortDate(a.ends_at) : 'no end');
+      return '<tr><td><strong>' + esc(a.text_en || '') + '</strong>' + (a.text_ar ? '<small dir="rtl">' + esc(a.text_ar) + '</small>' : '') + '<small>Order ' + esc(a.sort_order) + '</small></td>' +
+        '<td dir="ltr">' + esc(a.link_url || '-') + '</td><td>' + esc(dates) + '</td><td>' + annStatus(a) + '</td>' +
+        '<td><div class="actions"><button class="btn btn--sm" data-ann-edit="' + esc(a.id) + '">Edit</button>' +
+        '<button class="btn btn--sm" data-ann-toggle="' + esc(a.id) + '">' + (a.is_active ? 'Turn off' : 'Turn on') + '</button>' +
+        '<button class="btn btn--sm btn--danger" data-ann-del="' + esc(a.id) + '">Delete</button></div></td></tr>';
+    }).join('');
+  }
+  function loadAnns(){
+    return sb.from('announcements').select('*').order('sort_order').order('created_at').then(function(r){
+      var err = $('#annListErr');
+      if(r.error){ err.textContent = 'Announcements are not available yet. Run phase8-announcements.sql in the Supabase SQL Editor. (' + r.error.message + ')'; err.hidden = false; return; }
+      err.hidden = true; anns = r.data || []; renderAnns();
+    });
+  }
+  function openAnnForm(a){
+    var el = $('#annForm').elements; editingAnn = a || null;
+    $('#annFormTitle').textContent = a ? 'Edit announcement' : 'New announcement';
+    ['text_en','text_ar','link_url'].forEach(function(k){ el[k].value = a && a[k] ? a[k] : ''; });
+    el.sort_order.value = a ? a.sort_order : (anns.length + 1);
+    el.starts.value = a && a.starts_at ? a.starts_at.slice(0, 10) : ''; el.ends.value = a && a.ends_at ? a.ends_at.slice(0, 10) : '';
+    el.is_active.checked = a ? !!a.is_active : true;
+    $('#annErr').hidden = true; $('#annForm').hidden = false; $('#annForm').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  $('#newAnn').addEventListener('click', function(){ openAnnForm(null); });
+  $('#annCancel').addEventListener('click', function(){ $('#annForm').hidden = true; editingAnn = null; });
+  $('#annForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var el = e.target.elements, err = $('#annErr'), btn = $('#annSave');
+    var fail = function(m){ err.textContent = m; err.hidden = false; };
+    err.hidden = true;
+    var en = el.text_en.value.trim(), ar = el.text_ar.value.trim(), link = el.link_url.value.trim();
+    if(!en && !ar){ fail('Write the message in English or Arabic (ideally both).'); return; }
+    if(link && !/^(https?:\/\/|\/|#)/i.test(link)){ fail('The link must start with https://, http://, / (a page of your site) or # (a section).'); return; }
+    var starts = el.starts.value ? new Date(el.starts.value + 'T00:00:00') : null, ends = el.ends.value ? new Date(el.ends.value + 'T23:59:59') : null;
+    if(starts && ends && ends < starts){ fail('The end date is before the start date.'); return; }
+    var row = {text_en: en || null, text_ar: ar || null, link_url: link || null, sort_order: parseInt(el.sort_order.value, 10) || 0,
+      is_active: el.is_active.checked, starts_at: starts ? starts.toISOString() : null, ends_at: ends ? ends.toISOString() : null};
+    btn.disabled = true; btn.textContent = 'Saving…';
+    var q = editingAnn ? sb.from('announcements').update(row).eq('id', editingAnn.id) : sb.from('announcements').insert(row);
+    q.then(function(r){
+      btn.disabled = false; btn.textContent = 'Save announcement';
+      if(r.error){ fail('Could not save: ' + r.error.message); return; }
+      $('#annForm').hidden = true; editingAnn = null;
+      var ok = $('#annOk'); ok.hidden = false; setTimeout(function(){ ok.hidden = true; }, 2500); loadAnns();
+    });
+  });
+  $('#annRows').addEventListener('click', function(e){
+    var b, a;
+    function byId(id){ return anns.filter(function(x){ return String(x.id) === String(id); })[0]; }
+    if((b = e.target.closest('[data-ann-edit]'))){ openAnnForm(byId(b.getAttribute('data-ann-edit'))); }
+    else if((b = e.target.closest('[data-ann-toggle]'))){
+      a = byId(b.getAttribute('data-ann-toggle'));
+      sb.from('announcements').update({is_active: !a.is_active}).eq('id', a.id).then(function(r){ if(r.error) alert('Could not update: ' + r.error.message); else loadAnns(); });
+    } else if((b = e.target.closest('[data-ann-del]'))){
+      if(!confirm('Delete this announcement?')) return;
+      sb.from('announcements').delete().eq('id', b.getAttribute('data-ann-del')).then(function(r){ if(r.error) alert('Could not delete: ' + r.error.message); else loadAnns(); });
     }
   });
 

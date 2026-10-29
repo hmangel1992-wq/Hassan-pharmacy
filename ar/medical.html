@@ -812,6 +812,32 @@
     .nav li:last-child a{ border-bottom: 0; }
   }
   /* ===== AVARA header style (end) ===== */
+  /* ===== AVARA announcement ticker (start) ===== */
+  .announce{ display: flex; align-items: stretch; height: 38px; padding: 0; overflow: hidden; text-align: start; text-transform: none; letter-spacing: .03em; font-size: .84rem; font-weight: 500; }
+  .announce__tag{ display: none; align-items: center; gap: 9px; flex: none; padding: 0 18px; background: var(--white); color: var(--teal-deep); font-size: .68rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; }
+  .announce.is-live .announce__tag{ display: inline-flex; }
+  .announce__dot{ width: 8px; height: 8px; border-radius: 50%; background: var(--teal); animation: annPulse 1.8s ease-out infinite; }
+  @keyframes annPulse{ 0%{ box-shadow: 0 0 0 0 rgba(47,143,157,.55); } 70%{ box-shadow: 0 0 0 8px rgba(47,143,157,0); } 100%{ box-shadow: 0 0 0 0 rgba(47,143,157,0); } }
+  .announce__view{ flex: 1; min-width: 0; overflow: hidden; display: flex; align-items: center; }
+  .announce:not(.is-live) .announce__view{ justify-content: center; }
+  .announce__static{ padding: 0 16px; font-size: .76rem; letter-spacing: .2em; text-transform: uppercase; font-weight: 400; }
+  .announce.is-live .announce__view{ -webkit-mask-image: linear-gradient(90deg, transparent, #000 26px, #000 calc(100% - 26px), transparent); mask-image: linear-gradient(90deg, transparent, #000 26px, #000 calc(100% - 26px), transparent); }
+  .announce__track{ display: flex; flex: none; width: max-content; will-change: transform; animation: annLtr var(--ann-dur, 30s) linear infinite; }
+  [dir="rtl"] .announce__track{ animation-name: annRtl; }
+  .announce:hover .announce__track, .announce:focus-within .announce__track{ animation-play-state: paused; }
+  @keyframes annLtr{ from{ transform: translateX(0); } to{ transform: translateX(-50%); } }
+  @keyframes annRtl{ from{ transform: translateX(0); } to{ transform: translateX(50%); } }
+  .announce__seq{ display: flex; flex: none; align-items: center; }
+  .announce__item{ flex: none; white-space: nowrap; line-height: 38px; color: inherit; text-decoration: none; }
+  a.announce__item:hover{ text-decoration: underline; text-underline-offset: 4px; }
+  .announce__sep{ flex: none; width: 34px; text-align: center; font-size: .55rem; opacity: .7; }
+  .announce__track.is-still{ animation: none; margin-inline: auto; }
+  @media (max-width: 640px){
+    .announce{ height: 36px; font-size: .8rem; }
+    .announce__tag{ padding: 0 12px; gap: 7px; font-size: .62rem; letter-spacing: .12em; }
+    .announce__item{ line-height: 36px; }
+  }
+  /* ===== AVARA announcement ticker (end) ===== */
 </style>
 <title>الرعاية الطبية | AVARA: نصائح طبية وفيتامينات وأساسيات يومية</title><meta name="description" content="نصائح طبية وفيتامينات وإسعافات أولية وأجهزة صحية من AVARA. إجابات واضحة عن الأعراض وأسئلة الأدوية. لا تُباع الأدوية التي تُصرف بوصفة طبية عبر الإنترنت."><link rel="canonical" href="https://avaracare.online/ar/medical"><link rel="alternate" hreflang="en" href="https://avaracare.online/medical"><link rel="alternate" hreflang="ar" href="https://avaracare.online/ar/medical"><link rel="alternate" hreflang="x-default" href="https://avaracare.online/medical"><meta property="og:site_name" content="AVARA"><meta property="og:type" content="website"><meta property="og:title" content="الرعاية الطبية | AVARA: نصائح طبية وفيتامينات وأساسيات يومية"><meta property="og:description" content="نصائح طبية وفيتامينات وإسعافات أولية وأجهزة صحية من AVARA. إجابات واضحة عن الأعراض وأسئلة الأدوية. لا تُباع الأدوية التي تُصرف بوصفة طبية عبر الإنترنت."><meta property="og:url" content="https://avaracare.online/ar/medical"><meta property="og:image" content="https://avaracare.online/assets/hero-banner.jpg"><meta property="og:locale" content="ar_AR"><meta property="og:locale:alternate" content="en_US"><meta name="twitter:card" content="summary_large_image"><link rel="preload" as="image" href="/assets/hero-medical-1536.webp" imagesrcset="/assets/hero-medical-800.webp 800w, /assets/hero-medical-1536.webp 1536w" imagesizes="100vw" fetchpriority="high"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"AVARA","item":"https://avaracare.online/ar/"},{"@type":"ListItem","position":2,"name":"الرعاية الطبية","item":"https://avaracare.online/ar/medical"}]}</script></head>
 <body id="top">
@@ -890,7 +916,10 @@
 </svg>
 
 <!-- ============ ANNOUNCEMENT + HEADER ============ -->
-<div class="announce" data-i18n="announce">مستوحاة من الطبيعة، مصقولة بالعلم</div>
+<div class="announce" id="announce" role="region" data-i18n-aria="ann_tag" aria-label="الجديد">
+  <span class="announce__tag"><i class="announce__dot" aria-hidden="true"></i><span data-i18n="ann_tag">الجديد</span></span>
+  <div class="announce__view" id="announceView"><div class="announce__static" data-i18n="announce">مستوحاة من الطبيعة، مصقولة بالعلم</div></div>
+</div>
 
 <header class="site-header" id="siteHeader">
   <div class="site-header__in">
@@ -1261,7 +1290,7 @@ document.addEventListener('DOMContentLoaded', function(){
   /* ---------- Copy (EN / AR) ---------- */
   var I18N = {
     en: {
-      announce:'Inspired by Nature. Perfected by Science',
+      announce:'Inspired by Nature. Perfected by Science', ann_tag:'Latest',
       nav_medical:'Medical care', nav_about:'About', nav_contact:'Contact',
       nav_athlete_full:'Athlete care', nav_beauty_full:'Beauty care',
       hero_cta_medical:'Shop Medical care', hero_cta_beauty:'Shop Beauty care', hero_cta_athlete:'Shop Athlete care',
@@ -1359,7 +1388,7 @@ document.addEventListener('DOMContentLoaded', function(){
       langBtn:'العربية'
     },
     ar: {
-      announce:'مستوحاة من الطبيعة، مصقولة بالعلم',
+      announce:'مستوحاة من الطبيعة، مصقولة بالعلم', ann_tag:'الجديد',
       nav_medical:'الرعاية الطبية', nav_about:'من نحن', nav_contact:'تواصل معنا',
       nav_athlete_full:'الرعاية الرياضية', nav_beauty_full:'العناية بالجمال',
       hero_cta_medical:'تسوّق الرعاية الطبية', hero_cta_beauty:'تسوّق العناية بالجمال', hero_cta_athlete:'تسوّق الرعاية الرياضية',
@@ -1642,6 +1671,67 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 
   function t(k){ return I18N[lang][k]; }
+  /* ---------- Announcement ticker (messages come from admin > Announcements) ---------- */
+  var ANN = [], annSeq = '', annCount = 0, annRot = null, annTimer = null;
+  function annUrl(u){ u = String(u == null ? '' : u).trim(); return /^(https?:\/\/|\/|#)/i.test(u) ? u : ''; }
+  function annText(a){ return String((lang === 'ar' ? (a.text_ar || a.text_en) : (a.text_en || a.text_ar)) || '').trim(); }
+  function annItem(a){
+    var txt = annText(a); if(!txt) return '';
+    var u = annUrl(a.link_url), ext = /^https?:/i.test(u);
+    return u ? '<a class="announce__item" href="' + esc(u) + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '>' + esc(txt) + '</a>'
+             : '<span class="announce__item">' + esc(txt) + '</span>';
+  }
+  function loadAnnouncements(){
+    if(!sb) return Promise.resolve();
+    return sb.from('announcements').select('*').eq('is_active', true)
+      .order('sort_order', {ascending:true}).order('created_at', {ascending:true})
+      .then(function(res){
+        var now = Date.now();
+        ANN = res.error ? [] : (res.data || []).filter(function(a){
+          return (!a.starts_at || new Date(a.starts_at) <= now) && (!a.ends_at || new Date(a.ends_at) > now);
+        });
+        renderAnnounce();
+      })
+      .catch(function(){ ANN = []; renderAnnounce(); });
+  }
+  function renderAnnounce(){
+    var box = $('#announce'), view = $('#announceView'); if(!box || !view) return;
+    clearInterval(annRot);
+    var items = ANN.map(annItem).filter(Boolean);
+    annCount = items.length;
+    if(!annCount){
+      box.classList.remove('is-live');
+      view.innerHTML = '<div class="announce__static" data-i18n="announce"></div>';
+      view.firstChild.textContent = t('announce');
+      return;
+    }
+    box.classList.add('is-live');
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      // No movement: show one message at a time.
+      var i = 0, showOne = function(){ view.innerHTML = '<div class="announce__track is-still">' + items[i % annCount] + '</div>'; i++; };
+      showOne(); if(annCount > 1) annRot = setInterval(showOne, 6000);
+      return;
+    }
+    annSeq = items.map(function(h){ return h + '<span class="announce__sep" aria-hidden="true">&#9670;</span>'; }).join('');
+    view.innerHTML = '<div class="announce__track" id="annTrack"></div>';
+    fitTicker();
+  }
+  // Repeats the messages until one half is wider than the bar, then doubles it so the loop has no gap.
+  function fitTicker(){
+    var view = $('#announceView'), track = $('#annTrack'); if(!view || !track || !annSeq) return;
+    track.innerHTML = '<div class="announce__seq">' + annSeq + '</div>';
+    var one = track.firstChild.offsetWidth; if(!one) return;
+    var reps = Math.max(1, Math.ceil(view.clientWidth / one)), half = '';
+    for(var r = 0; r < reps; r++) half += annSeq;
+    track.innerHTML = '<div class="announce__seq">' + half + '</div><div class="announce__seq" aria-hidden="true">' + half + '</div>';
+    Array.prototype.forEach.call(track.querySelectorAll('.announce__item'), function(el, idx){
+      if(idx >= annCount){ el.setAttribute('aria-hidden', 'true'); if(el.tagName === 'A') el.setAttribute('tabindex', '-1'); }
+    });
+    track.style.setProperty('--ann-dur', Math.max(16, Math.round(track.firstChild.offsetWidth / 55)) + 's');
+  }
+  window.addEventListener('resize', function(){ clearTimeout(annTimer); annTimer = setTimeout(fitTicker, 200); });
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitTicker);
+
   function pick(o){ return o[lang === 'ar' ? 'ar' : 'en']; }
   function name(p){ return p[lang]; }
   function money(n){ return '$' + n.toFixed(2); }
@@ -2402,7 +2492,7 @@ document.addEventListener('DOMContentLoaded', function(){
     applyStore();
     renderRegions();
     renderCart();
-    runSearch(); renderPromos(); renderTrust(); renderReviews(); renderPayHint();
+    runSearch(); renderPromos(); renderTrust(); renderReviews(); renderAnnounce(); renderPayHint();
   }
 
   /* ---------- Events ---------- */
@@ -2657,6 +2747,7 @@ document.addEventListener('DOMContentLoaded', function(){
   loadProducts();
   loadStore();
   loadRegions();
+  loadAnnouncements();
   loadReviews();
   resetChat();
 });

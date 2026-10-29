@@ -289,6 +289,13 @@
           <label class="field">نص قصير (اختياري)<input name="text_ar" maxlength="160" dir="rtl"></label>
           <label class="field">Discount code (optional)<input name="code" maxlength="30" list="promoCodes" autocomplete="off" style="text-transform:uppercase"></label>
         </div>
+        <div class="row3">
+          <label class="field">Offer type
+            <select name="kind"><option value="normal">Normal (one product or a bundle)</option><option value="bogo">Buy and get one free</option></select></label>
+          <label class="field" id="buyQtyField" hidden>Customer buys (units)<input name="buy_qty" type="number" min="1" max="5" step="1" value="1"></label>
+          <span></span>
+        </div>
+        <p class="hint" id="bogoHint" hidden style="margin:-6px 0 14px">For every product picked below, every (buy + 1) units in an order include 1 free unit. Example: with 1, two units cost one; three cost two. The banner button adds the right quantity to the cart, and the discount is applied by the server when the order is placed. It can be combined with a discount code, but never takes more than the products cost.</p>
         <datalist id="promoCodes"></datalist>
         <div class="row3">
           <label class="field">Starts on (optional)<input name="starts" type="date"></label>
@@ -1419,7 +1426,7 @@
     $('#promoRows').innerHTML = promos.map(function(p){
       var names = (p.product_ids || []).map(function(id){ var x = products.filter(function(q){ return String(q.id) === String(id); })[0]; return x ? x.name_en : '(deleted product)'; });
       var dates = (p.starts_at ? new Date(p.starts_at).toLocaleDateString('en', {dateStyle:'medium'}) : 'now') + ' to ' + (p.ends_at ? new Date(p.ends_at).toLocaleDateString('en', {dateStyle:'medium'}) : 'no end');
-      return '<tr><td><strong>' + esc(p.title_en || p.title_ar || (names.length > 1 ? 'Bundle' : names[0])) + '</strong><br><small>Order ' + esc(p.sort_order) + '</small></td>' +
+      return '<tr><td><strong>' + esc(p.title_en || p.title_ar || (names.length > 1 ? 'Bundle' : names[0])) + '</strong><br><small>Order ' + esc(p.sort_order) + (p.kind === 'bogo' ? ' · Buy ' + esc(p.buy_qty || 1) + ', get 1 free' : '') + '</small></td>' +
         '<td>' + names.map(esc).join('<br>') + '</td><td>' + esc(p.code || '-') + '</td><td>' + esc(dates) + '</td><td>' + promoStatus(p) + '</td>' +
         '<td><div class="actions"><button class="btn btn--sm" data-promo-edit="' + esc(p.id) + '">Edit</button>' +
         '<button class="btn btn--sm" data-promo-toggle="' + esc(p.id) + '">' + (p.is_active ? 'Turn off' : 'Turn on') + '</button>' +
@@ -1455,6 +1462,7 @@
     el.sort_order.value = p ? p.sort_order : (promos.length + 1);
     el.starts.value = p && p.starts_at ? p.starts_at.slice(0, 10) : ''; el.ends.value = p && p.ends_at ? p.ends_at.slice(0, 10) : '';
     el.is_active.checked = p ? !!p.is_active : true;
+    el.kind.value = p && p.kind === 'bogo' ? 'bogo' : 'normal'; el.buy_qty.value = p && p.buy_qty ? p.buy_qty : 1; toggleBogoFields();
     promoSel = p ? (p.product_ids || []).map(String) : []; $('#promoSearch').value = '';
     var dl = $('#promoCodes'); dl.innerHTML = '';
     (typeof loadCodes === 'function' ? loadCodes() : Promise.resolve()).then(function(){ dl.innerHTML = (codes || []).map(function(c){ return '<option value="' + esc(c.code) + '">'; }).join(''); }).catch(function(){});
@@ -1462,6 +1470,11 @@
   }
   $('#newPromo').addEventListener('click', function(){ (products.length ? Promise.resolve() : loadProducts()).then(function(){ openPromoForm(null); }); });
   $('#promoCancel').addEventListener('click', function(){ $('#promoForm').hidden = true; editingPromo = null; });
+  function toggleBogoFields(){
+    var on = $('#promoForm').elements.kind.value === 'bogo';
+    $('#buyQtyField').hidden = !on; $('#bogoHint').hidden = !on;
+  }
+  $('#promoForm').elements.kind.addEventListener('change', toggleBogoFields);
   $('#promoSearch').addEventListener('input', renderPick);
   $('#promoPick').addEventListener('change', function(e){
     var cb = e.target.closest('[data-pick]'); if(!cb) return;
@@ -1490,6 +1503,9 @@
       is_active: el.is_active.checked, starts_at: starts ? starts.toISOString() : null, ends_at: ends ? ends.toISOString() : null
     };
     btn.disabled = true; btn.textContent = 'Saving…';
+    // The offer type is only sent when it is used, so normal promotions still save if the SQL has not been run yet.
+    if(el.kind.value === 'bogo'){ row.kind = 'bogo'; row.buy_qty = Math.max(1, Math.min(5, parseInt(el.buy_qty.value, 10) || 1)); }
+    else if(editingPromo && editingPromo.kind && editingPromo.kind !== 'normal'){ row.kind = 'normal'; row.buy_qty = 1; }
     var q = editingPromo ? sb.from('promotions').update(row).eq('id', editingPromo.id) : sb.from('promotions').insert(row);
     q.then(function(r){
       btn.disabled = false; btn.textContent = 'Save promotion';
@@ -1845,7 +1861,8 @@
       var d = new Date(o.created_at);
       var items = (o.items || []).map(function(i){
         return '<li><span>' + esc(i.name_en) + ' × ' + esc(i.qty) + '</span><span>' + money(i.price * i.qty) + '</span></li>';
-      }).join('') + (Number(o.discount) > 0 ? '<li><span>Discount (' + esc(o.discount_code || '') + ')</span><span>−' + money(o.discount) + '</span></li>' : '') +
+      }).join('') + (Number(o.promo_discount) > 0 ? '<li><span>' + esc(o.promo_note || 'Free items') + '</span><span>−' + money(o.promo_discount) + '</span></li>' : '') +
+        (Number(o.discount) - (Number(o.promo_discount) || 0) > 0.004 ? '<li><span>Discount (' + esc(o.discount_code || '') + ')</span><span>−' + money(Number(o.discount) - (Number(o.promo_discount) || 0)) + '</span></li>' : '') +
         (Number(o.delivery_fee) > 0 ? '<li><span>Delivery</span><span>' + money(o.delivery_fee) + '</span></li>' : '');
       var opts = STATUSES.map(function(s){ return '<option value="' + s + '"' + (s === o.status ? ' selected' : '') + '>' + (s.charAt(0).toUpperCase() + s.slice(1)).replace(/_/g, ' ') + '</option>'; }).join('');
       return '<article class="order">' +
