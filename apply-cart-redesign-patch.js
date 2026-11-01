@@ -22,8 +22,11 @@ const crlf = raw.includes('\r\n');
 let t = raw.replace(/\r\n/g, '\n');
 if (t.includes('id="cartBack"')) { console.log(file + ': already up to date'); process.exit(0); }
 
+// Matching ignores differences in spaces and line breaks. A find can be text or a regular expression;
+// a replacement can be text or a function that receives the matched text.
+const loose = (s) => new RegExp(s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s*'));
 const edits = [];
-const edit = (find, replace) => edits.push([find, replace]);
+const edit = (find, replace) => edits.push([typeof find === 'string' ? loose(find) : find, replace, typeof find === 'string' ? find : String(find)]);
 
 /* ---------- CSS ---------- */
 edit('  .toast{\n    position: fixed; z-index: 100;',
@@ -116,13 +119,11 @@ edit(`      <p class="code-box__msg" id="codeMsg" role="status" hidden></p>
   <form class="order-form" id="orderForm" novalidate>
     <div class="order-form__fields">`);
 
-edit('      <label><span data-i18n="address_label">Delivery address (optional)</span>',
-`      <details class="more"><summary data-i18n="more_details">Add address or notes</summary>
-      <label><span data-i18n="address_label">Delivery address (optional)</span>`);
+edit(/<label[^>]*>\s*<span[^>]*data-i18n="address_label"[^>]*>/,
+  (m) => '<details class="more"><summary data-i18n="more_details">Add address or notes</summary>\n      ' + m);
 
-edit('        <textarea name="notes" rows="2" maxlength="500"></textarea></label>',
-`        <textarea name="notes" rows="2" maxlength="500"></textarea></label>
-      </details>`);
+edit(/<textarea[^>]*name="notes"[^>]*>\s*<\/textarea>\s*<\/label>/,
+  (m) => m + '\n      </details>');
 
 edit(`      <p class="form-error" id="orderError" role="alert" hidden></p>
       <button class="btn btn--solid btn--block" id="placeBtn" type="submit" data-i18n="place_order">Place order</button>`,
@@ -168,6 +169,13 @@ edit("  function showOrderError(key){ var el = $('#orderError'); el.textContent 
     $('#drawerTitle').textContent = t(two ? 'cart_details' : 'cart_title');
     if(two){ var nm = $('#orderForm').elements.customer; if(nm && !nm.value) setTimeout(function(){ nm.focus(); }, 60); }
   }
+  // the total above Place order always mirrors the cart total
+  (function(){
+    var ct = $('#cartTotal'), pt = $('#placeTotal');
+    function syncTotal(){ pt.textContent = ct.textContent; }
+    if(window.MutationObserver) new MutationObserver(syncTotal).observe(ct, {childList:true, characterData:true, subtree:true});
+    syncTotal();
+  })();
   $('#checkoutBtn').addEventListener('click', function(){ setStep(2); });
   $('#cartBack').addEventListener('click', function(){ setStep(1); });`);
 
@@ -183,10 +191,6 @@ edit("<a class=\"btn btn--line btn--block\" href=\"/track?no=", "<a class=\"btn 
 edit("data-rm=\"' + esc(id) + '\">' + t('remove') + '</button></div>'",
      "data-rm=\"' + esc(id) + '\" aria-label=\"' + esc(t('remove')) + '\" title=\"' + esc(t('remove')) + '\">\\u00d7</button></div>'");
 
-// total above the Place order button
-edit("    $('#cartTotal').textContent = money(tot.sum - disc + fee);",
-     "    $('#cartTotal').textContent = money(tot.sum - disc + fee);\n    $('#placeTotal').textContent = money(tot.sum - disc + fee);");
-
 // free-delivery progress bar, and no checkout below the minimum order
 edit("    var info = $('#cartInfo'); info.innerHTML = notes.map(esc).join('<br>'); info.hidden = !notes.length;",
 `    var bar = (baseFee > 0 && th > 0 && tot.sum < th) ? '<span class="ship-bar" aria-hidden="true"><i style="width:' + Math.max(4, Math.min(100, Math.round(tot.sum / th * 100))) + '%"></i></span>' : '';
@@ -198,15 +202,17 @@ edit("    $('#codeInput').readOnly = on;",
      "    $('#codeInput').readOnly = on;\n    if(on) $('#codeBox').open = true;");
 
 /* ---------- apply (all or nothing) ---------- */
-for (const [find] of edits) {
-  const n = t.split(find).length - 1;
-  if (n !== 1) {
-    console.error(file + ': expected one match but found ' + n + ' for:\n  ' + find.split('\n')[0].slice(0, 110) +
-      '\nNothing changed. Send me this file and I will adjust the patch.');
-    process.exit(1);
-  }
+const problems = [];
+edits.forEach(([rx, , label], i) => {
+  const n = (t.match(new RegExp(rx.source, 'g')) || []).length;
+  if (n !== 1) problems.push('  #' + (i + 1) + ': found ' + n + ' (expected 1) for: ' + label.split('\n')[0].trim().slice(0, 110));
+});
+if (problems.length) {
+  console.error(file + ': ' + problems.length + ' line(s) not found exactly once:\n' + problems.join('\n') +
+    '\nNothing changed. Copy this whole message and send it to me.');
+  process.exit(1);
 }
-for (const [find, replace] of edits) t = t.replace(find, () => replace);
+for (const [rx, replace] of edits) t = t.replace(rx, (...a) => typeof replace === 'function' ? replace(a[0]) : replace);
 fs.writeFileSync(file + '.bak', raw);
 fs.writeFileSync(file, crlf ? t.replace(/\n/g, '\r\n') : t);
 console.log(file + ': cart panel is now two steps (backup saved as ' + file + '.bak)');

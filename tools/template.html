@@ -664,7 +664,63 @@
   .state-msg{ grid-column: 1 / -1; padding: 48px 0; text-align: center; color: var(--ink-soft); }
   .photo{ position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .line__img{ position: relative; overflow: hidden; }
-  .line__img .photo{ position: absolute; }
+  .line__img .photo{ position: absolute; }  /* ---------- Cart panel: two steps (items, then your details) ---------- */
+  .drawer__head{ gap: 8px; padding: 14px 16px 14px 24px; }
+  .drawer__title{ margin-inline-end: auto; font-size: 1.2rem; }
+  .drawer__back{ margin-inline-start: -10px; }
+  .drawer__back[hidden]{ display: none; }
+  [dir="rtl"] .drawer__back svg{ transform: scaleX(-1); }
+  .drawer__body{ padding: 0 24px; }
+
+  /* cart lines */
+  .line{ grid-template-columns: 72px 1fr auto; gap: 14px; padding: 16px 0; align-items: start; }
+  .line__img{ width: 72px; }
+  .line__name{ font-size: .98rem; }
+  .line__price{ font-size: .86rem; margin-top: 2px; }
+  .qty{ margin-top: 10px; border-color: var(--mint-2); }
+  .qty button{ width: 30px; height: 30px; }
+  .line > div:last-child{ display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+  .line__rm{ display: inline-grid; place-items: center; width: 28px; height: 28px; margin: 0; padding: 0; border: 1px solid var(--mint-2); border-radius: 50%;
+    font-size: 1.15rem; line-height: 1; text-decoration: none; color: var(--ink-soft); }
+  .line__rm:hover{ background: var(--mint); color: var(--ink); }
+
+  /* folded rows: store info, discount code, address and notes */
+  .cart-store{ margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--mint-2); }
+  .cart-store[open] > summary{ margin-bottom: 10px; }
+  details.code-box{ display: block; margin: 0; }
+  .code-box .code-box__row{ margin-top: 10px; }
+  .code-box .code-box__msg{ margin-top: 6px; }
+  .more > label{ margin-top: 12px; }
+  .cart-store > summary, .code-box > summary, .more > summary{ cursor: pointer; list-style: none; font-size: .9rem; font-weight: 500; color: var(--teal-deep); padding: 2px 0; }
+  .cart-store > summary::-webkit-details-marker, .code-box > summary::-webkit-details-marker, .more > summary::-webkit-details-marker{ display: none; }
+  .cart-store > summary::before, .code-box > summary::before, .more > summary::before{ content: "+"; display: inline-block; width: 1.1em; }
+  .cart-store[open] > summary::before, .code-box[open] > summary::before, .more[open] > summary::before{ content: "\2212"; }
+
+  /* step 1 footer */
+  .drawer__foot{ padding: 16px 24px calc(20px + env(safe-area-inset-bottom, 0px)); gap: 12px; max-height: 62vh; box-shadow: 0 -10px 24px rgba(44,44,44,.05); }
+  .cart-sum{ gap: 4px; }
+  .cart-sum__row{ font-size: .88rem; }
+  .subtotal{ font-size: 1.25rem; margin: 6px 0 0; padding-top: 10px; border-top: 1px solid var(--mint-2); }
+  .ship-bar{ display: block; height: 4px; margin-top: 8px; border-radius: 2px; background: var(--mint-2); overflow: hidden; }
+  .ship-bar i{ display: block; height: 100%; background: var(--teal); }
+  #checkoutBtn{ padding: 1rem 1.4rem; font-size: 1rem; }
+  #checkoutBtn[disabled]{ cursor: not-allowed; }
+
+  /* step 2 */
+  .drawer #orderForm{ display: none; }
+  .drawer.is-step2 #orderForm{ display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 0; }
+  .drawer.is-step2 #cartBody, .drawer.is-step2 #cartFoot{ display: none; }
+  .order-form__fields{ flex: 1; overflow-y: auto; padding: 20px 24px; display: grid; gap: 14px; align-content: start; }
+  .order-form__bar{ padding: 14px 24px calc(18px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--mint-2); display: grid; gap: 10px; box-shadow: 0 -10px 24px rgba(44,44,44,.05); }
+  .order-form__total{ display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 500; }
+  .order-form__bar .consent{ text-align: center; font-size: .8rem; }
+  #placeBtn{ padding: 1rem 1.4rem; font-size: 1rem; }
+
+  /* order received */
+  .done{ text-align: center; padding: 40px 0 24px; }
+  .done h3, .done p{ text-align: center; }
+  .done__tick{ width: 56px; height: 56px; margin: 0 auto 4px; border-radius: 50%; background: var(--mint); color: var(--teal-deep); display: grid; place-items: center; font-size: 1.6rem; }
+  .done a[href^="/track"]{ order: -1; }
 
   .toast{
     position: fixed; z-index: 100; bottom: 24px; inset-inline-start: 50%; transform: translate(-50%, 20px);
@@ -1221,36 +1277,40 @@
 <!-- ============ CART DRAWER ============ -->
 <div class="overlay" id="overlay"></div>
 <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
-  <div class="drawer__head">
+  <div class="drawer__head">    <button class="tool drawer__back" id="cartBack" type="button" data-i18n-aria="back" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+    </button>
     <h2 class="drawer__title" id="drawerTitle" data-i18n="cart_title">Your cart</h2>
     <button class="tool" id="closeCart" type="button" data-i18n-aria="close">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
   </div>
-  <div class="drawer__body" id="cartBody"></div>
-  <div class="drawer__foot" id="cartFoot" hidden>
+  <div class="drawer__body" id="cartBody"></div>  <div class="drawer__foot" id="cartFoot" hidden>
+    <p class="drawer__note" id="cartInfo" hidden></p>
     <div class="cart-sum">
       <div class="cart-sum__row"><span data-i18n="subtotal">Subtotal</span><span id="cartSub" dir="ltr">$0.00</span></div>
       <div class="cart-sum__row" id="feeRow" hidden><span data-i18n="delivery">Delivery</span><span id="cartFee" dir="ltr"></span></div>
       <div class="cart-sum__row cart-sum__row--disc" id="discRow" hidden><span id="discLabel"></span><span id="cartDisc" dir="ltr"></span></div>
       <div class="cart-sum__row cart-sum__row--disc" id="bogoRow" hidden><span data-i18n="bogo_row">Free items</span><span id="cartBogo" dir="ltr"></span></div>
       <div class="subtotal"><span data-i18n="total">Total</span><span id="cartTotal" dir="ltr">$0.00</span></div>
-    </div>
-    <div class="code-box" id="codeBox">
+    </div>    <details class="code-box" id="codeBox">
+      <summary data-i18n="code_have">Have a discount code?</summary>
       <div class="code-box__row">
         <input id="codeInput" type="text" maxlength="30" autocomplete="off" autocapitalize="characters" dir="ltr" data-i18n-ph="code_ph" placeholder="Discount code" aria-label="Discount code">
         <button class="btn btn--line" id="codeBtn" type="button" data-i18n="code_apply">Apply</button>
-      </div>
-      <p class="code-box__msg" id="codeMsg" role="status" hidden></p>
-    </div>
-    <p class="drawer__note" id="cartInfo" hidden></p>
-    <form class="order-form" id="orderForm" novalidate>
+      </div>      <p class="code-box__msg" id="codeMsg" role="status" hidden></p>
+    </details>
+    <button class="btn btn--solid btn--block" id="checkoutBtn" type="button" data-i18n="checkout">Checkout</button>
+  </div>
+  <form class="order-form" id="orderForm" novalidate>
+    <div class="order-form__fields">
       <label><span data-i18n="name_label">Full name</span>
         <input name="customer" type="text" required minlength="2" maxlength="100" autocomplete="name"></label>
       <label><span data-i18n="phone_label">Phone number</span>
         <input name="phone" type="tel" required maxlength="30" autocomplete="tel" dir="ltr"></label>
       <label id="regionBox" hidden><span data-i18n="region_label">Delivery region</span>
         <select name="region" id="regionSel"></select></label>
+      <details class="more"><summary data-i18n="more_details">Add address or notes</summary>
       <label><span data-i18n="address_label">Delivery address (optional)</span>
         <input name="address" type="text" maxlength="300" autocomplete="street-address"></label>
       <fieldset class="paybox" id="payBox">
@@ -1261,13 +1321,14 @@
       </fieldset>
       <label><span data-i18n="notes_label">Notes (optional)</span>
         <textarea name="notes" rows="2" maxlength="450"></textarea></label>
-      <label class="optin"><input type="checkbox" name="wa_optin"><span data-i18n="wa_optin">Send me offers and news on WhatsApp. I can stop anytime by replying STOP.</span></label>
-      <p class="form-error" id="orderError" role="alert" hidden></p>
+      </details>
+      <label class="optin"><input type="checkbox" name="wa_optin"><span data-i18n="wa_optin">Send me offers and news on WhatsApp. I can stop anytime by replying STOP.</span></label>      <p class="form-error" id="orderError" role="alert" hidden></p>
+    </div>
+    <div class="order-form__bar">
+      <div class="order-form__total"><span data-i18n="total">Total</span><span id="placeTotal" dir="ltr"></span></div>
       <button class="btn btn--solid btn--block" id="placeBtn" type="submit" data-i18n="place_order">Place order</button>
-      <p class="drawer__note consent"><span data-i18n="consent_pre">By placing an order you accept our </span><a href="/policies" target="_blank" rel="noopener" data-i18n="policies">Privacy and policies</a></p>
-      <p class="drawer__note" data-i18n="cart_note">We'll contact you to confirm your order, delivery and payment.</p>
-    </form>
-  </div>
+      <p class="drawer__note consent"><span data-i18n="consent_pre">By placing an order you accept our </span><a href="/policies" target="_blank" rel="noopener" data-i18n="policies">Privacy and policies</a></p>    </div>
+  </form>
 </aside>
 <div class="install-help" id="installHelp" hidden role="dialog" aria-modal="false" aria-labelledby="installHelpTitle">
   <div class="install-help__in">
@@ -1387,6 +1448,8 @@ document.addEventListener('DOMContentLoaded', function(){
       region_label:'Delivery region', region_choose:'Choose your region', region_required:'Please choose your delivery region.',
       hero_h_home:'Your Health Matters', hero_s_home:'Medical advice, athlete care and beauty, in one trusted place.',
       cta_depts:'Shop by department', featured_title:'Featured picks', featured_sub:'A few products from across our three departments.',
+      back:'Back', checkout:'Checkout', cart_details:'Your details', code_have:'Have a discount code?',
+      more_details:'Add address or notes', cart_info:'Delivery and payment info',
       langBtn:'العربية'
     },
     ar: {
@@ -1485,6 +1548,8 @@ document.addEventListener('DOMContentLoaded', function(){
       region_label:'منطقة التوصيل', region_choose:'اختر منطقتك', region_required:'يرجى اختيار منطقة التوصيل.',
       hero_h_home:'صحتك تهمّنا', hero_s_home:'نصائح طبية ورعاية رياضية وعناية بالجمال، في مكان واحد تثق به.',
       cta_depts:'تسوّق حسب القسم', featured_title:'مختارات لك', featured_sub:'مجموعة منتجات من أقسامنا الثلاثة.',
+      back:'رجوع', checkout:'متابعة الطلب', cart_details:'بياناتك', code_have:'لديك رمز خصم؟',
+      more_details:'إضافة عنوان أو ملاحظات', cart_info:'معلومات التوصيل والدفع',
       langBtn:'English'
     }
   };
@@ -2062,17 +2127,17 @@ document.addEventListener('DOMContentLoaded', function(){
     return {n:n, sum:sum};
   }
 
-  function renderCart(){
-    var ids = cartIds(), tot = cartTotals();
+  function renderCart(){    var ids = cartIds(), tot = cartTotals();
+    if(!ids.length || lastOrder) setStep(1);   // empty cart or order received: back to the first screen
     var badge = $('#cartCount');
     badge.textContent = tot.n; badge.hidden = tot.n === 0;
 
     if(lastOrder){
       var wa = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(t('wa_order').replace('{no}', lastOrder));
-      $('#cartBody').innerHTML = '<div class="done"><h3>' + t('order_ok_title') + '</h3><p>' + t('order_ok_text').replace('{no}', '<strong dir="ltr">#' + esc(lastOrder) + '</strong>') + '</p>' +
+      $('#cartBody').innerHTML = '<div class="done"><span class="done__tick" aria-hidden="true">\u2713</span><h3>' + t('order_ok_title') + '</h3><p>' + t('order_ok_text').replace('{no}', '<strong dir="ltr">#' + esc(lastOrder) + '</strong>') + '</p>' +
         '<p class="pay-next">' + esc(t('pay_next_' + lastPay)) + '</p>' +
-        '<a class="btn btn--solid btn--block" href="' + wa + '" target="_blank" rel="noopener">' + t('order_wa_confirm') + '</a>' +
-        '<a class="btn btn--line btn--block" href="/track?no=' + encodeURIComponent(lastOrder) + '">' + t('track_order') + '</a>' +
+        '<a class="btn btn--line btn--block" href="' + wa + '" target="_blank" rel="noopener">' + t('order_wa_confirm') + '</a>' +
+        '<a class="btn btn--solid btn--block" href="/track?no=' + encodeURIComponent(lastOrder) + '">' + t('track_order') + '</a>' +
         '<button class="btn btn--line btn--block" type="button" data-close-cart>' + t('continue') + '</button></div>' + storeInfoHtml();
       $('#cartFoot').hidden = true;
       return;
@@ -2088,7 +2153,7 @@ document.addEventListener('DOMContentLoaded', function(){
         '<div class="line__img">' + media(p) + '</div>' +
         '<div><div class="line__name">' + esc(name(p)) + '</div>' + bogoNote(id) + '<div class="line__price' + (p.salePrice != null ? ' line__price--sale' : '') + '" dir="ltr">' + (p.salePrice != null ? '<span class="line__price-was">' + money(p.price) + '</span>' + money(p.salePrice) : money(p.price)) + '</div>' +
           '<div class="qty"><button type="button" data-qty="' + esc(id) + ':-1" aria-label="' + t('dec') + '">−</button><span>' + cart[id] + '</span><button type="button" data-qty="' + esc(id) + ':1" aria-label="' + t('inc') + '">+</button></div></div>' +
-        '<div><div class="line__total" dir="ltr">' + money(effPrice(p) * cart[id]) + '</div><button class="line__rm" type="button" data-rm="' + esc(id) + '">' + t('remove') + '</button></div>' +
+        '<div><div class="line__total" dir="ltr">' + money(effPrice(p) * cart[id]) + '</div><button class="line__rm" type="button" data-rm="' + esc(id) + '" aria-label="' + esc(t('remove')) + '" title="' + esc(t('remove')) + '">\u00d7</button></div>' +
       '</div>';
     }).join('') + storeInfoHtml();
     var rf = regionFee(), fee = deliveryFor(tot.sum), baseFee = rf != null ? rf : (Number(store.delivery_fee) || 0);
@@ -2108,8 +2173,9 @@ document.addEventListener('DOMContentLoaded', function(){
     $('#cartTotal').textContent = money(tot.sum - disc - bogo + fee);
     var notes = [];
     if(minO > 0 && tot.sum < minO) notes.push(t('min_order_note').replace('{amt}', money(minO)));
-    if(baseFee > 0 && th > 0) notes.push(tot.sum < th ? t('add_for_free').replace('{amt}', money(th - tot.sum)) : t('free_over').replace('{amt}', money(th)));
-    var info = $('#cartInfo'); info.innerHTML = notes.map(esc).join('<br>'); info.hidden = !notes.length;
+    if(baseFee > 0 && th > 0) notes.push(tot.sum < th ? t('add_for_free').replace('{amt}', money(th - tot.sum)) : t('free_over').replace('{amt}', money(th)));    var bar = (baseFee > 0 && th > 0 && tot.sum < th) ? '<span class="ship-bar" aria-hidden="true"><i style="width:' + Math.max(4, Math.min(100, Math.round(tot.sum / th * 100))) + '%"></i></span>' : '';
+    var info = $('#cartInfo'); info.innerHTML = notes.map(esc).join('<br>') + bar; info.hidden = !notes.length;
+    $('#checkoutBtn').disabled = minO > 0 && tot.sum < minO;
     $('#cartFoot').hidden = false;
   }
 
@@ -2121,8 +2187,7 @@ document.addEventListener('DOMContentLoaded', function(){
     var list = rows.filter(function(r){ return storeText(r[0]); }).map(function(r){
       return '<li><strong>' + t(r[1]) + '</strong><span>' + esc(storeText(r[0])) + '</span></li>';
     }).join('');
-    if(list) h += '<ul class="cart-facts">' + list + '</ul>';
-    return h ? '<div class="cart-store">' + h + '</div>' : '';
+    if(list) h += '<ul class="cart-facts">' + list + '</ul>';    return h ? '<details class="cart-store"><summary>' + t('cart_info') + '</summary>' + h + '</details>' : '';
   }
 
   /* ---------- Discount code ---------- */
@@ -2138,8 +2203,8 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   function setCodeUi(){
     var on = !!appliedCode;
-    $('#codeBtn').textContent = on ? t('code_remove') : t('code_apply');
-    $('#codeInput').readOnly = on;
+    $('#codeBtn').textContent = on ? t('code_remove') : t('code_apply');    $('#codeInput').readOnly = on;
+    if(on) $('#codeBox').open = true;
     if(on) $('#codeInput').value = appliedCode.code;
   }
   function validateCode(silent){
@@ -2191,9 +2256,26 @@ document.addEventListener('DOMContentLoaded', function(){
   function payNote(f){
     var tag = payChoice(f) === 'whish' ? 'Payment: Whish' : 'Payment: Cash on delivery';
     return ('[' + tag + '] ' + f.notes.value.trim()).trim();
-  }
+  }  function showOrderError(key){ var el = $('#orderError'); el.textContent = t(key); el.hidden = false; }
 
-  function showOrderError(key){ var el = $('#orderError'); el.textContent = t(key); el.hidden = false; }
+  /* ---------- Cart steps: 1 = items, 2 = your details ---------- */
+  function setStep(n){
+    var d = $('#drawer'); if(!d) return;
+    var two = n === 2;
+    d.classList.toggle('is-step2', two);
+    $('#cartBack').hidden = !two;
+    $('#drawerTitle').textContent = t(two ? 'cart_details' : 'cart_title');
+    if(two){ var nm = $('#orderForm').elements.customer; if(nm && !nm.value) setTimeout(function(){ nm.focus(); }, 60); }
+  }
+  // the total above Place order always mirrors the cart total
+  (function(){
+    var ct = $('#cartTotal'), pt = $('#placeTotal');
+    function syncTotal(){ pt.textContent = ct.textContent; }
+    if(window.MutationObserver) new MutationObserver(syncTotal).observe(ct, {childList:true, characterData:true, subtree:true});
+    syncTotal();
+  })();
+  $('#checkoutBtn').addEventListener('click', function(){ setStep(2); });
+  $('#cartBack').addEventListener('click', function(){ setStep(1); });
 
   function submitOrder(e){
     e.preventDefault();
